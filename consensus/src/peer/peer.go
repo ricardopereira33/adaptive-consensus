@@ -54,6 +54,7 @@ func main() {
 	
 	debug = *debugFlag
 	args := flag.Args()	
+	
 	if len(args) < 3 { 
 		fmt.Println("Less than arguments 3!")
 		os.Exit(1) 
