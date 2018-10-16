@@ -11,13 +11,10 @@ func handleMessages(channel stubborn.StubChannel) {
 	for {
 		message := channel.SReceive()
 		
-		message.PrintPacket()
-
-		fmt.Println("--------")
-		data := message.GetData()
-
+		
 		var msg Message 
-		err := json.Unmarshal(data, &msg)
+		data := message.GetData()
+		err  := json.Unmarshal(data, &msg)
 		checkError(err, false)
 
 		fmt.Print("[ " + msg.Username + " ]")

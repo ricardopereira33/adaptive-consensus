@@ -8,54 +8,52 @@ import (
 
 // Buffer is a interface to absract the buffer implementation
 type Buffer interface {
-	insertElem(*Package)
-	getElem(int)		*Package
+	insertElem(int, *Package)
+	getElem(int)			  *Package
 }
 
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
-	size	int
-	data 	map[int] *Package
-	mutex 	*sync.Mutex
+	Size	int
+	Data 	map[int] *Package
+	Mutex 	*sync.Mutex
 }
 
 // Package is a struct to represent a package received via UDP.
 type Package struct {
-	id	 	int
-	data	[]byte
-	arrived bool
-	isACK	bool
+	ID	 	int
+	Data	[]byte
+	Arrived bool
+	IsACK	bool
 }
 
 func newBuffer(size int) (buffer *BufferStruct) {
 	buffer       = new(BufferStruct)
-	buffer.size  = size
-	buffer.data	 = make(map[int] *Package, size)
-	buffer.mutex = new(sync.Mutex)
+	buffer.Size  = size
+	buffer.Data	 = make(map[int] *Package, size)
+	buffer.Mutex = new(sync.Mutex)
 
 	return
 }
 
 func newPackage(id int, data []byte, isAck bool) (pack *Package) {
 	pack 	     = new(Package)
-	pack.id      = id
-	pack.data    = data
-	pack.isACK	 = isAck
-	pack.arrived = false
+	pack.ID      = id
+	pack.Data    = data
+	pack.IsACK	 = isAck
+	pack.Arrived = false
 
 	return 
 }
 
-func (b BufferStruct) insertElem(p *Package) {
-	b.mutex.Lock()
-	b.data[p.id-1] = p 
-	b.mutex.Unlock()
+func (b *BufferStruct) insertElem(id int, p *Package) {
+	b.Mutex.Lock()
+	b.Data[id] = p 
+	b.Mutex.Unlock()
 }
 
 func (b BufferStruct) getElem(id int) *Package {
-	b.mutex.Lock()	
-	elem, prs := b.data[id-1]
-	b.mutex.Unlock()
+	elem, prs := b.Data[id]
 	
 	if prs {
 		return elem
@@ -66,25 +64,25 @@ func (b BufferStruct) getElem(id int) *Package {
 
 // GetID returns the peer ID that sends the package
 func (p Package) GetID() int {
-	return p.id
+	return p.ID
 }
 
 // GetData returns the data in the Package
 func (p Package) GetData() []byte {
-	return p.data
+	return p.Data
 }
 
 // PrintPacket prints all information in the Package
 func (p Package) PrintPacket() {
 	log.Println("-----------")	
 	log.Print("ID: ")
-	log.Println(p.id)
+	log.Println(p.ID)
 	log.Print("Arrived: ")
-	log.Println(p.arrived)
+	log.Println(p.Arrived)
 	log.Print("isACK: ")
-	log.Println(p.isACK)
+	log.Println(p.IsACK)
 	log.Println("Data: ")
-	log.Println(p.data)	
+	log.Println(p.Data)	
 	log.Println("-----------")
 }
 

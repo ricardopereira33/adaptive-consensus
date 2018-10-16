@@ -9,22 +9,24 @@ import (
 	"stubborn"
 )
 
-var (
-	username string 								 // Username of the client
-	port 	 string 								 // Port address
-	debug  	 bool         							 // Debug mode
-)
+// Debug mode
+var Debug bool
 
-func run(port string, neighborsPorts []string) {
-    if debug { log.Println("server") }
-	
-	id, err := strconv.Atoi(port)
-	checkError(err, false)
+func run(peerID int, port string, neighborsPorts []string) {
+    if Debug { log.Println("server") }
 
-	channel := stubborn.NewStubChannel(id, port, neighborsPorts)
+	channel := stubborn.NewStubChannel(peerID, port, neighborsPorts)
+	defer channel.Close()
+
 	channel.Init()
 	channel.SetDelta0(delta0)
 	channel.SetDelta(delta)
+
+	if peerID == 4000 {
+		message := newMessage("peer1", "hello")
+		data	:= messageToBytes(message)
+		channel.SSend(3000, data)
+	}
 
 	handleMessages(channel)
 }
@@ -34,19 +36,20 @@ func main() {
 	debugFlag := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 	
-	debug = *debugFlag
+	Debug = *debugFlag
 	args := flag.Args()	
 	
-	if len(args) < 3 { 
-		fmt.Println("Less than arguments 3!")
+	if len(args) < 2 { 
+		fmt.Println("Less than arguments 2!")
 		os.Exit(1) 
 	}
 
-	username = args[0] 							
-	port 	 = args[1]			
+	port   		:= args[0]	
+	peerID, err := strconv.Atoi(args[0])
+	checkError(err, false)
 
 	//starting server
-	run(port, args[2:])
+	run(peerID, port, args[1:])
 }
 
 

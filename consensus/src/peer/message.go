@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"encoding/json"
+)
 
 // Message sent out to the server
 type Message struct {
@@ -9,12 +12,19 @@ type Message struct {
 }
 
 // Creates a new message using the parameters passed in and returns it
-func createMessage(username string, info string,) (msg *Message){
-	msg = new(Message)
-	
-	msg.Username = username
-	msg.Info     = info
+func newMessage(username string, info string) (message *Message){
+	message 		 = new(Message)
+	message.Username = username
+	message.Info     = info
+
 	return
+}
+
+func messageToBytes(message *Message) (data []byte) {
+	data, err := json.Marshal(message)
+	checkError(err, false)
+
+	return 
 }
 
 // Print the message
