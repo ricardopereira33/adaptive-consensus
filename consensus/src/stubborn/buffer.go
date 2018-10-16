@@ -3,55 +3,88 @@ package stubborn
 import (
 	"log"
 	"fmt"
+	"encoding/json"
+	"sync"
 )
 
-const debug = true
-
 // Buffer is a interface to absract the buffer implementation
-// FIFO 
 type Buffer interface {
-	insertElem(int, []byte) bool
-	getElem(int)			[]byte
-	getSize()				int
-	getData()				[][]byte
+	insertElem(*Package)
+	getElem(int)		*Package
+	getSize()			int
+	getData()			map[int] *Package
 }
 
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
-	size 	 int
-	data 	 [][]byte
+	size	int
+	data 	map[int] *Package
+	mutex 	*sync.Mutex
 }
 
-func newBuffer(size int) (buffer *BufferStruct){
-	buffer = new(BufferStruct)
+// Package is a struct to represent a package received via UDP.
+type Package struct {
+	id	 	int
+	data	[]byte
+	arrived bool
+	isACK	bool
+}
 
-	buffer.size 	= size
-	buffer.data		= make([][]byte, size)
+func newBuffer(size int) (buffer *BufferStruct) {
+	buffer       = new(BufferStruct)
+	buffer.size  = size
+	buffer.data	 = make(map[int] *Package, size)
+	buffer.mutex = new(sync.Mutex)
+
 	return
 }
 
-func (b BufferStruct) insertElem(id int, elem []byte) bool {
-	b.data[id-1] = elem
-	return true
+func newPackage(id int, data []byte, isAck bool) (pack *Package) {
+	pack 	     = new(Package)
+	pack.id      = id
+	pack.data    = data
+	pack.isACK	 = isAck
+	pack.arrived = false
+
+	return 
 }
 
-func (b BufferStruct) getElem(id int) []byte {
-	elem := b.data[id-1]
-	return elem
+func bytesToPackage(data []byte) (pack *Package) {
+	err := json.Unmarshal(data, &pack)
+	checkError(err, false)
+
+	return
+}
+
+func (b BufferStruct) insertElem(p *Package) {
+	b.mutex.Lock()
+	b.data[p.id-1] = p 
+	b.mutex.Unlock()
+}
+
+func (b BufferStruct) getElem(id int) *Package {
+	b.mutex.Lock()	
+	elem, prs := b.data[id-1]
+	b.mutex.Unlock()
+	
+	if prs {
+		return elem
+	}
+	
+	return nil
 }
 
 func (b BufferStruct) getSize() int {
 	return b.size
 }
 
-func (b BufferStruct) getData() [][]byte {
+func (b BufferStruct) getData() map[int] *Package {
 	return b.data
 }
 
 func (b BufferStruct) printBuffer() {
 	log.Println("-----------")	
-	log.Println("Elems: " + fmt.Sprint(b.elements))
-	log.Println("Size: " + fmt.Sprint(b.elements))
+	log.Println("Size: " + fmt.Sprint(b.size))
 	log.Println(b.data)	
 	log.Println("-----------")
 }

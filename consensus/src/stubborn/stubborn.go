@@ -1,14 +1,14 @@
 package stubborn
 
-import "net"
-
 // Interface to abstract the channel
 type stubChannel interface {
-	sSend(int, []byte)	bool
-	sReceive()    		[]byte
+	sReceive() *Package
+	sSend(int, []byte)					  
+	setDelta0(f func(int, *Package) bool)	
+	setDelta(f func(int) bool)				
 }
 
-func newStubChannel(peers map[int] *net.UDPAddr) (channel stubChannel){
-	channel = newChannel(peers)
+func newStubChannel(id int, ownPort string, neighborsPorts []string) (channel stubChannel){
+	channel = newChannel(id, ownPort, neighborsPorts)
 	return 
-} 
+}
