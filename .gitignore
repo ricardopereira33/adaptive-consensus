@@ -1,2 +1,5 @@
 misc
 consensus/bin
+consensus/pkg
+consensus/.vscode
+.DS_Store

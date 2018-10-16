@@ -2,7 +2,6 @@ package stubborn
 
 import (
 	"log"
-	"fmt"
 	"encoding/json"
 	"sync"
 )
@@ -11,8 +10,6 @@ import (
 type Buffer interface {
 	insertElem(*Package)
 	getElem(int)		*Package
-	getSize()			int
-	getData()			map[int] *Package
 }
 
 // BufferStruct is a struct where we keep the messages
@@ -49,13 +46,6 @@ func newPackage(id int, data []byte, isAck bool) (pack *Package) {
 	return 
 }
 
-func bytesToPackage(data []byte) (pack *Package) {
-	err := json.Unmarshal(data, &pack)
-	checkError(err, false)
-
-	return
-}
-
 func (b BufferStruct) insertElem(p *Package) {
 	b.mutex.Lock()
 	b.data[p.id-1] = p 
@@ -74,17 +64,35 @@ func (b BufferStruct) getElem(id int) *Package {
 	return nil
 }
 
-func (b BufferStruct) getSize() int {
-	return b.size
+// GetID returns the peer ID that sends the package
+func (p Package) GetID() int {
+	return p.id
 }
 
-func (b BufferStruct) getData() map[int] *Package {
-	return b.data
+// GetData returns the data in the Package
+func (p Package) GetData() []byte {
+	return p.data
 }
 
-func (b BufferStruct) printBuffer() {
+// PrintPacket prints all information in the Package
+func (p Package) PrintPacket() {
 	log.Println("-----------")	
-	log.Println("Size: " + fmt.Sprint(b.size))
-	log.Println(b.data)	
+	log.Print("ID: ")
+	log.Println(p.id)
+	log.Print("Arrived: ")
+	log.Println(p.arrived)
+	log.Print("isACK: ")
+	log.Println(p.isACK)
+	log.Println("Data: ")
+	log.Println(p.data)	
 	log.Println("-----------")
+}
+
+// Auxiliary Funtions 
+
+func bytesToPackage(data []byte) (pack *Package) {
+	err := json.Unmarshal(data, &pack)
+	checkError(err, false)
+
+	return
 }

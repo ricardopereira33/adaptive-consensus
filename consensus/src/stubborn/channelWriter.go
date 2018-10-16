@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 )
 
-func (c Channel) sSend(idDest int, message []byte) {
+// SSend is the method that sends the messages through the channel
+func (c Channel) SSend(idDest int, message []byte) {
 	if Debug { log.Println("sSend a message") }	
 	
 	packageMsg := newPackage(idDest, message, false)

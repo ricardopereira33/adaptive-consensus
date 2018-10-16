@@ -5,6 +5,8 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strconv"
+	"stubborn"
 )
 
 var (
@@ -16,11 +18,15 @@ var (
 func run(port string, neighborsPorts []string) {
     if debug { log.Println("server") }
 	
-	// add Stubborn channel
-	// run channel
+	id, err := strconv.Atoi(port)
+	checkError(err, false)
 
-    //go writer(conn)
-    //reader(conn)
+	channel := stubborn.NewStubChannel(id, port, neighborsPorts)
+	channel.Init()
+	channel.SetDelta0(delta0)
+	channel.SetDelta(delta)
+
+	handleMessages(channel)
 }
 
 //start the peer

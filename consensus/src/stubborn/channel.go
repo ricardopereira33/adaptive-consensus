@@ -14,7 +14,7 @@ const (
 	// MaxTries is the maximum value of tries
 	MaxTries 		= 3
 	// DefaultDelta is the default time to relay the messages to the others peers
-	DefaultDelta	= time.Second
+	DefaultDelta	= time.Second * 3
 )
 
 // Channel to send and receive messages between peers
@@ -58,14 +58,6 @@ func (c Channel) delta(id int) {
 	c.deltaFunc(id)
 }
 
-func (c Channel) setDelta0(f func(int, *Package) bool) {
-	c.delta0Func = f
-}
-
-func (c Channel) setDelta(f func(int) bool) {
-	c.deltaFunc = f	
-}
-
 func (c Channel) retransmission() {
 	tries := 0
 	for {
@@ -74,8 +66,8 @@ func (c Channel) retransmission() {
 			if c.deltaFunc(id) || tries > MaxTries {
 				pack := c.outBuffer.getElem(id)
 				
-				if !pack.arrived { 
-					c.sSend(id, pack.data) 
+				if pack != nil && !pack.arrived { 
+					c.send(id) 
 				}
 			}
 			tries++
@@ -83,7 +75,27 @@ func (c Channel) retransmission() {
 	}
 }
 
-func (c Channel) close() {
+
+// Exported methods
+
+// SetDelta0 is the method to define the delta0 implemention
+func (c Channel) SetDelta0(f func(int, *Package) bool) {
+	c.delta0Func = f
+}
+
+// SetDelta is the method to define the delta0 implemention
+func (c Channel) SetDelta(f func(int) bool) {
+	c.deltaFunc = f	
+}
+
+// Init is the method that start receipt of the message 
+func (c Channel) Init() {
+	go c.receive()
+	go c.retransmission()
+}
+
+// Close is the method that closes the UDP connection 
+func (c Channel) Close() {
 	c.connection.Close()
 }
 

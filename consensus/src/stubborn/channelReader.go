@@ -4,6 +4,19 @@ import (
 	"log"
 )
 
+// SReceive is the method that receives the messages through the channel
+func (c Channel) SReceive() (pack *Package){
+    if Debug { log.Println("sReceive a message") }	
+
+    select{
+        case pack := <-c.inBuffer :
+            c.ack(pack.id)
+            return pack
+    }
+}
+
+// receive is the loop that receive the message and send through the buffer(pipe)
+// for the SReceive method receive the messages
 func (c Channel) receive() (int, []byte) {
 	if Debug { log.Println("receive") }
 
@@ -28,17 +41,7 @@ func (c Channel) receive() (int, []byte) {
     }
 }
 
-func (c Channel) sReceive() (pack *Package){
-    if Debug { log.Println("sReceive a message") }	
-
-    select{
-        case pack := <-c.inBuffer :
-            c.ack(pack.id)
-            return pack
-    }
-}
-
-func (c Channel) ack (id int){
+func (c Channel) ack(id int){
     pack := newPackage(id, nil, true)
 
     c.sendDirect(id, pack)
