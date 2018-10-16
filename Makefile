@@ -9,3 +9,7 @@ compile:
 run:
 	./consensus/bin/peer
 
+clean:
+	rm -rf ./consensus/bin
+	rm -rf ./consensus/pkg
+
