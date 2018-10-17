@@ -6,12 +6,13 @@ type StubChannel interface {
 	SSend(int, []byte)					  
 	SetDelta0(f func(int, *Package) bool)	
 	SetDelta(f func(int) bool)	
+	GetPeerID() int
 	Init()	
 	Close()		
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(id int, ownPort string, neighborsPorts []string) (channel StubChannel){
-	channel = newChannel(id, ownPort, neighborsPorts)
+func NewStubChannel(ownPort string, allPorts []string) (channel StubChannel){
+	channel = newChannel(ownPort, allPorts)
 	return 
 }

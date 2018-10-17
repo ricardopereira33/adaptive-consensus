@@ -9,9 +9,9 @@ import (
 func (c *Channel) SSend(idDest int, message []byte) {
 	if Debug { log.Println("sSend a message") }	
 	
-	packageMsg := newPackage(c.peerID, message, false)
+	packageMsg := newPackage(c.PeerID, message, false)
 	isToSend   := c.delta0(idDest, packageMsg)
-	c.outBuffer.insertElem(idDest, packageMsg)
+	c.OutBuffer.insertElem(idDest, packageMsg)
 
 	if isToSend { 
 		c.send(idDest) 
@@ -19,22 +19,22 @@ func (c *Channel) SSend(idDest int, message []byte) {
 }
 
 func (c *Channel) send(idDest int) {
-	message 	  := c.outBuffer.getElem(idDest)
-	peerAddr, prs := c.peers[idDest]
+	message 	  := c.OutBuffer.getElem(idDest)
+	peerAddr, prs := c.Peers[idDest]
 	jsonMsg, err  := json.Marshal(message)
 	checkError(err, false)
 
 	if prs {
-		c.connection.WriteTo(jsonMsg, peerAddr)
+		c.Connection.WriteTo(jsonMsg, peerAddr)
 	} else{
 		log.Println("The address doesn't exist!")
 	}
 }
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
-	peerAddr 	 := c.peers[idDest]
+	peerAddr 	 := c.Peers[idDest]
 	jsonMsg, err := json.Marshal(message)
 	checkError(err, false)
 	
-	c.connection.WriteTo(jsonMsg, peerAddr)
+	c.Connection.WriteTo(jsonMsg, peerAddr)
 }

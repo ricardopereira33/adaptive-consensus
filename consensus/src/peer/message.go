@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"encoding/json"
 )
 
@@ -29,6 +29,6 @@ func messageToBytes(message *Message) (data []byte) {
 
 // Print the message
 func printMessage(msg Message){
-	fmt.Print("[ " + msg.Username + " ]\t")
-	fmt.Println(msg.Info)
+	log.Print("[ " + msg.Username + " ] ")
+	log.Println(" " + msg.Info)
 }

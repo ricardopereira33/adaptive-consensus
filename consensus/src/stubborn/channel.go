@@ -1,7 +1,7 @@
 package stubborn
 
 import (
-	"strconv"
+	"sort"
 	"time"
 	"log"
 	"net"
@@ -12,52 +12,53 @@ const (
 	MaxDatagramSize = 2048  
 	// Debug flag, when it is true, prints some debug infos	
 	Debug 	        = true	
-	// MaxTries is the maximum value of tries
+)	
+
+var ( // Default value (adaptive) 
+	// MaxTries is the maximum value of tries 
 	MaxTries 		= 3
-	// DefaultDelta is the default time to relay the messages to the others peers
+	// DefaultDelta is the default time to relay the messages to the others peers 
 	DefaultDelta	= time.Second * 3
 )
 
 // Channel to send and receive messages between peers
 type Channel struct {
-	peers 		map[int] *net.UDPAddr
-	connection	*net.UDPConn
-	outBuffer	Buffer
-	inBuffer	chan *Package
-	delta0Func	func(int, *Package) bool
-	deltaFunc	func(int) bool
-	peerID		int
+	Peers 		map[int] *net.UDPAddr
+	Connection	*net.UDPConn
+	OutBuffer	Buffer
+	InBuffer	chan *Package
+	Delta0Func	func(int, *Package) bool
+	DeltaFunc	func(int) bool
+	PeerID		int
 }
 
-func newChannel(id int, ownPort string, neighborsPorts []string) (channel *Channel) {
-	channel = new(Channel)
-
-	channel.connection = initConnection(ownPort)
-	channel.peers	   = listOfPeers(neighborsPorts)
-	channel.outBuffer  = newBuffer(len(neighborsPorts))
-	channel.inBuffer   = make(chan *Package)
-	channel.peerID	   = id
-
+func newChannel(ownPort string, allPorts []string) (channel *Channel) {
+	channel 		   = new(Channel)
+	channel.Connection = initConnection(ownPort)
+	channel.OutBuffer  = newBuffer(len(allPorts))
+	channel.InBuffer   = make(chan *Package)
+	channel.Peers, channel.PeerID = listOfPeers(ownPort, allPorts)
+	
 	return
 }
 
 func (c *Channel) delta0(id int, pack *Package) bool {
-	return c.delta0Func(id, pack)
+	return c.Delta0Func(id, pack)
 }
 
 func (c *Channel) delta(id int) bool {
-	return c.deltaFunc(id)
+	return c.DeltaFunc(id)
 }
 
 func (c *Channel) retransmission() {
-	if Debug { log.Println("Retransmisson")}
+	if Debug { log.Println("Retransmisson start...")}
 
 	tries := 0
 	for {
 		time.Sleep(DefaultDelta)	
-		for id := range c.peers {
+		for id := range c.Peers {
 			if c.delta(id) || tries > MaxTries {
-				pack := c.outBuffer.getElem(id)
+				pack := c.OutBuffer.getElem(id)
 				
 				if pack != nil && !pack.Arrived { 
 					c.send(id) 
@@ -71,14 +72,19 @@ func (c *Channel) retransmission() {
 
 // Exported methods
 
+// GetPeerID returns the peer ID
+func (c *Channel) GetPeerID() int {
+	return c.PeerID
+}
+
 // SetDelta0 is the method to define the delta0 implemention
 func (c *Channel) SetDelta0(f func(int, *Package) bool) {
-	c.delta0Func = f
+	c.Delta0Func = f
 }
 
 // SetDelta is the method to define the delta0 implemention
 func (c *Channel) SetDelta(f func(int) bool) {
-	c.deltaFunc = f	
+	c.DeltaFunc = f	
 }
 
 // Init is the method that start receipt of the message 
@@ -89,15 +95,15 @@ func (c *Channel) Init() {
 
 // Close is the method that closes the UDP connection 
 func (c *Channel) Close() {
-	c.connection.Close()
+	c.Connection.Close()
 }
 
 func (c Channel) printStatus() {
-	log.Println(c.peers) 	
-	log.Println(c.connection) 	
-	log.Println(c.outBuffer) 	
-	log.Println(c.delta0Func != nil) 	
-	log.Println(c.deltaFunc != nil) 	
+	log.Println(c.Peers) 	
+	log.Println(c.Connection) 	
+	log.Println(c.OutBuffer) 	
+	log.Println(c.Delta0Func != nil) 	
+	log.Println(c.DeltaFunc != nil) 	
 }
 
 // Auxiliary Functions 
@@ -116,17 +122,19 @@ func initConnection(port string) (conn *net.UDPConn){
 	return
 }
 
-func listOfPeers(ports []string) (list map[int] *net.UDPAddr){
+func listOfPeers(ownPort string, ports []string) (list map[int] *net.UDPAddr, ownID int){
 	list = make(map[int] *net.UDPAddr)
-	
-	for _, port := range ports {
-		addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:" + port)
-		checkError(err, false)
+	sort.Strings(ports)
 
-		id, err := strconv.Atoi(port)
-		checkError(err, false)
-
-		list[id] = addr
+	for index, port := range ports {
+		if port ==  ownPort {
+			ownID = index+1
+		} else {
+			addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:" + port)
+			checkError(err, false)
+			
+			list[index+1] = addr
+		}
 	}
 	return
 }

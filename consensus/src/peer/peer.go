@@ -1,34 +1,51 @@
 package main
 
 import (
+	"net"
 	"fmt"
 	"flag"
-	"log"
 	"os"
-	"strconv"
 	"stubborn"
 )
 
 // Debug mode
-var Debug bool
+var (
+	Debug 			  bool
+	value 			  string 
+	consensusDecision string
+	voters			  map[int] *net.UDPAddr
+	round 			  int
+	phase 			  int
+	peerID			  int
+	nParticipants	  int
+)
 
-func run(peerID int, port string, neighborsPorts []string) {
-    if Debug { log.Println("server") }
-
-	channel := stubborn.NewStubChannel(peerID, port, neighborsPorts)
+func run(port string, allPorts []string) {
+	channel := stubborn.NewStubChannel(port, allPorts)
 	defer channel.Close()
 
 	channel.Init()
 	channel.SetDelta0(delta0)
 	channel.SetDelta(delta)
+	
+	peerID 	      = channel.GetPeerID()
+	value  		  = "consensus"
+	nParticipants = len(allPorts)
 
-	if peerID == 4000 {
-		message := newMessage("peer1", "hello")
-		data	:= messageToBytes(message)
-		channel.SSend(3000, data)
-	}
+	//go consensus(channel, value)
+
+	testConnection(channel, 1, 2)
 
 	handleMessages(channel)
+}
+
+func testConnection(channel stubborn.StubChannel, srcID int, destID int){
+	if peerID == srcID {
+		message := newMessage("peer1", "hello")
+		data := messageToBytes(message)
+
+		channel.SSend(destID, data)
+	}
 }
 
 //start the peer
@@ -44,12 +61,8 @@ func main() {
 		os.Exit(1) 
 	}
 
-	port   		:= args[0]	
-	peerID, err := strconv.Atoi(args[0])
-	checkError(err, false)
-
-	//starting server
-	run(peerID, port, args[1:])
+	port := args[0]	
+	run(port, args)
 }
 
 
