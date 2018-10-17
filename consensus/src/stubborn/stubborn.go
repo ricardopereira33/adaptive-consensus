@@ -3,7 +3,8 @@ package stubborn
 // StubChannel is a interface to abstract the channel
 type StubChannel interface {
 	SReceive() *Package
-	SSend(int, []byte)					  
+	SSend(int, []byte)
+	SSendAll([]byte)					  
 	SetDelta0(f func(int, *Package) bool)	
 	SetDelta(f func(int) bool)	
 	GetPeerID() int

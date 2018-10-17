@@ -1,21 +1,41 @@
 package main
 
 import (
+	"strconv"
 	"log"
 	"encoding/json"
 )
 
 // Message sent out to the server
 type Message struct {
-	Username  string   // My username
-	Info      string   // Message
+	PeerID	 int  
+	Round    int  
+	Phase 	 int
+	Voters   []int 
+	Estimate *Estimate
+}
+
+type Estimate struct {
+	Value  string
+	peerID int
 }
 
 // Creates a new message using the parameters passed in and returns it
-func newMessage(username string, info string) (message *Message){
-	message 		 = new(Message)
-	message.Username = username
-	message.Info     = info
+func newMessage(peerID int, round int, phase int, voters []int, estimate *Estimate) (message *Message){
+	message 	   	 = new(Message)
+	message.PeerID 	 = peerID
+	message.Round  	 = round
+	message.Phase  	 = phase
+	message.Voters 	 = voters
+	message.Estimate = estimate
+
+	return
+}
+
+func newEstimate(value string, id int) (estimate *Estimate){
+	estimate 		= new(Estimate)
+	estimate.Value  = value
+	estimate.peerID = id
 
 	return
 }
@@ -29,6 +49,18 @@ func messageToBytes(message *Message) (data []byte) {
 
 // Print the message
 func printMessage(msg Message){
-	log.Print("[ " + msg.Username + " ] ")
-	log.Println(" " + msg.Info)
+	log.Println("[ " + toString(msg.PeerID) + " ] Message")
+	log.Println("Round: " + toString(msg.Round))
+	log.Println("Phase: " + toString(msg.Phase))
+	log.Println("Voters: ")
+	log.Println(msg.Voters)
+	log.Println("Estimate: ") 
+	log.Println(msg.Estimate)
+	log.Println("----------------------")
+}
+
+// Axiliary Functions 
+
+func toString(integer int) string { 
+	return strconv.Itoa(integer)
 }

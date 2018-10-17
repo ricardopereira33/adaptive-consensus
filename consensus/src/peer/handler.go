@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"stubborn"
 	"encoding/json"
 )
@@ -16,7 +15,6 @@ func handleMessages(channel stubborn.StubChannel) {
 		err  := json.Unmarshal(data, &msg)
 		checkError(err, false)
 
-		fmt.Print("[ " + msg.Username + " ]")
-		fmt.Println(msg.Info)
+		printMessage(msg)
 	}
 }

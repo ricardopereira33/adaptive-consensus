@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net"
 	"fmt"
 	"flag"
 	"os"
@@ -13,7 +12,7 @@ var (
 	Debug 			  bool
 	value 			  string 
 	consensusDecision string
-	voters			  map[int] *net.UDPAddr
+	voters			  []int
 	round 			  int
 	phase 			  int
 	peerID			  int
@@ -41,8 +40,11 @@ func run(port string, allPorts []string) {
 
 func testConnection(channel stubborn.StubChannel, srcID int, destID int){
 	if peerID == srcID {
-		message := newMessage("peer1", "hello")
-		data := messageToBytes(message)
+		estimate := newEstimate("1", 1)
+		vot 	 := make([]int, 1)
+		vot 	 = append(vot, 1)
+		message  := newMessage(1, 1, 1, vot, estimate)
+		data     := messageToBytes(message)
 
 		channel.SSend(destID, data)
 	}

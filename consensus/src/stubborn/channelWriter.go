@@ -5,6 +5,15 @@ import (
 	"encoding/json"
 )
 
+func (c *Channel) SSendAll(message []byte) {
+	if Debug { log.Println("sSendAll a message") }
+	
+	for id, _ := range c.Peers {
+		c.SSend(id, message)
+	}
+}
+
+
 // SSend is the method that sends the messages through the channel
 func (c *Channel) SSend(idDest int, message []byte) {
 	if Debug { log.Println("sSend a message") }	
