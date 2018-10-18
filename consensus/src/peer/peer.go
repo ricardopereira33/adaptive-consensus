@@ -9,7 +9,7 @@ import (
 
 // Debug mode
 var (
-	Debug 			  bool
+	debug 			  bool
 	value 			  string 
 	consensusDecision string
 	voters			  []int
@@ -31,9 +31,7 @@ func run(port string, allPorts []string) {
 	value  		  = "consensus"
 	nParticipants = len(allPorts)
 
-	//go consensus(channel, value)
-
-	testConnection(channel, 1, 2)
+	go consensus(channel, value)
 
 	handleMessages(channel)
 }

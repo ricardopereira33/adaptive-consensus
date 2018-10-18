@@ -15,6 +15,7 @@ type Message struct {
 	Estimate *Estimate
 }
 
+// Estimate is the estimate value
 type Estimate struct {
 	Value  string
 	peerID int
