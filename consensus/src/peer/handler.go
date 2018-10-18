@@ -2,19 +2,13 @@ package main
 
 import (
 	"stubborn"
-	"encoding/json"
 )
 
 func handleMessages(channel stubborn.StubChannel) {
-
 	for {
-		message := channel.SReceive()
-		
-		var msg Message 
-		data := message.GetData()
-		err  := json.Unmarshal(data, &msg)
-		checkError(err, false)
+		pack 	:= channel.SReceive()
+		message := bytesToMessage(pack)
 
-		printMessage(msg)
+		printMessage(message)
 	}
 }

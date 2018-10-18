@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"log"
 	"encoding/json"
+	"stubborn"
 )
 
 // Message sent out to the server
@@ -15,7 +16,7 @@ type Message struct {
 	Estimate *Estimate
 }
 
-// Estimate is the estimate value
+// Estimate is the estimate value for a consensus
 type Estimate struct {
 	Value  string
 	peerID int
@@ -48,8 +49,16 @@ func messageToBytes(message *Message) (data []byte) {
 	return 
 }
 
+func bytesToMessage(pack *stubborn.Package) (message *Message) {
+	data := pack.GetData()
+	err  := json.Unmarshal(data, &message)
+	checkError(err, false)
+
+	return 
+}
+
 // Print the message
-func printMessage(msg Message){
+func printMessage(msg *Message){
 	log.Println("[ " + toString(msg.PeerID) + " ] Message")
 	log.Println("Round: " + toString(msg.Round))
 	log.Println("Phase: " + toString(msg.Phase))

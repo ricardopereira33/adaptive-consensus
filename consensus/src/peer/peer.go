@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"stubborn"
+	"log"
 )
 
 // Debug mode
@@ -34,6 +35,8 @@ func run(port string, allPorts []string) {
 	go consensus(channel, value)
 
 	handleMessages(channel)
+
+	if debug { log.Println("Consensus decision: " + consensusDecision) }
 }
 
 func testConnection(channel stubborn.StubChannel, srcID int, destID int){
@@ -53,7 +56,7 @@ func main() {
 	debugFlag := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 	
-	Debug = *debugFlag
+	debug = *debugFlag
 	args := flag.Args()	
 	
 	if len(args) < 2 { 

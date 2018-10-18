@@ -12,7 +12,9 @@ func consensus(channel stubborn.StubChannel, value string) {
 	phase    = 1 
 	estimate := newEstimate(value, peerID)
 	
-	if debug { log.Println("CoordID: " strconv.Itoa(((round % nParticipants) + 1))) }
+	if debug { 
+		log.Println("CoordID: " + strconv.Itoa(((round % nParticipants) + 1))) 
+	}
 
 	if peerID == ((round % nParticipants) + 1) {
 		voters 			= append(voters, peerID)

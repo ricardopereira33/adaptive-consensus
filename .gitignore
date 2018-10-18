@@ -1,7 +1,7 @@
+.DS_Store
+.vscode
 misc
 consensus/bin
 consensus/pkg
-consensus/.vscode
 consensus/src/github.com/
 consensus/src/golang.org/
-.DS_Store
