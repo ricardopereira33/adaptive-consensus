@@ -13,11 +13,12 @@ var (
 	debug 			  bool
 	value 			  string 
 	consensusDecision string
-	voters			  []int
+	voters			  map[int] bool
 	round 			  int
 	phase 			  int
 	peerID			  int
 	nParticipants	  int
+	estimate 		  *Estimate
 )
 
 func run(port string, allPorts []string) {
@@ -42,8 +43,8 @@ func run(port string, allPorts []string) {
 func testConnection(channel stubborn.StubChannel, srcID int, destID int){
 	if peerID == srcID {
 		estimate := newEstimate("1", 1)
-		vot 	 := make([]int, 1)
-		vot 	 = append(vot, 1)
+		vot 	 := make(map[int] bool)
+		vot[1]   = true
 		message  := newMessage(1, 1, 1, vot, estimate)
 		data     := messageToBytes(message)
 
