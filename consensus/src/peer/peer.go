@@ -28,19 +28,20 @@ func run(port string, allPorts []string) {
 	channel.SetDelta0(delta0)
 	channel.SetDelta(delta)
 	channel.SetMaxTries(3)
-	channel.SetDefaultDelta(2)
+	channel.SetDefaultDelta(3)
 	
 	peerID 	      = channel.GetPeerID()
-	value  		  = "consensus"
+	if(peerID % 2 == 0) {
+		value = "consensus"
+	} else {
+		value = "consensus"
+	}
 	nParticipants = len(allPorts)
 
 	go consensus(channel, value)
 
 	handleMessages(channel)
-
-	if debug { 
-		log.Println("Consensus decision: " + consensusDecision) 
-	}
+	log.Println("Finish: " + consensusDecision)
 }
 
 func testConnection(channel stubborn.StubChannel, srcID int, destID int){

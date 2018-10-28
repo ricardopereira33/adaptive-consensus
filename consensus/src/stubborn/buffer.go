@@ -90,7 +90,7 @@ func (p Package) PrintPacket() {
 
 func bytesToPackage(data []byte) (pack *Package) {
 	err := json.Unmarshal(data, &pack)
-	checkError(err, false)
+	checkError(err)
 
 	return
 }

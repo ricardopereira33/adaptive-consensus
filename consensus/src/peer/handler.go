@@ -9,12 +9,14 @@ func handleMessages(channel stubborn.StubChannel) {
 		pack 	:= channel.SReceive()
 		message := bytesToMessage(pack)
 
+		message.printMessage()
+
 		if len(voters) <= nParticipants/2 {
 			checkRound(message)
-			existsNewVoters := (round == message.Round) && !containsNewVoters(message.Voters)
+			existsNewVoters := (round == message.Round) && containsNewVoters(message.Voters)
 			isMajority 		:= (phase == 1) && (len(message.Voters) > nParticipants/2)
 			
-			if existsNewVoters && isMajority {
+			if existsNewVoters || isMajority {
 				message.Voters[peerID] = true
 				voters = union(voters, message.Voters)
 				
@@ -26,10 +28,8 @@ func handleMessages(channel stubborn.StubChannel) {
 				data 	:= message.messageToBytes()
 				channel.SSendAll(data)
 			}
-		} else {
-			if checkPhase(message) { 
-				break 
-			}
+		} else if checkPhase(message) { 
+			break 
 		}
 	}
 }

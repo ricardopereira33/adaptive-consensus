@@ -51,6 +51,7 @@ func (message *Message) messageToBytes() (data []byte) {
 
 // Print the message
 func (msg *Message) printMessage() {
+	log.Println("----------------------")
 	log.Println("[ " + toString(msg.PeerID) + " ] Message")
 	log.Println("Round: " + toString(msg.Round))
 	log.Println("Phase: " + toString(msg.Phase))

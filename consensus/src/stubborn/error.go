@@ -14,11 +14,18 @@ func handleErr(err error) {
 }
 
 //check errors
-func checkError(err error, pass bool) bool{
+func checkError(err error) bool{
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		
-		if !pass { os.Exit(1) }
+		os.Exit(1) 
 	}
 	return true 
+}
+
+func checkUDPError(err error) bool{
+	if err != nil {
+		log.Println("Conection closed.")
+		return true 
+	}
+	return false
 }

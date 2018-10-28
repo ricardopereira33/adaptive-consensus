@@ -120,10 +120,10 @@ func initConnection(port string) (conn *net.UDPConn){
 	if Debug { log.Println("Init Peer - 127.0.0.1:" + port) }
 
 	addr, err := net.ResolveUDPAddr("udp", ":" + port)
-    checkError(err, false)
+    checkError(err)
 
     conn, err = net.ListenUDP("udp", addr)
-    checkError(err, false)
+    checkError(err)
     
 	conn.SetReadBuffer(MaxDatagramSize)
 
@@ -139,7 +139,7 @@ func listOfPeers(ownPort string, ports []string) (list map[int] *net.UDPAddr, ow
 			ownID = index+1
 		} else {
 			addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:" + port)
-			checkError(err, false)
+			checkError(err)
 			
 			list[index+1] = addr
 		}

@@ -1,7 +1,7 @@
 package stubborn
 
 import (
-	"log"
+    "log"
 )
 
 // SReceive is the method that receives the messages through the channel
@@ -15,7 +15,7 @@ func (c *Channel) SReceive() (pack *Package){
 
 // receive is the loop that receive the message and send through the buffer(pipe)
 // for the SReceive method receive the messages
-func (c *Channel) receive() (int, []byte) {
+func (c *Channel) receive() {
 	if Debug { log.Println("Listener start...") }
 
     buffer  := make([]byte, MaxDatagramSize)
@@ -23,18 +23,19 @@ func (c *Channel) receive() (int, []byte) {
 
     for {
         nBytes, _, err := channel.ReadFromUDP(buffer)
+        if checkUDPError(err) {
+            break
+        }
+        
+        data := buffer[:nBytes]
+        pack := bytesToPackage(data)
 
-        if checkError(err, true){
-            data := buffer[:nBytes]
-            pack := bytesToPackage(data)
-
-            if pack.IsACK {
-                oldPack := c.OutBuffer.getElem(pack.ID)
-                oldPack.Arrived = true
-                c.OutBuffer.insertElem(pack.ID, oldPack)
-            } else {
-                go func() { c.InBuffer<- pack }()
-            }
+        if pack.IsACK {
+            oldPack := c.OutBuffer.getElem(pack.ID)
+            oldPack.Arrived = true
+            c.OutBuffer.insertElem(pack.ID, oldPack)
+        } else {
+            go func() { c.InBuffer<- pack }()
         }
     }
 }

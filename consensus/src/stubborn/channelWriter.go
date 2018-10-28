@@ -31,7 +31,7 @@ func (c *Channel) send(idDest int) {
 	message 	  := c.OutBuffer.getElem(idDest)
 	peerAddr, prs := c.Peers[idDest]
 	jsonMsg, err  := json.Marshal(message)
-	checkError(err, false)
+	checkError(err)
 
 	if prs {
 		c.Connection.WriteTo(jsonMsg, peerAddr)
@@ -43,7 +43,7 @@ func (c *Channel) send(idDest int) {
 func (c *Channel) sendDirect(idDest int, message *Package) {
 	peerAddr 	 := c.Peers[idDest]
 	jsonMsg, err := json.Marshal(message)
-	checkError(err, false)
+	checkError(err)
 	
 	c.Connection.WriteTo(jsonMsg, peerAddr)
 }
