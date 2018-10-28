@@ -8,7 +8,6 @@ import (
 	"log"
 )
 
-// Debug mode
 var (
 	debug 			  bool
 	value 			  string 
@@ -28,6 +27,8 @@ func run(port string, allPorts []string) {
 	channel.Init()
 	channel.SetDelta0(delta0)
 	channel.SetDelta(delta)
+	channel.SetMaxTries(3)
+	channel.SetDefaultDelta(3)
 	
 	peerID 	      = channel.GetPeerID()
 	value  		  = "consensus"
@@ -37,7 +38,9 @@ func run(port string, allPorts []string) {
 
 	handleMessages(channel)
 
-	if debug { log.Println("Consensus decision: " + consensusDecision) }
+	if debug { 
+		log.Println("Consensus decision: " + consensusDecision) 
+	}
 }
 
 func testConnection(channel stubborn.StubChannel, srcID int, destID int){

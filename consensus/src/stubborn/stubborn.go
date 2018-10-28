@@ -6,7 +6,9 @@ type StubChannel interface {
 	SSend(int, []byte)
 	SSendAll([]byte)					  
 	SetDelta0(f func(int, *Package) bool)	
-	SetDelta(f func(int) bool)	
+	SetDelta(f func(int) bool)
+	SetMaxTries(int)
+	SetDefaultDelta(int)	
 	GetPeerID() int
 	Init()	
 	Close()		

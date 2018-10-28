@@ -16,9 +16,9 @@ const (
 
 var ( // Default value (adaptive) 
 	// MaxTries is the maximum value of tries 
-	MaxTries 		= 3
+	MaxTries 	 = 3
 	// DefaultDelta is the default time to relay the messages to the others peers 
-	DefaultDelta	= time.Second * 3
+	DefaultDelta = time.Second * 3
 )
 
 // Channel to send and receive messages between peers
@@ -104,6 +104,14 @@ func (c Channel) printStatus() {
 	log.Println(c.OutBuffer) 	
 	log.Println(c.Delta0Func != nil) 	
 	log.Println(c.DeltaFunc != nil) 	
+}
+
+func (c *Channel) SetMaxTries(max int) {
+	MaxTries = max
+}
+
+func (c *Channel) SetDefaultDelta(ddelta int) {
+	DefaultDelta = time.Second * time.Duration(ddelta)
 }
 
 // Auxiliary Functions 
