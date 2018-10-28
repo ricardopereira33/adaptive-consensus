@@ -28,7 +28,7 @@ func run(port string, allPorts []string) {
 	channel.SetDelta0(delta0)
 	channel.SetDelta(delta)
 	channel.SetMaxTries(3)
-	channel.SetDefaultDelta(3)
+	channel.SetDefaultDelta(2)
 	
 	peerID 	      = channel.GetPeerID()
 	value  		  = "consensus"
@@ -49,7 +49,7 @@ func testConnection(channel stubborn.StubChannel, srcID int, destID int){
 		vot 	 := make(map[int] bool)
 		vot[1]   = true
 		message  := newMessage(1, 1, 1, vot, estimate)
-		data     := messageToBytes(message)
+		data     := message.messageToBytes()
 
 		channel.SSend(destID, data)
 	}

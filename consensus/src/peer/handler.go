@@ -23,7 +23,7 @@ func handleMessages(channel stubborn.StubChannel) {
 				}
 
 				message := newMessage(peerID, round, phase, voters, estimate)
-				data 	:= messageToBytes(message)
+				data 	:= message.messageToBytes()
 				channel.SSendAll(data)
 			}
 		} else {
@@ -42,7 +42,7 @@ func checkRound(message *Message) {
 		voters   = make(map[int] bool)
 	} else if round == message.Round && phase < message.Phase {
 		phase  = message.Phase
-		voters   = make(map[int] bool)
+		voters = make(map[int] bool)
 	}
 }
 

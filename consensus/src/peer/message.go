@@ -42,23 +42,15 @@ func newEstimate(value string, id int) (estimate *Estimate){
 	return
 }
 
-func messageToBytes(message *Message) (data []byte) {
+func (message *Message) messageToBytes() (data []byte) {
 	data, err := json.Marshal(message)
 	checkError(err, false)
 
 	return 
 }
 
-func bytesToMessage(pack *stubborn.Package) (message *Message) {
-	data := pack.GetData()
-	err  := json.Unmarshal(data, &message)
-	checkError(err, false)
-
-	return 
-}
-
 // Print the message
-func printMessage(msg *Message){
+func (msg *Message) printMessage() {
 	log.Println("[ " + toString(msg.PeerID) + " ] Message")
 	log.Println("Round: " + toString(msg.Round))
 	log.Println("Phase: " + toString(msg.Phase))
@@ -67,6 +59,14 @@ func printMessage(msg *Message){
 	log.Println("Estimate: ") 
 	log.Println(msg.Estimate)
 	log.Println("----------------------")
+}
+
+func bytesToMessage(pack *stubborn.Package) (message *Message) {
+	data := pack.GetData()
+	err  := json.Unmarshal(data, &message)
+	checkError(err, false)
+
+	return 
 }
 
 // Axiliary Functions 

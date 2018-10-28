@@ -21,7 +21,7 @@ func consensus(channel stubborn.StubChannel, value string) {
 		estimate.peerID = peerID
 
 		message := newMessage(peerID, round, phase, voters, estimate)
-		data 	:= messageToBytes(message)
+		data 	:= message.messageToBytes()
 
 		channel.SSendAll(data)
 	}
