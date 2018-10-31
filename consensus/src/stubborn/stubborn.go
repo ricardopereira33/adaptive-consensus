@@ -1,6 +1,6 @@
 package stubborn
 
-// StubChannel is a interface to abstract the channel
+// StubChannel is an interface to abstract the channel
 type StubChannel interface {
 	SReceive() *Package
 	SSend(int, []byte)

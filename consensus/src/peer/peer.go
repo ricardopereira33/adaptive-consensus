@@ -23,20 +23,15 @@ var (
 func run(port string, allPorts []string) {
 	channel := stubborn.NewStubChannel(port, allPorts)
 	defer channel.Close()
+	configChannel(channel)
 
-	channel.Init()
-	channel.SetDelta0(delta0)
-	channel.SetDelta(delta)
-	channel.SetMaxTries(3)
-	channel.SetDefaultDelta(3)
-	
 	peerID 	      = channel.GetPeerID()
+	nParticipants = len(allPorts)
 	if(peerID % 2 == 0) {
 		value = "consensus"
 	} else {
-		value = "consensus"
+		value = "consensus1"
 	}
-	nParticipants = len(allPorts)
 
 	go consensus(channel, value)
 
@@ -44,16 +39,14 @@ func run(port string, allPorts []string) {
 	log.Println("Finish: " + consensusDecision)
 }
 
-func testConnection(channel stubborn.StubChannel, srcID int, destID int){
-	if peerID == srcID {
-		estimate := newEstimate("1", 1)
-		vot 	 := make(map[int] bool)
-		vot[1]   = true
-		message  := newMessage(1, 1, 1, vot, estimate)
-		data     := message.messageToBytes()
+func configChannel(channel stubborn.StubChannel) {
+	channel.Init()
+	channel.SetMaxTries(3)
+	channel.SetDefaultDelta(3)
 
-		channel.SSend(destID, data)
-	}
+	mut := newMutation(EARLY)
+	channel.SetDelta0(mut.Delta0)
+	channel.SetDelta(mut.Delta)
 }
 
 //start the peer
