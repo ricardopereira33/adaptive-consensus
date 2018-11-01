@@ -16,7 +16,8 @@ func consensus(channel stubborn.StubChannel, value string) {
 	if debug { 
 		log.Println("CoordID: " + strconv.Itoa(((round % nParticipants) + 1))) 
 	}
-	coord := ((round % nParticipants) + 1
+	
+	coord := (round % nParticipants) + 1
 	if peerID == coord {
 		voters[peerID]  = true
 		estimate.PeerID = peerID
