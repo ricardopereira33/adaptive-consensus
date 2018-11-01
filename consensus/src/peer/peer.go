@@ -42,7 +42,7 @@ func configChannel(channel stubborn.StubChannel) {
 	channel.SetMaxTries(3)
 	channel.SetDefaultDelta(3)
 
-	mut := mut.NewMutation(mut.EARLY)
+	mut := mut.NewMutation(channel, mut.EARLY)
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 }
@@ -53,7 +53,7 @@ func main() {
 	flag.Parse()
 	
 	debug = *debugFlag
-	args := flag.Args()	
+	args  := flag.Args()	
 	
 	if len(args) < 2 { 
 		fmt.Println("Less than arguments 2!")

@@ -2,14 +2,22 @@ package mutation
 
 import "stubborn"
 
-type Early struct { }
-
-func NewEarly() *Early {
-	return new(Early)
+type Early struct { 
+	channel stubborn.StubChannel
 }
 
-func (e Early) Delta0(id int, message *stubborn.Package) bool {
-	return true
+func NewEarly(channel stubborn.StubChannel) (e *Early) {
+	e 		  = new(Early)
+	e.channel = channel
+	
+	return e
+}
+
+func (e Early) Delta0(id int, pack *stubborn.Package) bool {
+	isFresh    := fresh(e.channel.GetPackage(id), pack)
+	isMajority := majority(pack, e.channel.GetNParticipants())
+	
+	return isFresh || isMajority
 }
 	
 func (e Early) Delta(id int) bool {

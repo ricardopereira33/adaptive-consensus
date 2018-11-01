@@ -2,10 +2,15 @@ package mutation
 
 import "stubborn"
 
-type Gossip struct { }
+type Gossip struct {
+	channel stubborn.StubChannel
+}
 
-func NewGossip() *Gossip {
-	return new(Gossip)
+func NewGossip(channel stubborn.StubChannel) (g *Gossip) {
+	g 		  = new(Gossip)
+	g.channel = channel
+	
+	return g
 }
 
 func (g Gossip) Delta0(id int, message *stubborn.Package) bool {

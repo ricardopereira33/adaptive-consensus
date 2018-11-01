@@ -18,19 +18,19 @@ type Mutation interface {
 	Delta(int) 					   bool
 }
 
-func NewMutation(mutationType int) Mutation {
+func NewMutation(channel stubborn.StubChannel, mutationType int) Mutation {
 	switch mutationType {
 	case EARLY:
-		return NewEarly()
+		return NewEarly(channel)
 	case RING:
-		return NewRing()
+		return NewRing(channel)
 	case GOSSIP:
-		return NewGossip()
+		return NewGossip(channel)
 	case CENTRALIZED:
-		return NewCentralized()
+		return NewCentralized(channel)
 	}
 
-	return NewEarly()
+	return NewEarly(channel)
 }
 
 

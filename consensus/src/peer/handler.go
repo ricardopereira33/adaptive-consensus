@@ -25,7 +25,7 @@ func handleMessages(channel stubborn.StubChannel) {
 					estimate = message.Estimate
 				}
 
-				message := msg.NewMessage(peerID, round, phase, nParticipants, voters, estimate)
+				message := msg.NewMessage(peerID, round, phase, voters, estimate)
 				data 	:= message.MessageToBytes()
 				channel.SSendAll(data)
 			}

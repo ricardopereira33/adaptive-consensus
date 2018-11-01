@@ -31,6 +31,7 @@ type Channel struct {
 	Delta0Func	func(int, *Package) bool
 	DeltaFunc	func(int) bool
 	PeerID		int
+	CoordID		int
 }
 
 func newChannel(ownPort string, allPorts []string) (channel *Channel) {
@@ -78,6 +79,23 @@ func (c *Channel) GetPeerID() int {
 	return c.PeerID
 }
 
+// GetPackage returns the last package sent to id
+func (c *Channel) GetPackage(id int) *Package {
+	pack := c.OutBuffer.getElem(id)
+
+	return pack
+}
+
+// GetNParticipants returns the number of participants
+func (c *Channel) GetNParticipants() int {
+	return len(c.Peers)
+}
+
+// GetCoordID returns the coordinator ID
+func (c *Channel) GetCoordID() int {
+	return c.CoordID
+}
+
 // SetDelta0 is the method to define the delta0 implemention
 func (c *Channel) SetDelta0(f func(int, *Package) bool) {
 	c.Delta0Func = f
@@ -86,6 +104,11 @@ func (c *Channel) SetDelta0(f func(int, *Package) bool) {
 // SetDelta is the method to define the delta0 implemention
 func (c *Channel) SetDelta(f func(int) bool) {
 	c.DeltaFunc = f	
+}
+
+// SetCoordinator saves the coordainator ID
+func (c *Channel) SetCoordinator(coordID int) {
+	c.CoordID = coordID
 }
 
 // Init is the method that start receipt of the message 

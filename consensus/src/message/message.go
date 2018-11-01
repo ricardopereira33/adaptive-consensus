@@ -13,7 +13,6 @@ type Message struct {
 	PeerID	 int  
 	Round    int  
 	Phase 	 int
-	NPeers   int
 	Voters   map[int] bool 
 	Estimate *Estimate
 }
@@ -25,12 +24,11 @@ type Estimate struct {
 }
 
 // Creates a new message using the parameters passed in and returns it
-func NewMessage(peerID int, round int, phase int, npeers int, voters map[int] bool, estimate *Estimate) (message *Message){
+func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate *Estimate) (message *Message){
 	message 	   	 = new(Message)
 	message.PeerID 	 = peerID
 	message.Round  	 = round
 	message.Phase  	 = phase
-	message.NPeers   = npeers
 	message.Voters 	 = voters
 	message.Estimate = estimate
 
