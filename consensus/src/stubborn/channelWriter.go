@@ -3,6 +3,7 @@ package stubborn
 import (
 	"log"
 	"encoding/json"
+	ex "exception"
 )
 
 func (c *Channel) SSendAll(message []byte) {
@@ -31,7 +32,7 @@ func (c *Channel) send(idDest int) {
 	message 	  := c.OutBuffer.getElem(idDest)
 	peerAddr, prs := c.Peers[idDest]
 	jsonMsg, err  := json.Marshal(message)
-	checkError(err)
+	ex.CheckError(err)
 
 	if prs {
 		c.Connection.WriteTo(jsonMsg, peerAddr)
@@ -43,7 +44,7 @@ func (c *Channel) send(idDest int) {
 func (c *Channel) sendDirect(idDest int, message *Package) {
 	peerAddr 	 := c.Peers[idDest]
 	jsonMsg, err := json.Marshal(message)
-	checkError(err)
+	ex.CheckError(err)
 	
 	c.Connection.WriteTo(jsonMsg, peerAddr)
 }

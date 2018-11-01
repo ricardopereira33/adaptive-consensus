@@ -4,13 +4,14 @@ import (
 	"strconv"
 	"stubborn"
 	"log"
+	msg "message"
 )
 
 func consensus(channel stubborn.StubChannel, value string) {
 	voters   = make(map[int] bool)
 	round    = 1 			  
 	phase    = 1 
-	estimate = newEstimate(value, peerID)
+	estimate = msg.NewEstimate(value, peerID)
 	
 	if debug { 
 		log.Println("CoordID: " + strconv.Itoa(((round % nParticipants) + 1))) 
@@ -18,10 +19,10 @@ func consensus(channel stubborn.StubChannel, value string) {
 
 	if peerID == ((round % nParticipants) + 1) {
 		voters[peerID]  = true
-		estimate.peerID = peerID
+		estimate.PeerID = peerID
 
-		message := newMessage(peerID, round, phase, voters, estimate)
-		data 	:= message.messageToBytes()
+		message := msg.NewMessage(peerID, round, phase, nParticipants, voters, estimate)
+		data 	:= message.MessageToBytes()
 
 		channel.SSendAll(data)
 	}

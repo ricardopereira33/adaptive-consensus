@@ -4,6 +4,7 @@ import (
 	"log"
 	"encoding/json"
 	"sync"
+	ex "exception"
 )
 
 // Buffer is a interface to absract the buffer implementation
@@ -90,7 +91,7 @@ func (p Package) PrintPacket() {
 
 func bytesToPackage(data []byte) (pack *Package) {
 	err := json.Unmarshal(data, &pack)
-	checkError(err)
+	ex.CheckError(err)
 
 	return
 }

@@ -1,8 +1,7 @@
-package main
+package mutation
 
 import (
 	"stubborn"
-	"mutation"
 )
 
 // kind of enums
@@ -19,19 +18,19 @@ type Mutation interface {
 	Delta(int) 					   bool
 }
 
-func newMutation(mutationType int) Mutation {
+func NewMutation(mutationType int) Mutation {
 	switch mutationType {
 	case EARLY:
-		return mutation.NewEarly()
+		return NewEarly()
 	case RING:
-		return mutation.NewRing()
+		return NewRing()
 	case GOSSIP:
-		return mutation.NewGossip()
+		return NewGossip()
 	case CENTRALIZED:
-		return mutation.NewCentralized()
+		return NewCentralized()
 	}
 
-	return mutation.NewEarly()
+	return NewEarly()
 }
 
 

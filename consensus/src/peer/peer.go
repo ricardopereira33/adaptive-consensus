@@ -6,6 +6,8 @@ import (
 	"os"
 	"stubborn"
 	"log"
+	mut "mutation"
+	msg "message"
 )
 
 var (
@@ -17,7 +19,7 @@ var (
 	phase 			  int
 	peerID			  int
 	nParticipants	  int
-	estimate 		  *Estimate
+	estimate 		  *msg.Estimate
 )
 
 func run(port string, allPorts []string) {
@@ -27,11 +29,7 @@ func run(port string, allPorts []string) {
 
 	peerID 	      = channel.GetPeerID()
 	nParticipants = len(allPorts)
-	if(peerID % 2 == 0) {
-		value = "consensus"
-	} else {
-		value = "consensus1"
-	}
+	value = "consensus1"
 
 	go consensus(channel, value)
 
@@ -44,7 +42,7 @@ func configChannel(channel stubborn.StubChannel) {
 	channel.SetMaxTries(3)
 	channel.SetDefaultDelta(3)
 
-	mut := newMutation(EARLY)
+	mut := mut.NewMutation(mut.EARLY)
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 }

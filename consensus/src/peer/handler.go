@@ -2,14 +2,15 @@ package main
 
 import (
 	"stubborn"
+	msg "message"
 )
 
 func handleMessages(channel stubborn.StubChannel) {
 	for {
 		pack 	:= channel.SReceive()
-		message := bytesToMessage(pack)
+		message := msg.PackageToMessage(pack)
 
-		message.printMessage()
+		message.PrintMessage()
 
 		if len(voters) <= nParticipants/2 {
 			checkRound(message)
@@ -20,12 +21,12 @@ func handleMessages(channel stubborn.StubChannel) {
 				message.Voters[peerID] = true
 				voters = union(voters, message.Voters)
 				
-				if message.Estimate.peerID == ((round % nParticipants) + 1){
+				if message.Estimate.PeerID == ((round % nParticipants) + 1){
 					estimate = message.Estimate
 				}
 
-				message := newMessage(peerID, round, phase, voters, estimate)
-				data 	:= message.messageToBytes()
+				message := msg.NewMessage(peerID, round, phase, nParticipants, voters, estimate)
+				data 	:= message.MessageToBytes()
 				channel.SSendAll(data)
 			}
 		} else if checkPhase(message) { 
@@ -34,7 +35,7 @@ func handleMessages(channel stubborn.StubChannel) {
 	}
 }
 
-func checkRound(message *Message) {
+func checkRound(message *msg.Message) {
 	if round < message.Round {
 		estimate = message.Estimate
 		round 	 = message.Round
@@ -46,7 +47,7 @@ func checkRound(message *Message) {
 	}
 }
 
-func checkPhase(message *Message) bool {
+func checkPhase(message *msg.Message) bool {
 	if phase == 1 {
 		consensusDecision = message.Estimate.Value
 		return true

@@ -2,6 +2,7 @@ package stubborn
 
 import (
     "log"
+	ex "exception"
 )
 
 // SReceive is the method that receives the messages through the channel
@@ -23,7 +24,7 @@ func (c *Channel) receive() {
 
     for {
         nBytes, _, err := channel.ReadFromUDP(buffer)
-        if checkUDPError(err) {
+        if ex.CheckUDPError(err) {
             break
         }
         
