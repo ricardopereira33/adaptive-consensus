@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	ex "exception"
+	msg "message"
 )
 
 const ( 
@@ -25,21 +26,24 @@ var ( // Default value (adaptive)
 // Channel to send and receive messages between peers
 type Channel struct {
 	Peers 		map[int] *net.UDPAddr
-	Connection	*net.UDPConn
-	OutBuffer	Buffer
+	OutBuffer	chan *Package
 	InBuffer	chan *Package
 	Delta0Func	func(int, *Package) bool
 	DeltaFunc	func(int) bool
 	PeerID		int
 	CoordID		int
+	Voters	    map[int] bool
+	Round 	    int
+	Phase       int
+	estimate    *msg.Estimate
 }
 
-func newChannel(ownPort string, allPorts []string) (channel *Channel) {
-	channel 		   = new(Channel)
-	channel.Connection = initConnection(ownPort)
-	channel.OutBuffer  = newBuffer(len(allPorts))
-	channel.InBuffer   = make(chan *Package)
-	channel.Peers, channel.PeerID = listOfPeers(ownPort, allPorts)
+func newChannelSim(peerID int) (channel *Channel) {
+	channel 		  = new(Channel)
+	channel.OutBuffer = make(chan *Package)
+	channel.InBuffer  = make(chan *Package)
+	channel.PeerID    = peerID
+	channel.Peers     = 
 	
 	return
 }
@@ -52,27 +56,7 @@ func (c *Channel) delta(id int) bool {
 	return c.DeltaFunc(id)
 }
 
-func (c *Channel) retransmission() {
-	if Debug { log.Println("Retransmisson start...")}
-
-	tries := 0
-	for {
-		time.Sleep(DefaultDelta)	
-		for id := range c.Peers {
-			if c.delta(id) || tries > MaxTries {
-				pack := c.OutBuffer.getElem(id)
-				
-				if pack != nil && !pack.Arrived { 
-					c.send(id) 
-				}
-			}
-			tries++
-		}
-	}
-}
-
-
-// Exported methods
+/*** Exported methods ***/
 
 // GetPeerID returns the peer ID
 func (c *Channel) GetPeerID() int {
@@ -124,12 +108,6 @@ func (c *Channel) SetDefaultDelta(ddelta int) {
 // Init is the method that start receipt of the message 
 func (c *Channel) Init() {
 	go c.receive()
-	go c.retransmission()
-}
-
-// Close is the method that closes the UDP connection 
-func (c *Channel) Close() {
-	c.Connection.Close()
 }
 
 func (c Channel) printStatus() {
@@ -140,25 +118,7 @@ func (c Channel) printStatus() {
 	log.Println(c.DeltaFunc != nil) 	
 }
 
-// Auxiliary Functions 
-
-func initConnection(port string) (conn *net.UDPConn){
-	if Debug { 
-		log.Println("Init Peer - 127.0.0.1:" + port) 
-	}
-
-	addr, err := net.ResolveUDPAddr("udp", ":" + port)
-    ex.CheckError(err)
-
-    conn, err = net.ListenUDP("udp", addr)
-    ex.CheckError(err)
-    
-	conn.SetReadBuffer(MaxDatagramSize)
-
-	return
-}
-
-func listOfPeers(ownPort string, ports []string) (list map[int] *net.UDPAddr, ownID int){
+func listOfPeers(ownPort string, ports []string) (list map[int] *net.UDPAddr){
 	list = make(map[int] *net.UDPAddr)
 	sort.Strings(ports)
 

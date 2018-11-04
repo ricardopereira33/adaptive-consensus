@@ -2,6 +2,7 @@ package mutation
 
 import (
 	"stubborn"
+	ex "exception"
 )
 
 // kind of enums
@@ -18,6 +19,7 @@ type Mutation interface {
 	Delta(int) 					   bool
 }
 
+// NewMutation creates a new Mutation.
 func NewMutation(channel stubborn.StubChannel, mutationType int) Mutation {
 	switch mutationType {
 	case EARLY:
@@ -31,6 +33,22 @@ func NewMutation(channel stubborn.StubChannel, mutationType int) Mutation {
 	}
 
 	return NewEarly(channel)
+}
+
+// Find returns the constant number for a mutation.
+func Find(mutation string) (int, error) {
+	switch mutation {
+	case "early":
+		return EARLY, nil
+	case "ring":
+		return RING, nil
+	case "gossip":
+		return GOSSIP, nil
+	case "centralized":
+		return CENTRALIZED, nil
+	}
+
+	return -1, ex.NewError("Wrong mutation!")
 }
 
 

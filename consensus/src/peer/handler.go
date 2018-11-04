@@ -51,19 +51,19 @@ func checkPhase(message *msg.Message) bool {
 	if phase == 1 {
 		consensusDecision = message.Estimate.Value
 		return true
-	} else {
-		round++
-		phase  = 1
-		voters = make(map[int] bool)
-		return false
-	}
+	} 
+	
+	round++
+	phase  = 1
+	voters = make(map[int] bool)
+	return false
 }
 
 
 // Auxiliary Funtions 
 
 func containsNewVoters(senderVoters map[int] bool) bool {
-	for id, _ := range senderVoters {
+	for id := range senderVoters {
 		_, isPresent := voters[id]
 		if !isPresent {
 			return true
@@ -74,7 +74,7 @@ func containsNewVoters(senderVoters map[int] bool) bool {
 }
 
 func union(hash1 map[int] bool, hash2 map[int] bool) map[int] bool{
-	for id, _ := range hash2 {
+	for id := range hash2 {
 		hash1[id] = true
 	}
 
