@@ -1,13 +1,7 @@
 package stubborn
 
-import (
-    "log"
-)
-
 // SReceive is the method that receives the messages through the channel
 func (c *Channel) SReceive() (pack *Package){    
-    if Debug { log.Println("Listener start...") }
-    
     select{
         case pack := <-c.InBuffer :
             c.ack(pack.ID)

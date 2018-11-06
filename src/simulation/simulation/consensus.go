@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-	"log"
 	stb "simulation/stubborn"
     msg "simulation/message"
     con "simulation/consensusinfo"
@@ -15,10 +13,6 @@ func consensus(channel stb.StubChannel, value string) {
 	c.Phase    = 1 
     c.Estimate = con.NewEstimate(value, channel.GetPeerID())
     peerID    := channel.GetPeerID()
-	
-	if debug { 
-		log.Println("CoordID: " + strconv.Itoa(((c.Round % channel.GetNParticipants()) + 1))) 
-	}
 	
 	coord := (c.Round % channel.GetNParticipants()) + 1
 	if peerID == channel.GetCoordID(){
