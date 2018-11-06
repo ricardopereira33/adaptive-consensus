@@ -1,6 +1,6 @@
 package mutation
 
-import "stubborn"
+import "simulation/stubborn"
 
 type Centralized struct {
 	channel stubborn.StubChannel

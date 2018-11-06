@@ -1,12 +1,9 @@
 package stubborn
 
 import (
-	"sort"
 	"time"
 	"log"
-	"net"
-	ex "exception"
-	msg "message"
+    con "simulation/consensusinfo"
 )
 
 const ( 
@@ -14,7 +11,8 @@ const (
 	MaxDatagramSize = 2048  
 )	
 
-var ( // Default value (adaptive) 
+// Default value (adaptive) 
+var ( 
 	// MaxTries is the maximum value of tries 
 	MaxTries 	 = 3
 	// DefaultDelta is the default time to relay the messages to the others peers 
@@ -25,25 +23,21 @@ var ( // Default value (adaptive)
 
 // Channel to send and receive messages between peers
 type Channel struct {
-	Peers 		map[int] *net.UDPAddr
-	OutBuffer	chan *Package
-	InBuffer	chan *Package
-	Delta0Func	func(int, *Package) bool
-	DeltaFunc	func(int) bool
-	PeerID		int
-	CoordID		int
-	Voters	    map[int] bool
-	Round 	    int
-	Phase       int
-	estimate    *msg.Estimate
+	Peers 	   map[int] chan *Package
+	OutBuffer  Buffer
+	InBuffer   chan *Package
+	Delta0Func func(int, *Package) bool
+	DeltaFunc  func(int) bool
+	consInfo   *con.ConsensusInfo
+	PeerID	   int
 }
 
-func newChannelSim(peerID int) (channel *Channel) {
+func newChannel(peerID, nParticipants int, peers map[int] chan *Package) (channel *Channel) {
 	channel 		  = new(Channel)
-	channel.OutBuffer = make(chan *Package)
+	channel.OutBuffer = newBuffer(nParticipants)
 	channel.InBuffer  = make(chan *Package)
-	channel.PeerID    = peerID
-	channel.Peers     = 
+    channel.PeerID	  = peerID
+    channel.Peers     = peers
 	
 	return
 }
@@ -56,6 +50,23 @@ func (c *Channel) delta(id int) bool {
 	return c.DeltaFunc(id)
 }
 
+func (c *Channel) retransmission() {
+	tries := 0
+	for {
+		time.Sleep(DefaultDelta)	
+		for id := range c.Peers {
+			if c.delta(id) || tries > MaxTries {
+				pack := c.OutBuffer.GetElem(id)
+				
+				if pack != nil && !pack.Arrived { 
+					c.send(id) 
+				}
+			}
+			tries++
+		}
+	}
+}
+
 /*** Exported methods ***/
 
 // GetPeerID returns the peer ID
@@ -65,7 +76,7 @@ func (c *Channel) GetPeerID() int {
 
 // GetPackage returns the last package sent to id
 func (c *Channel) GetPackage(id int) *Package {
-	pack := c.OutBuffer.getElem(id)
+	pack := c.OutBuffer.GetElem(id)
 
 	return pack
 }
@@ -77,7 +88,17 @@ func (c *Channel) GetNParticipants() int {
 
 // GetCoordID returns the coordinator ID
 func (c *Channel) GetCoordID() int {
-	return c.CoordID
+	return c.consInfo.CoordID
+}
+
+// GetConsensusDecision returns the consensus decision value
+func (c *Channel) GetConsensusDecision() string {
+	return c.consInfo.CDecision
+}
+
+// GetConsensusInfo returns the consensus information
+func (c *Channel) GetConsensusInfo() *con.ConsensusInfo {
+    return c.consInfo
 }
 
 // SetDelta0 is the method to define the delta0 implemention
@@ -92,7 +113,7 @@ func (c *Channel) SetDelta(f func(int) bool) {
 
 // SetCoordinator saves the coordainator ID
 func (c *Channel) SetCoordinator(coordID int) {
-	c.CoordID = coordID
+	c.consInfo.CoordID = coordID
 }
 
 // SetMaxTries sets the MaxTries value.
@@ -107,30 +128,12 @@ func (c *Channel) SetDefaultDelta(ddelta int) {
 
 // Init is the method that start receipt of the message 
 func (c *Channel) Init() {
-	go c.receive()
+	go c.retransmission()
 }
 
 func (c Channel) printStatus() {
 	log.Println(c.Peers) 	
-	log.Println(c.Connection) 	
 	log.Println(c.OutBuffer) 	
 	log.Println(c.Delta0Func != nil) 	
 	log.Println(c.DeltaFunc != nil) 	
-}
-
-func listOfPeers(ownPort string, ports []string) (list map[int] *net.UDPAddr){
-	list = make(map[int] *net.UDPAddr)
-	sort.Strings(ports)
-
-	for index, port := range ports {
-		if port ==  ownPort {
-			ownID = index+1
-		} else {
-			addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:" + port)
-			ex.CheckError(err)
-			
-			list[index+1] = addr
-		}
-	}
-	return
 }

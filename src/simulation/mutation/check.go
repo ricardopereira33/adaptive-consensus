@@ -1,8 +1,8 @@
 package mutation
 
 import (
-	"stubborn"
-	msg "message"
+	"simulation/stubborn"
+	msg "simulation/message"
 )
 
 func fresh(old_pack *stubborn.Package, new_pack *stubborn.Package) bool {

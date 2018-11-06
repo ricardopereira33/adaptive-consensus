@@ -2,19 +2,21 @@ package mutation
 
 import (
 	"log"
-	"stubborn"
 	"math/rand"
+	stb "simulation/stubborn"
 )
 
+// Gossip is a mutation 
 type Gossip struct {
-	channel stubborn.StubChannel
+	channel stb.StubChannel
 	permut 	[]int
 	c 		int
 	turn    int
 	fanout  int
 }
 
-func NewGossip(channel stubborn.StubChannel) (g *Gossip) {
+// NewGossip creates a new gossip mutation
+func NewGossip(channel stb.StubChannel) (g *Gossip) {
 	g 		  = new(Gossip)
 	g.channel = channel
 	g.permut  = perm(channel.GetNParticipants())
@@ -25,10 +27,12 @@ func NewGossip(channel stubborn.StubChannel) (g *Gossip) {
 	return g
 }
 
-func (g Gossip) Delta0(id int, message *stubborn.Package) bool {
+// Delta0 is the delta0 implementation
+func (g Gossip) Delta0(id int, message *stb.Package) bool {
 	return g.Delta(id)
 }
-	
+
+// Delta is the delta implementation	
 func (g Gossip) Delta(id int) bool {
 	nParticipants := len(g.permut)
 	g.turn++
@@ -55,7 +59,7 @@ func (g Gossip) Delta(id int) bool {
 func perm(nParticipants int) (list []int) {
 	list = rand.Perm(nParticipants)
 
-	for i, _ := range list {
+	for i := range list {
 		list[i]++
 	}
 

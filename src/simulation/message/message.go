@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"log"
 	"encoding/json"
-	"stubborn"
-	ex "exception"
+    stb "simulation/stubborn"
+    con "simulation/consensusinfo"
+	ex "simulation/exception"
 )
 
 // Message sent out to the server
@@ -14,17 +15,11 @@ type Message struct {
 	Round    int  
 	Phase 	 int
 	Voters   map[int] bool 
-	Estimate *Estimate
+	Estimate *con.Estimate
 }
 
-// Estimate is the estimate value for a consensus
-type Estimate struct {
-	Value  string
-	PeerID int
-}
-
-// Creates a new message using the parameters passed in and returns it
-func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate *Estimate) (message *Message){
+// NewMessage creates a new message using the parameters passed in and returns it
+func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate *con.Estimate) (message *Message){
 	message 	   	 = new(Message)
 	message.PeerID 	 = peerID
 	message.Round  	 = round
@@ -35,14 +30,7 @@ func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate
 	return
 }
 
-func NewEstimate(value string, id int) (estimate *Estimate){
-	estimate 		= new(Estimate)
-	estimate.Value  = value
-	estimate.PeerID = id
-
-	return
-}
-
+// MessageToBytes convert a Message to Bytes
 func (message *Message) MessageToBytes() (data []byte) {
 	data, err := json.Marshal(message)
 	ex.CheckError(err)
@@ -50,19 +38,20 @@ func (message *Message) MessageToBytes() (data []byte) {
 	return 
 }
 
-// Print the message
-func (msg *Message) PrintMessage() {
+// PrintMessage prints the message
+func (message *Message) PrintMessage() {
 	log.Println("----------------------")
-	log.Println("[ " + toString(msg.PeerID) + " ] Message")
-	log.Println("R: " + toString(msg.Round) + "| Ph: " + toString(msg.Phase))
+	log.Println("[ " + toString(message.PeerID) + " ] Message")
+	log.Println("R: " + toString(message.Round) + "| Ph: " + toString(message.Phase))
 	log.Print("Voters: ")
-	log.Println(msg.Voters)
+	log.Println(message.Voters)
 	log.Print("Estimate: ") 
-	log.Println(msg.Estimate)
+	log.Println(message.Estimate)
 	log.Println("----------------------")
 }
 
-func PackageToMessage(pack *stubborn.Package) (message *Message) {
+// PackageToMessage convert a Package to a Message
+func PackageToMessage(pack *stb.Package) (message *Message) {
 	data := pack.GetData()
 	err  := json.Unmarshal(data, &message)
 	ex.CheckError(err)

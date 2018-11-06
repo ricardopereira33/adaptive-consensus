@@ -1,17 +1,23 @@
 CURDIR :=$(shell pwd)
-GOPATH :=$(CURDIR)/consensus
-PATH   :=$(CURDIR)/consensus/bin:$(PATH)
+GOPATH :=$(CURDIR)
+PATH   :=$(CURDIR)/bin:$(PATH)
 
 compile:
-	go install ./consensus/src/exception/
-	go install ./consensus/src/message/
-	go install ./consensus/src/stubborn/
-	go install ./consensus/src/peer/
+	go install ./src/consensus/exception/
+	go install ./src/consensus/message/
+	go install ./src/consensus/stubborn/
+	go install ./src/consensus/peer/
+
+simulation:
+	go install ./src/simulation/exception/
+	go install ./src/simulation/consensusInfo/
+	go install ./src/simulation/message/
+	go install ./src/simulation/stubborn/
+	go install ./src/simulation/simulation/
 
 run:
-	./consensus/bin/peer
+	./bin/peer
 
 clean:
-	rm -rf ./consensus/bin
-	rm -rf ./consensus/pkg
-
+	rm -rf ./bin
+	rm -rf ./pkg

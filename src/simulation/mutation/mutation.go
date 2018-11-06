@@ -1,8 +1,8 @@
 package mutation
 
 import (
-	"stubborn"
-	ex "exception"
+	stb "simulation/stubborn"
+	ex  "simulation/exception"
 )
 
 // kind of enums
@@ -15,12 +15,12 @@ const (
 
 // Mutation is an interface
 type Mutation interface {
-	Delta0(int, *stubborn.Package) bool
+	Delta0(int, *stb.Package) bool
 	Delta(int) 					   bool
 }
 
 // NewMutation creates a new Mutation.
-func NewMutation(channel stubborn.StubChannel, mutationType int) Mutation {
+func NewMutation(channel stb.StubChannel, mutationType int) Mutation {
 	switch mutationType {
 	case EARLY:
 		return NewEarly(channel)
