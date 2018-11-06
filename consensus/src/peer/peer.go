@@ -4,79 +4,62 @@ import (
 	"fmt"
 	"flag"
 	"os"
-	stubborn "stubbornSim"
+	"stubborn"
 	"log"
-	"strconv"
 	mut "mutation"
 	msg "message"
-	ex "exception"
 )
 
 var (
 	debug 			  bool
-	mutation     	  int
-	nNodes			  int
-	defaultDelta	  int
-	maxTries		  int
-	percentMiss		  int
+	value 			  string 
 	consensusDecision string
+	voters			  map[int] bool
+	round 			  int
+	phase 			  int
+	peerID			  int
+	nParticipants	  int
+	estimate 		  *msg.Estimate
 )
 
-func propose(value string) {
-	nParticipants = nNodes
-
-	for id := 1; id < nParticipants; id++ {
-		runPeer(id, value)
-	}
-
-	// wait for the answer
-}
-
-func runPeer(peerID int, value string) {
-	channel := stubborn.NewStubChannelSim(peerID)
+func run(port string, allPorts []string) {
+	channel := stubborn.NewStubChannel(port, allPorts)
 	defer channel.Close()
 	configChannel(channel)
 
+	peerID 	      = channel.GetPeerID()
+	nParticipants = len(allPorts)
+	value         = "consensus1"
+
 	go consensus(channel, value)
+
 	handleMessages(channel)
+	log.Println("Finish: " + consensusDecision)
 }
 
 func configChannel(channel stubborn.StubChannel) {
 	channel.Init()
-	channel.SetMaxTries(maxTries)
-	channel.SetDefaultDelta(defaultDelta)
+	channel.SetMaxTries(3)
+	channel.SetDefaultDelta(3)
 
-	mut := mut.NewMutation(channel, mutation)
+	mut := mut.NewMutation(channel, mut.GOSSIP)
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 }
 
-func argsInfo(nArgs int) {
-	if nArgs < 2 { 
-		fmt.Println("peer <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>")
-		os.Exit(1) 
-	}
-}
-
-/** Start the peer
-  *
-  * peer gossip 1000 3 3 0.01
-  *	peer <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> 
-***/
+//start the peer
 func main() {
 	debugFlag := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 	
-	debug  = *debugFlag
+	debug = *debugFlag
 	args  := flag.Args()	
-	argsInfo(len(args))
+	
+	if len(args) < 2 { 
+		fmt.Println("Less than arguments 2!")
+		os.Exit(1) 
+	}
 
-	mutation,     err := mut.Find(args[0])	
-	nNodes,       err := strconv.Atoi(args[1])
-	defaultDelta, err := strconv.Atoi(args[2])
-	maxTries,     err := strconv.Atoi(args[3])
-	percentMiss,  err := strconv.Atoi(args[4])
-	ex.CheckError(err)
-
-	propose("consensus")
+	port := args[0]	
+	run(port, args)
 }

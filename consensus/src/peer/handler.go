@@ -51,12 +51,12 @@ func checkPhase(message *msg.Message) bool {
 	if phase == 1 {
 		consensusDecision = message.Estimate.Value
 		return true
-	} 
-	
-	round++
-	phase  = 1
-	voters = make(map[int] bool)
-	return false
+    } 
+
+    round++
+    phase  = 1
+    voters = make(map[int] bool)
+    return false	
 }
 
 
