@@ -1,7 +1,6 @@
 package mutation
 
 import (
-	"log"
 	"math/rand"
 	stb "simulation/stubborn"
 )
@@ -20,7 +19,6 @@ func NewGossip(channel stb.StubChannel) (g *Gossip) {
 	g 		  = new(Gossip)
 	g.channel = channel
 	g.permut  = perm(channel.GetNParticipants())
-	log.Println(g.permut)
 	g.c       = 1
 	g.turn    = 0
 	g.fanout  = 5

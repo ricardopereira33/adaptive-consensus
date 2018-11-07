@@ -2,7 +2,10 @@ package stubborn
 
 import (
 	"time"
-	"log"
+    "log"
+    "fmt"
+    "sync"
+    "strconv"
     con "simulation/consensusinfo"
 )
 
@@ -29,17 +32,26 @@ type Channel struct {
 	Delta0Func func(int, *Package) bool
 	DeltaFunc  func(int) bool
 	consInfo   *con.ConsensusInfo
-	PeerID	   int
+    PeerID	   int
+    Mutex      *sync.Mutex    
 }
 
-func newChannel(peerID, nParticipants int, peers map[int] chan *Package) (channel *Channel) {
+func newChannel(peerID, nParticipants int, peers map[int] chan *Package, mutex *sync.Mutex) (channel *Channel) {
 	channel 		  = new(Channel)
-	channel.OutBuffer = newBuffer(nParticipants)
-	channel.InBuffer  = make(chan *Package)
-    channel.PeerID	  = peerID
     channel.Peers     = peers
+	channel.OutBuffer = newBuffer(nParticipants)
+	channel.InBuffer  = peers[peerID]
+    channel.PeerID	  = peerID
+    channel.consInfo  = con.NewConsensusInfo()
+    channel.Mutex     = mutex
 	
 	return
+}
+
+func (c *Channel) sendToBuffer(id int, pack *Package) {
+    c.Mutex.Lock()
+    c.Peers[id] <- pack 
+    c.Mutex.Unlock()
 }
 
 func (c *Channel) delta0(id int, pack *Package) bool {
@@ -51,7 +63,8 @@ func (c *Channel) delta(id int) bool {
 }
 
 func (c *Channel) retransmission() {
-	tries := 0
+    tries := 0
+    // make a copy of c.Peers
 	for {
 		time.Sleep(DefaultDelta)	
 		for id := range c.Peers {
@@ -101,6 +114,16 @@ func (c *Channel) GetConsensusInfo() *con.ConsensusInfo {
     return c.consInfo
 }
 
+// SetMaxTries sets the MaxTries value.
+func (c *Channel) SetMaxTries(max int) {
+	MaxTries = max
+}
+
+// SetDefaultDelta sets the DefaultDelta value.
+func (c *Channel) SetDefaultDelta(ddelta int) {
+	DefaultDelta = time.Second * time.Duration(ddelta)
+}
+
 // SetDelta0 is the method to define the delta0 implemention
 func (c *Channel) SetDelta0(f func(int, *Package) bool) {
 	c.Delta0Func = f
@@ -116,14 +139,9 @@ func (c *Channel) SetCoordinator(coordID int) {
 	c.consInfo.CoordID = coordID
 }
 
-// SetMaxTries sets the MaxTries value.
-func (c *Channel) SetMaxTries(max int) {
-	MaxTries = max
-}
-
-// SetDefaultDelta sets the DefaultDelta value.
-func (c *Channel) SetDefaultDelta(ddelta int) {
-	DefaultDelta = time.Second * time.Duration(ddelta)
+// SetPercentageMiss sets percentMiss value
+func (c *Channel) SetPercentageMiss(miss float64) {
+    c.consInfo.PercentMiss = miss
 }
 
 // Init is the method that start receipt of the message 
@@ -136,4 +154,10 @@ func (c Channel) printStatus() {
 	log.Println(c.OutBuffer) 	
 	log.Println(c.Delta0Func != nil) 	
 	log.Println(c.DeltaFunc != nil) 	
+}
+
+// Print prints a message
+func (c Channel) print(message interface{}) {
+    fmt.Print("[Peer " + strconv.Itoa(c.GetPeerID()) + "] ")
+    log.Println(message)
 }

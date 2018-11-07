@@ -29,9 +29,12 @@ func handleMessages(channel stubborn.StubChannel) {
 				data 	:= message.MessageToBytes()
 				channel.SSendAll(data)
 			}
-		} else if checkPhase(message) { 
-			break 
-		}
+        } 
+        if len(voters) > nParticipants/2 {
+            if checkPhase(message) { 
+                break 
+            }
+        }
 	}
 }
 

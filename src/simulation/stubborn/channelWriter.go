@@ -4,7 +4,7 @@ package stubborn
 func (c *Channel) SSendAll(message []byte) {
     for id := range c.Peers {
         if id != c.GetPeerID() {
-            c.SSend(id, message)
+            go c.SSend(id, message)
         }
     }
 }
@@ -15,24 +15,28 @@ func (c *Channel) SSend(idDest int, message []byte) {
     isToSend   := c.delta0(idDest, packageMsg)
     c.OutBuffer.InsertElem(idDest, packageMsg)
 
-    if isToSend { 
+    if isToSend {
         c.send(idDest) 
     }
 }
 
 func (c *Channel) send(idDest int) {
     message := c.OutBuffer.GetElem(idDest)
-    c.sendDirect(idDest, message)
+    go c.sendDirect(idDest, message)
 }
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
-    dest, _     := c.Peers[idDest]
-    coefficient := int(1/c.consInfo.PercentMiss)
-    percentMsg  := float64(1/(c.consInfo.NMessages % coefficient))*100
+    coefficient := int(1/c.consInfo.PercentMiss) * 100
+    numberMsg   := (c.consInfo.NMessages+1) % coefficient
+    percentMsg  := float64(100)/float64(numberMsg)
 
+    /*
+    c.print("nMsg: " + strconv.Itoa(numberMsg))
+    c.print("percMsg:" + strconv.FormatFloat(percentMsg,'f',-1,64))
+    */
 
-    if  percentMsg != c.consInfo.PercentMiss {
-        dest <-message
+    if percentMsg != c.consInfo.PercentMiss {
+        c.sendToBuffer(idDest, message)
         c.consInfo.NMessages++
     }
 }

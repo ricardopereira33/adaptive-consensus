@@ -42,7 +42,7 @@ func configChannel(channel stubborn.StubChannel) {
 	channel.SetMaxTries(3)
 	channel.SetDefaultDelta(3)
 
-	mut := mut.NewMutation(channel, mut.GOSSIP)
+	mut := mut.NewMutation(channel, mut.EARLY)
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 }

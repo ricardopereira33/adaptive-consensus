@@ -2,6 +2,7 @@ package stubborn
 
 import (
     con "simulation/consensusinfo"
+    "sync"
 )
 
 // StubChannel is an interface to abstract the channel
@@ -16,7 +17,8 @@ type StubChannel interface {
 	SetDelta(f func(int) bool)
 	SetMaxTries(int)
 	SetDefaultDelta(int)
-	SetCoordinator(int)	
+    SetCoordinator(int)	
+    SetPercentageMiss(float64)
 	
 	// Gets
 	GetPeerID()            int
@@ -28,8 +30,8 @@ type StubChannel interface {
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(peerID, nParticipantes int, peers map[int] chan *Package) (channel StubChannel){
-	channel = newChannel(peerID, nParticipantes, peers)
+func NewStubChannel(peerID, nParticipantes int, peers map[int] chan *Package, mutex *sync.Mutex) (channel StubChannel){
+	channel = newChannel(peerID, nParticipantes, peers, mutex)
 	return 
 }
 

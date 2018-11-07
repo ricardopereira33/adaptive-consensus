@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"fmt"
 	"flag"
 	"os"
@@ -20,37 +21,38 @@ var (
 	percentMiss	  float64
 )
 
-func propose(value string, mutationID int) {
-    mutation   = mutationID
+func propose(value string) {
     channels  := stb.Channels(nParticipants)
+    mutex     := new(sync.Mutex)
 	responses := make(chan string)
 	
-	for id := 1; id < nParticipants; id++ {
-		go runPeer(id, value, responses, channels)
+	for id := 1; id <= nParticipants; id++ {
+		go runPeer(id, value, responses, channels, mutex)
 	}
 
-	for id := 1; id < nParticipants; id++ {
+	for id := 1; id <= nParticipants; id++ {
 		select {
 		case response := <-responses :
-			log.Println(response)
+			log.Println("END - " + response)
 		}
 	}
 }
 
-func runPeer(peerID int, value string, response chan string, channels map[int]chan *stb.Package) {
-	channel := stb.NewStubChannel(peerID, nParticipants, channels)
+func runPeer(peerID int, value string, response chan string, channels map[int]chan *stb.Package, mutex *sync.Mutex) {
+	channel := stb.NewStubChannel(peerID, nParticipants, channels, mutex)
 	configChannel(channel)
 
 	go consensus(channel, value)
 	handleMessages(channel)
 
-	response <- channel.GetConsensusDecision()
+	response <- "[Peer " + strconv.Itoa(channel.GetPeerID()) + "] " + channel.GetConsensusDecision()
 }
 
 func configChannel(channel stb.StubChannel) {
 	channel.Init()
 	channel.SetMaxTries(maxTries)
-	channel.SetDefaultDelta(defaultDelta)
+    channel.SetDefaultDelta(defaultDelta)
+    channel.SetPercentageMiss(percentMiss)
 
 	mut := mut.NewMutation(channel, mutation)
 	channel.SetDelta0(mut.Delta0)
@@ -77,12 +79,13 @@ func main() {
 	args  := flag.Args()	
 	argsInfo(len(args))
 
-	mutation,      err := mut.Find(args[0])	
+    var err error
+	mutation,      err = mut.Find(args[0])	
 	nParticipants, err = strconv.Atoi(args[1])
 	defaultDelta,  err = strconv.Atoi(args[2])
 	maxTries,      err = strconv.Atoi(args[3])
-	percentMiss,   err = strconv.ParseFloat(args[4], 64)
+    percentMiss,   err = strconv.ParseFloat(args[4], 64)
     ex.CheckError(err)
 
-	propose("consensus", mutation)
+	propose("accept")
 }

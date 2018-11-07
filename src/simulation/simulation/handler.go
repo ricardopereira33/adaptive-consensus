@@ -31,11 +31,15 @@ func handleMessages(channel stb.StubChannel) {
 				data 	:= message.MessageToBytes()
 				channel.SSendAll(data)
 			}
-		} else if checkPhase(message, c) { 
-			break 
-		}
+        }
+        if len(c.Voters) > nParticipants/2 {
+            if checkPhase(message, c) { 
+                break 
+            }
+        }
 	}
 }
+
 
 func checkRound(message *msg.Message, cInfo *con.ConsensusInfo) {
 	if cInfo.Round < message.Round {
@@ -50,7 +54,7 @@ func checkRound(message *msg.Message, cInfo *con.ConsensusInfo) {
 }
 
 func checkPhase(message *msg.Message, cInfo *con.ConsensusInfo) bool {
-	if cInfo.Phase == 1 {
+    if cInfo.Phase == 1 {
 		cInfo.CDecision = message.Estimate.Value
 		return true
 	} 
