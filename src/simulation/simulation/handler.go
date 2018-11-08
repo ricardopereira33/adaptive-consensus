@@ -47,7 +47,8 @@ func checkRound(message *msg.Message, cInfo *con.ConsensusInfo) {
 		cInfo.Round    = message.Round
 	    cInfo.Phase    = message.Phase
 		cInfo.Voters   = make(map[int] bool)
-	} else if cInfo.Round == message.Round && cInfo.Phase < message.Phase {
+    } 
+    if cInfo.Round == message.Round && cInfo.Phase < message.Phase {
 		cInfo.Phase  = message.Phase
 		cInfo.Voters = make(map[int] bool)
 	}

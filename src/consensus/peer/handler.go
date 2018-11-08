@@ -44,7 +44,8 @@ func checkRound(message *msg.Message) {
 		round 	 = message.Round
 		phase    = message.Phase
 		voters   = make(map[int] bool)
-	} else if round == message.Round && phase < message.Phase {
+    } 
+    if round == message.Round && phase < message.Phase {
 		phase  = message.Phase
 		voters = make(map[int] bool)
 	}
