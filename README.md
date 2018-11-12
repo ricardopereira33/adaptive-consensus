@@ -17,6 +17,22 @@ To run a simulation, only need to do the following steps:
     cd ./bin/
     simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>
 
+The above parameters represent:
+
+`MUTATION` - the algorithm that the simulation implements during the execution. Actually, there are 4 mutation :
+- Early
+- Centralized
+- Gossip
+- Ring
+
+`N_NODES` - number of nodes.
+
+`DEFAULT_DELTA` - time between each retransmission.
+
+`MAX_TRIES` - Maximum number of tries.
+
+`%_MISS` - percentage of messages lost between nodes.
+
 ## Run
 
 To run a peer, only need to do the following steps:
