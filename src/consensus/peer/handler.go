@@ -9,8 +9,7 @@ func handleMessages(channel stubborn.StubChannel) {
     for {
         pack 	:= channel.SReceive()
         message := msg.PackageToMessage(pack)
-
-        message.PrintMessage()
+        //message.PrintMessage()
 
         if len(voters) <= nParticipants/2 {
             checkRound(message)

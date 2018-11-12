@@ -65,8 +65,8 @@ func argsInfo(nArgs int) {
 
 /** Start the peer
   *
-  * peer gossip 1000 3 3 0.01
-  *	peer <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> 
+  * simulation gossip 1000 3 3 0.01
+  *	simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> 
 ***/
 func main() {
     debugFlag := flag.Bool("debug", false, "Debug mode")

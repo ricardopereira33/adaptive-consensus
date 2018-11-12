@@ -7,11 +7,9 @@ import (
 
 // SReceive is the method that receives the messages through the channel
 func (c *Channel) SReceive() (pack *Package){
-    select{
-        case pack := <-c.InBuffer :
-            c.ack(pack.ID)
-            return pack
-    }
+    pack = <-c.InBuffer
+    c.ack(pack.ID)
+    return 
 }
 
 // receive is the loop that receive the message and send through the buffer(pipe)
@@ -36,7 +34,9 @@ func (c *Channel) receive() {
             oldPack.Arrived = true
             c.OutBuffer.insertElem(pack.ID, oldPack)
         } else {
-            go func() { c.InBuffer<- pack }()
+            go func() { 
+                c.InBuffer<- pack 
+            }()
         }
     }
 }

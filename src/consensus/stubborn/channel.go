@@ -15,16 +15,16 @@ const (
 
 var ( // Default value (adaptive) 
     // MaxTries is the maximum value of tries 
-    MaxTries 	 = 3
+    MaxTries     = 3
     // DefaultDelta is the default time to relay the messages to the others peers 
     DefaultDelta = time.Second * 3
     // Debug flag, when it is true, prints some debug infos	
-    Debug 	     = true	
+    Debug        = true	
 )
 
 // Channel to send and receive messages between peers
 type Channel struct {
-    Peers 		map[int] *net.UDPAddr
+    Peers       map[int] *net.UDPAddr
     Connection	*net.UDPConn
     OutBuffer	Buffer
     InBuffer	chan *Package
@@ -35,7 +35,7 @@ type Channel struct {
 }
 
 func newChannel(ownPort string, allPorts []string) (channel *Channel) {
-    channel 		   = new(Channel)
+    channel            = new(Channel)
     channel.Connection = initConnection(ownPort)
     channel.OutBuffer  = newBuffer(len(allPorts))
     channel.InBuffer   = make(chan *Package)
@@ -53,7 +53,9 @@ func (c *Channel) delta(id int) bool {
 }
 
 func (c *Channel) retransmission() {
-    if Debug { log.Println("Retransmisson start...")}
+    if Debug { 
+        log.Println("Retransmisson start...")
+    }
 
     tries := 0
     for {
@@ -71,8 +73,7 @@ func (c *Channel) retransmission() {
     }
 }
 
-
-// Exported methods
+/*** Exported methods ***/
 
 // GetPeerID returns the peer ID
 func (c *Channel) GetPeerID() int {
@@ -148,9 +149,7 @@ func initConnection(port string) (conn *net.UDPConn){
     }
 
     addr, err := net.ResolveUDPAddr("udp", ":" + port)
-    ex.CheckError(err)
-
-    conn, err = net.ListenUDP("udp", addr)
+    conn, err  = net.ListenUDP("udp", addr)
     ex.CheckError(err)
     
     conn.SetReadBuffer(MaxDatagramSize)

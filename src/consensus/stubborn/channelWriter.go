@@ -8,7 +8,9 @@ import (
 
 // SSendAll is the method that sends a message to all participants
 func (c *Channel) SSendAll(message []byte) {
-    if Debug { log.Println("sSendAll a message") }
+    if Debug { 
+        log.Println("sSendAll a message")
+    }
     
     for id := range c.Peers {
         c.SSend(id, message)
@@ -18,7 +20,9 @@ func (c *Channel) SSendAll(message []byte) {
 
 // SSend is the method that sends the messages through the channel
 func (c *Channel) SSend(idDest int, message []byte) {
-    if Debug { log.Println("sSend a message") }	
+    if Debug { 
+        log.Println("sSend a message") 
+    }	
     
     packageMsg := newPackage(c.PeerID, message, false)
     isToSend   := c.delta0(idDest, packageMsg)
