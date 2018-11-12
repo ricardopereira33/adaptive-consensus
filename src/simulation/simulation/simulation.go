@@ -10,6 +10,7 @@ import (
 	mut "simulation/mutation"
 	ex "simulation/exception"
     stb "simulation/stubborn"
+    cmap "github.com/orcaman/concurrent-map"
 )
 
 var (
@@ -38,7 +39,7 @@ func propose(value string) {
 	}
 }
 
-func runPeer(peerID int, value string, response chan string, channels map[int]chan *stb.Package, mutex *sync.Mutex) {
+func runPeer(peerID int, value string, response chan string, channels cmap.ConcurrentMap, mutex *sync.Mutex) {
 	channel := stb.NewStubChannel(peerID, nParticipants, channels, mutex)
 	configChannel(channel)
 

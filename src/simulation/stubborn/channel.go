@@ -7,6 +7,7 @@ import (
     "sync"
     "strconv"
     con "simulation/consensusinfo"
+    cmap "github.com/orcaman/concurrent-map"
 )
 
 const ( 
@@ -26,32 +27,39 @@ var (
 
 // Channel to send and receive messages between peers
 type Channel struct {
-	Peers 	   map[int] chan *Package
-	OutBuffer  Buffer
-	InBuffer   chan *Package
-	Delta0Func func(int, *Package) bool
-	DeltaFunc  func(int) bool
-	consInfo   *con.ConsensusInfo
-    PeerID	   int
-    Mutex      *sync.Mutex    
+	Peers 	      cmap.ConcurrentMap
+	OutBuffer     Buffer
+	InBuffer      chan *Package
+	Delta0Func    func(int, *Package) bool
+	DeltaFunc     func(int) bool
+	consInfo      *con.ConsensusInfo
+    PeerID	      int
+    NParticipants int
 }
 
-func newChannel(peerID, nParticipants int, peers map[int] chan *Package, mutex *sync.Mutex) (channel *Channel) {
-	channel 		  = new(Channel)
-    channel.Peers     = peers
-	channel.OutBuffer = newBuffer(nParticipants)
-	channel.InBuffer  = peers[peerID]
-    channel.PeerID	  = peerID
-    channel.consInfo  = con.NewConsensusInfo()
-    channel.Mutex     = mutex
+func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap, mutex *sync.Mutex) (channel *Channel) {
+	channel 		      = new(Channel)
+    channel.Peers         = peers
+	channel.OutBuffer     = newBuffer(nParticipants)
+    channel.PeerID	      = peerID
+    channel.consInfo      = con.NewConsensusInfo()
+    channel.NParticipants = nParticipants
 	
+    value, prs       := peers.Get(strconv.Itoa(peerID))
+    if prs {
+        channel.InBuffer  = value.(chan *Package)
+    }
+
 	return
 }
 
 func (c *Channel) sendToBuffer(id int, pack *Package) {
-    c.Mutex.Lock()
-    c.Peers[id] <- pack 
-    c.Mutex.Unlock()
+    value, prs := c.Peers.Get(strconv.Itoa(id))
+    
+    if prs {
+        channel := value.(chan *Package)
+        channel <- pack 
+    }
 }
 
 func (c *Channel) delta0(id int, pack *Package) bool {
@@ -67,7 +75,7 @@ func (c *Channel) retransmission() {
     // make a copy of c.Peers
 	for {
 		time.Sleep(DefaultDelta)	
-		for id := range c.Peers {
+		for id := 1; id <= c.NParticipants; id++ {
 			if c.delta(id) || tries > MaxTries {
 				pack := c.OutBuffer.GetElem(id)
 				
@@ -96,7 +104,7 @@ func (c *Channel) GetPackage(id int) *Package {
 
 // GetNParticipants returns the number of participants
 func (c *Channel) GetNParticipants() int {
-	return len(c.Peers)
+	return c.NParticipants
 }
 
 // GetCoordID returns the coordinator ID

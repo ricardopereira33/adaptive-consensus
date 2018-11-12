@@ -15,6 +15,9 @@ simulation:
 	go install ./src/simulation/stubborn/
 	go install ./src/simulation/simulation/
 
+install:
+	go get "github.com/orcaman/concurrent-map"
+
 run:
 	./bin/peer
 
