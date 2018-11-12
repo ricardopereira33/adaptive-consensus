@@ -1,32 +1,32 @@
 package mutation
 
 import (
-	"simulation/stubborn"
-	msg "simulation/message"
+    "simulation/stubborn"
+    msg "simulation/message"
 )
 
-func fresh(old_pack *stubborn.Package, new_pack *stubborn.Package) bool {
-	if old_pack != nil {
-		old_msg := msg.PackageToMessage(old_pack)
-		new_msg := msg.PackageToMessage(new_pack)
-		
-		sameRound := old_msg.Round == new_msg.Round
-		samePhase := old_msg.Phase == new_msg.Round
-		
-		if sameRound && samePhase {
-			return false
-		}
-	}
-	
-	return true 
+func fresh(oldPack *stubborn.Package, newPack *stubborn.Package) bool {
+    if oldPack != nil {
+        oldMsg := msg.PackageToMessage(oldPack)
+        newMsg := msg.PackageToMessage(newPack)
+        
+        sameRound := oldMsg.Round == newMsg.Round
+        samePhase := oldMsg.Phase == newMsg.Round
+        
+        if sameRound && samePhase {
+            return false
+        }
+    }
+    
+    return true 
 }
 
 func majority(pack *stubborn.Package, nPeers int) bool {
-	message := msg.PackageToMessage(pack)
+    message := msg.PackageToMessage(pack)
 
-	if len(message.Voters) > nPeers/2 {
-		return true
-	}
+    if len(message.Voters) > nPeers/2 {
+        return true
+    }
 
-	return false
+    return false
 }

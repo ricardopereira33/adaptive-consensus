@@ -15,9 +15,9 @@ type Buffer interface {
 
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
-    Size    int
-    Data    map[int] *Package
-    Mutex   *sync.Mutex
+    Size   int
+    Data   map[int] *Package
+    Mutex  *sync.Mutex
 }
 
 // Package is a struct to represent a package received via UDP.
