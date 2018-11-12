@@ -9,7 +9,7 @@ type Ring struct {
 
 // NewRing creates a new ring
 func NewRing(channel stb.StubChannel) (r *Ring) {
-    r 		  = new(Ring)
+    r         = new(Ring)
     r.channel = channel
 
     return r

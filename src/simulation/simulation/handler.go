@@ -8,7 +8,7 @@ import (
 
 func handleMessages(channel stb.StubChannel) {
     for {
-        pack 	      := channel.SReceive()
+        pack          := channel.SReceive()
         message       := msg.PackageToMessage(pack)
         c             := channel.GetConsensusInfo()
         nParticipants := channel.GetNParticipants()
@@ -17,7 +17,7 @@ func handleMessages(channel stb.StubChannel) {
         if len(c.Voters) <= nParticipants/2 {
             checkRound(message, c)
             existsNewVoters := (c.Round == message.Round) && containsNewVoters(message.Voters, c)
-            isMajority 		:= (c.Phase == 1) && (len(message.Voters) > nParticipants/2)
+            isMajority      := (c.Phase == 1) && (len(message.Voters) > nParticipants/2)
             
             if existsNewVoters || isMajority {
                 message.Voters[peerID] = true
@@ -28,7 +28,7 @@ func handleMessages(channel stb.StubChannel) {
                 }
 
                 message := msg.NewMessage(peerID, c.Round, c.Phase, c.Voters, c.Estimate)
-                data 	:= message.MessageToBytes()
+                data    := message.MessageToBytes()
                 channel.SSendAll(data)
             }
         }

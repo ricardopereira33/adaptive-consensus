@@ -10,38 +10,38 @@ import (
 // Buffer is a interface to absract the buffer implementation
 type Buffer interface {
     insertElem(int, *Package)
-    getElem(int)			  *Package
+    getElem(int) *Package
 }
 
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
-    Size	int
-    Data 	map[int] *Package
-    Mutex 	*sync.Mutex
+    Size    int
+    Data    map[int] *Package
+    Mutex   *sync.Mutex
 }
 
 // Package is a struct to represent a package received via UDP.
 type Package struct {
-    ID	 	int
-    Data	[]byte
+    ID      int
+    Data    []byte
     Arrived bool
-    IsACK	bool
+    IsACK   bool
 }
 
 func newBuffer(size int) (buffer *BufferStruct) {
     buffer       = new(BufferStruct)
     buffer.Size  = size
-    buffer.Data	 = make(map[int] *Package, size)
+    buffer.Data  = make(map[int] *Package, size)
     buffer.Mutex = new(sync.Mutex)
 
     return
 }
 
 func newPackage(id int, data []byte, isAck bool) (pack *Package) {
-    pack 	     = new(Package)
+    pack         = new(Package)
     pack.ID      = id
     pack.Data    = data
-    pack.IsACK	 = isAck
+    pack.IsACK   = isAck
     pack.Arrived = false
 
     return 
@@ -54,7 +54,9 @@ func (b *BufferStruct) insertElem(id int, p *Package) {
 }
 
 func (b BufferStruct) getElem(id int) *Package {
+    b.Mutex.Lock()
     elem, prs := b.Data[id]
+    b.Mutex.Unlock()
     
     if prs {
         return elem

@@ -8,20 +8,21 @@ import (
 // Gossip is a mutation type
 type Gossip struct {
     channel stb.StubChannel
-    permut 	[]int
-    c 		int
+    permut  []int
+    c       int
     turn    int
     fanout  int
 }
 
 // NewGossip creates a new gossip mutation
 func NewGossip(channel stb.StubChannel) (g *Gossip) {
-    g 		  = new(Gossip)
+    g         = new(Gossip)
     g.channel = channel
     g.permut  = perm(channel.GetNParticipants())
     g.c       = 1
     g.turn    = 0
     g.fanout  = 5
+    
     return g
 }
 

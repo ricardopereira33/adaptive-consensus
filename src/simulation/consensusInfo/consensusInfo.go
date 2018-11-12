@@ -4,9 +4,9 @@ import "sync/atomic"
 
 // ConsensusInfo is the struct that contains the information about consensus
 type ConsensusInfo struct {
-    CoordID		int
-    Voters	    map[int] bool
-    Round 	    int
+    CoordID     int
+    Voters      map[int] bool
+    Round       int
     Phase       int
     Estimate    *Estimate
     CDecision   string
@@ -29,7 +29,7 @@ func NewConsensusInfo() *ConsensusInfo {
 
 // NewEstimate creates a new estimate
 func NewEstimate(value string, id int) (estimate *Estimate){
-    estimate 		= new(Estimate)
+    estimate        = new(Estimate)
     estimate.Value  = value
     estimate.PeerID = id
 

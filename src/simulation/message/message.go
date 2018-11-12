@@ -11,20 +11,20 @@ import (
 
 // Message sent out to the server
 type Message struct {
-    PeerID	 int  
+    PeerID   int  
     Round    int  
-    Phase 	 int
+    Phase    int
     Voters   map[int] bool 
     Estimate *con.Estimate
 }
 
 // NewMessage creates a new message using the parameters passed in and returns it
 func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate *con.Estimate) (message *Message){
-    message 	   	 = new(Message)
-    message.PeerID 	 = peerID
-    message.Round  	 = round
-    message.Phase  	 = phase
-    message.Voters 	 = voters
+    message          = new(Message)
+    message.PeerID   = peerID
+    message.Round    = round
+    message.Phase    = phase
+    message.Voters   = voters
     message.Estimate = estimate
 
     return

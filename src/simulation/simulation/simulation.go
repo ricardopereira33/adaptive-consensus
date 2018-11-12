@@ -13,12 +13,12 @@ import (
 )
 
 var (
-    debug 		  bool
+    debug         bool
     mutation      int
     nParticipants int
     defaultDelta  int
-    maxTries	  int
-    percentMiss	  float64
+    maxTries      int
+    percentMiss   float64
 )
 
 func propose(value string) {

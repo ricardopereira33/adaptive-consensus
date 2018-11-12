@@ -34,9 +34,9 @@ func (c *Channel) SSend(idDest int, message []byte) {
 }
 
 func (c *Channel) send(idDest int) {
-    message 	  := c.OutBuffer.getElem(idDest)
+    message       := c.OutBuffer.getElem(idDest)
     peerAddr, prs := c.Peers[idDest]
-    jsonMsg, err  := json.Marshal(message)
+    jsonMsg,  err := json.Marshal(message)
     ex.CheckError(err)
 
     if prs {
@@ -47,7 +47,7 @@ func (c *Channel) send(idDest int) {
 }
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
-    peerAddr 	 := c.Peers[idDest]
+    peerAddr     := c.Peers[idDest]
     jsonMsg, err := json.Marshal(message)
     ex.CheckError(err)
     

@@ -19,19 +19,19 @@ var ( // Default value (adaptive)
     // DefaultDelta is the default time to relay the messages to the others peers 
     DefaultDelta = time.Second * 3
     // Debug flag, when it is true, prints some debug infos	
-    Debug        = true	
+    Debug        = false	
 )
 
 // Channel to send and receive messages between peers
 type Channel struct {
     Peers       map[int] *net.UDPAddr
-    Connection	*net.UDPConn
-    OutBuffer	Buffer
-    InBuffer	chan *Package
-    Delta0Func	func(int, *Package) bool
-    DeltaFunc	func(int) bool
-    PeerID		int
-    CoordID		int
+    Connection  *net.UDPConn
+    OutBuffer   Buffer
+    InBuffer    chan *Package
+    Delta0Func  func(int, *Package) bool
+    DeltaFunc   func(int) bool
+    PeerID      int
+    CoordID     int
 }
 
 func newChannel(ownPort string, allPorts []string, debug bool) (channel *Channel) {

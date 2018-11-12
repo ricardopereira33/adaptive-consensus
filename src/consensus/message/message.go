@@ -10,9 +10,9 @@ import (
 
 // Message sent out to the server
 type Message struct {
-    PeerID	 int  
+    PeerID   int  
     Round    int  
-    Phase 	 int
+    Phase    int
     Voters   map[int] bool 
     Estimate *Estimate
 }
@@ -25,18 +25,18 @@ type Estimate struct {
 
 // NewMessage creates a new message using the parameters passed in and returns it
 func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate *Estimate) (message *Message){
-    message 	   	 = new(Message)
-    message.PeerID 	 = peerID
-    message.Round  	 = round
-    message.Phase  	 = phase
-    message.Voters 	 = voters
+    message          = new(Message)
+    message.PeerID   = peerID
+    message.Round    = round
+    message.Phase    = phase
+    message.Voters   = voters
     message.Estimate = estimate
 
     return
 }
 // NewEstimate creates a new estimate value
 func NewEstimate(value string, id int) (estimate *Estimate){
-    estimate 		= new(Estimate)
+    estimate        = new(Estimate)
     estimate.Value  = value
     estimate.PeerID = id
 

@@ -7,14 +7,14 @@ import (
 
 func handleMessages(channel stubborn.StubChannel) {
     for {
-        pack 	:= channel.SReceive()
+        pack    := channel.SReceive()
         message := msg.PackageToMessage(pack)
         //message.PrintMessage()
 
         if len(voters) <= nParticipants/2 {
             checkRound(message)
             existsNewVoters := (round == message.Round) && containsNewVoters(message.Voters)
-            isMajority 		:= (phase == 1) && (len(message.Voters) > nParticipants/2)
+            isMajority      := (phase == 1) && (len(message.Voters) > nParticipants/2)
             
             if existsNewVoters || isMajority {
                 message.Voters[peerID] = true
@@ -25,7 +25,7 @@ func handleMessages(channel stubborn.StubChannel) {
                 }
 
                 message := msg.NewMessage(peerID, round, phase, voters, estimate)
-                data 	:= message.MessageToBytes()
+                data    := message.MessageToBytes()
                 channel.SSendAll(data)
             }
         } 
@@ -40,7 +40,7 @@ func handleMessages(channel stubborn.StubChannel) {
 func checkRound(message *msg.Message) {
     if round < message.Round {
         estimate = message.Estimate
-        round 	 = message.Round
+        round    = message.Round
         phase    = message.Phase
         voters   = make(map[int] bool)
     } 

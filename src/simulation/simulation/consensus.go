@@ -20,7 +20,7 @@ func consensus(channel stb.StubChannel, value string) {
         c.Estimate.PeerID = peerID
 
         message := msg.NewMessage(peerID, c.Round, c.Phase, c.Voters, c.Estimate)
-        data 	:= message.MessageToBytes()
+        data    := message.MessageToBytes()
 
         channel.SetCoordinator(c.CoordID)
         channel.SSendAll(data)

@@ -31,7 +31,7 @@ func run(value, port string, allPorts []string) {
     defer channel.Close()
     configChannel(channel)
 
-    peerID 	      = channel.GetPeerID()
+    peerID        = channel.GetPeerID()
     nParticipants = len(allPorts)
 
     go consensus(channel, value)
@@ -63,7 +63,7 @@ func main() {
     flag.Parse()
     
     debug = *debugFlag
-    args  := flag.Args()	
+    args := flag.Args()	
     argsInfo(len(args))
 
     var err error

@@ -1,9 +1,9 @@
 package stubborn
 
 import (
+    "strconv"
     con "simulation/consensusinfo"
     cmap "github.com/orcaman/concurrent-map"
-    "strconv"
 )
 
 // StubChannel is an interface to abstract the channel

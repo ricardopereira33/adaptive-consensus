@@ -7,16 +7,16 @@ import (
 
 // kind of enums
 const (
-    EARLY 		= iota
-    RING 		= iota
-    GOSSIP 		= iota
+    EARLY       = iota
+    RING        = iota
+    GOSSIP      = iota
     CENTRALIZED = iota
 )
 
 // Mutation is an interface
 type Mutation interface {
     Delta0(int, *stb.Package) bool
-    Delta(int) 					   bool
+    Delta(int)                bool
 }
 
 // NewMutation creates a new Mutation.

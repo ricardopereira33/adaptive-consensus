@@ -9,7 +9,7 @@ type Early struct {
 
 // NewEarly creates a new early mutation
 func NewEarly(channel stubborn.StubChannel) (e *Early) {
-    e 		  = new(Early)
+    e         = new(Early)
     e.channel = channel
     
     return e

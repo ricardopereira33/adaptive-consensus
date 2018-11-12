@@ -16,9 +16,9 @@ type StubChannel interface {
     SetCoordinator(int)	
     
     // Gets
-    GetPeerID() int
-    GetCoordID() int
-    GetPackage(int) *Package
+    GetPeerID()        int
+    GetCoordID()       int
+    GetPackage(int)    *Package
     GetNParticipants() int 	
 }
 

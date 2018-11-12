@@ -1,7 +1,6 @@
 package mutation
 
 import (
-    "log"
     "math/rand"
     "consensus/stubborn"
 )
@@ -9,21 +8,21 @@ import (
 // Gossip is a mutation type
 type Gossip struct {
     channel stubborn.StubChannel
-    permut 	[]int
-    c 		int
+    permut  []int
+    c       int
     turn    int
     fanout  int
 }
 
 // NewGossip creates a new gossip mutation
 func NewGossip(channel stubborn.StubChannel) (g *Gossip) {
-    g 		  = new(Gossip)
+    g         = new(Gossip)
     g.channel = channel
     g.permut  = perm(channel.GetNParticipants())
-    log.Println(g.permut)
     g.c       = 1
     g.turn    = 0
     g.fanout  = 5
+
     return g
 }
 
