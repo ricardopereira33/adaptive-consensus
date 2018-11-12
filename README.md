@@ -39,6 +39,6 @@ To run a peer, only need to do the following steps:
 
     make
     cd ./bin/
-    peer <YOUR_PORT> <NEIGHTBOR_PORT> ...
+    peer <MUTATION> <DEFAULT_DELTA> <MAX_TRIES> <OWN_PORT> <NEIGHBOR_PORT> ...
 
 
