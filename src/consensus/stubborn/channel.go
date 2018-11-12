@@ -34,12 +34,14 @@ type Channel struct {
     CoordID		int
 }
 
-func newChannel(ownPort string, allPorts []string) (channel *Channel) {
+func newChannel(ownPort string, allPorts []string, debug bool) (channel *Channel) {
     channel            = new(Channel)
     channel.Connection = initConnection(ownPort)
     channel.OutBuffer  = newBuffer(len(allPorts))
     channel.InBuffer   = make(chan *Package)
     channel.Peers, channel.PeerID = listOfPeers(ownPort, allPorts)
+
+    Debug = debug
     
     return
 }

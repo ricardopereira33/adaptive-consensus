@@ -27,7 +27,7 @@ var (
 )
 
 func run(value, port string, allPorts []string) {
-    channel := stubborn.NewStubChannel(port, allPorts)
+    channel := stubborn.NewStubChannel(port, allPorts, debug)
     defer channel.Close()
     configChannel(channel)
 

@@ -23,7 +23,7 @@ type StubChannel interface {
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(ownPort string, allPorts []string) (channel StubChannel){
-    channel = newChannel(ownPort, allPorts)
+func NewStubChannel(ownPort string, allPorts []string, debug bool) (channel StubChannel){
+    channel = newChannel(ownPort, allPorts, debug)
     return 
 }
