@@ -2,7 +2,7 @@ package stubborn
 
 import (
     "log"
-	ex "consensus/exception"
+    ex "consensus/exception"
 )
 
 // SReceive is the method that receives the messages through the channel
@@ -17,7 +17,7 @@ func (c *Channel) SReceive() (pack *Package){
 // receive is the loop that receive the message and send through the buffer(pipe)
 // for the SReceive method receive the messages
 func (c *Channel) receive() {
-	if Debug { log.Println("Listener start...") }
+    if Debug { log.Println("Listener start...") }
 
     buffer  := make([]byte, MaxDatagramSize)
     channel := c.Connection

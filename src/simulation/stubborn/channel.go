@@ -21,26 +21,26 @@ var (
     // DefaultDelta is the default time to relay the messages to the others peers 
     DefaultDelta = time.Second * 3
     // Debug flag, when it is true, prints some debug infos	
-    Debug 	     = true	
+    Debug        = true	
 )
 
 // Channel to send and receive messages between peers
 type Channel struct {
-    Peers 	      cmap.ConcurrentMap
+    Peers         cmap.ConcurrentMap
     OutBuffer     Buffer
     InBuffer      chan *Package
     Delta0Func    func(int, *Package) bool
     DeltaFunc     func(int) bool
     consInfo      *con.ConsensusInfo
-    PeerID	      int
+    PeerID        int
     NParticipants int
 }
 
 func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
-    channel 		      = new(Channel)
+    channel               = new(Channel)
     channel.Peers         = peers
     channel.OutBuffer     = newBuffer(nParticipants)
-    channel.PeerID	      = peerID
+    channel.PeerID        = peerID
     channel.consInfo      = con.NewConsensusInfo()
     channel.NParticipants = nParticipants
     
