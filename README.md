@@ -9,12 +9,20 @@ The Adaptive Consensus is a proposal of an consensus protocol, in order to impro
 It is based on the paper [Worldwide Consensus](https://www.researchgate.net/publication/220973671_Worldwide_Consensus).
 </div>
 
+## Simulation
+
+To run a simulation, only need to do the following steps:
+    
+    make simulation
+    cd ./bin/
+    simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>
+
 ## Run
 
 To run a peer, only need to do the following steps:
 
     make
-    cd ./consensus/bin/
+    cd ./bin/
     peer <YOUR_PORT> <NEIGHTBOR_PORT> ...
 
 

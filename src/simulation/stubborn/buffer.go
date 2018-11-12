@@ -10,7 +10,7 @@ import (
 // Buffer is a interface to absract the buffer implementation
 type Buffer interface {
     InsertElem(int, *Package)
-    GetElem(int)              *Package
+    GetElem(int) *Package
 }
 
 // BufferStruct is a struct where we keep the messages
@@ -56,7 +56,9 @@ func (b *BufferStruct) InsertElem(id int, p *Package) {
 
 // GetElem get a package for the process "id"
 func (b BufferStruct) GetElem(id int) *Package {
+    b.Mutex.Lock()    
     elem, prs := b.Data[id]
+    b.Mutex.Unlock()
     
     if prs {
         return elem

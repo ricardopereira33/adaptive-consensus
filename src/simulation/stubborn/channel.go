@@ -17,7 +17,7 @@ const (
 // Default value (adaptive) 
 var ( 
     // MaxTries is the maximum value of tries 
-    MaxTries 	 = 3
+    MaxTries     = 3
     // DefaultDelta is the default time to relay the messages to the others peers 
     DefaultDelta = time.Second * 3
     // Debug flag, when it is true, prints some debug infos	
@@ -50,15 +50,6 @@ func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap) (channel *C
     }
 
     return
-}
-
-func (c *Channel) sendToBuffer(id int, pack *Package) {
-    value, prs := c.Peers.Get(strconv.Itoa(id))
-    
-    if prs {
-        channel := value.(chan *Package)
-        channel <- pack 
-    }
 }
 
 func (c *Channel) delta0(id int, pack *Package) bool {

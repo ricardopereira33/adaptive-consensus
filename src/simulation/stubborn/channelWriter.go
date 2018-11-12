@@ -1,8 +1,10 @@
 package stubborn
 
+import "strconv"
+
 // SSendAll is the method that sends a message to all participants
 func (c *Channel) SSendAll(message []byte) {
-    for id := range c.Peers {
+    for id := 1; id <= c.NParticipants; id++ {
         if id != c.GetPeerID() {
             go c.SSend(id, message)
         }
@@ -27,16 +29,20 @@ func (c *Channel) send(idDest int) {
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
     coefficient := int(1/c.consInfo.PercentMiss) * 100
-    numberMsg   := (c.consInfo.NMessages+1) % coefficient
+    numberMsg   := (c.consInfo.GetMsg()+1) % coefficient
     percentMsg  := float64(100)/float64(numberMsg)
-
-    /*
-    c.print("nMsg: " + strconv.Itoa(numberMsg))
-    c.print("percMsg:" + strconv.FormatFloat(percentMsg,'f',-1,64))
-    */
 
     if percentMsg != c.consInfo.PercentMiss {
         c.sendToBuffer(idDest, message)
-        c.consInfo.NMessages++
+        c.consInfo.IncMsg()
+    }
+}
+
+func (c *Channel) sendToBuffer(id int, pack *Package) {
+    value, prs := c.Peers.Get(strconv.Itoa(id))
+    
+    if prs {
+        channel := value.(chan *Package)
+        channel <- pack 
     }
 }

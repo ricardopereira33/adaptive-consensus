@@ -1,5 +1,7 @@
 package consensusinfo
 
+import "sync/atomic"
+
 // ConsensusInfo is the struct that contains the information about consensus
 type ConsensusInfo struct {
     CoordID		int
@@ -9,7 +11,7 @@ type ConsensusInfo struct {
     Estimate    *Estimate
     CDecision   string
     PercentMiss float64
-    NMessages   int
+    NMessages   uint64
 }
 
 // Estimate is the estimate value for a consensus
@@ -20,7 +22,7 @@ type Estimate struct {
 
 // NewConsensusInfo creates a new consensusInfo
 func NewConsensusInfo() *ConsensusInfo {
-    consensusInfo          := new(ConsensusInfo)
+    consensusInfo := new(ConsensusInfo)
 
     return consensusInfo
 }
@@ -32,4 +34,16 @@ func NewEstimate(value string, id int) (estimate *Estimate){
     estimate.PeerID = id
 
     return
+}
+
+// IncMsg increments the number of messages exchanged
+func (ci *ConsensusInfo) IncMsg() {
+    atomic.AddUint64(&ci.NMessages, 1)
+}
+
+// GetMsg returns the number of messages exchanged
+func (ci *ConsensusInfo) GetMsg() (value int) {
+    value = int(atomic.LoadUint64(&ci.NMessages))
+    
+    return 
 }

@@ -58,7 +58,7 @@ func configChannel(channel stb.StubChannel) {
 
 func argsInfo(nArgs int) {
     if nArgs < 2 { 
-        fmt.Println("peer <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>")
+        fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>")
         os.Exit(1) 
     }
 }
