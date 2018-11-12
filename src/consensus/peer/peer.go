@@ -13,14 +13,14 @@ import (
 )
 
 var (
-    debug 			  bool
+    debug             bool
     consensusDecision string
-    voters			  map[int] bool
-    round 			  int
-    phase 			  int
-    peerID			  int
-    nParticipants	  int
-    estimate 		  *msg.Estimate
+    voters            map[int] bool
+    round             int
+    phase             int
+    peerID            int
+    nParticipants     int
+    estimate          *msg.Estimate
     mutation          int
     defaultDelta      int
     maxTries          int
