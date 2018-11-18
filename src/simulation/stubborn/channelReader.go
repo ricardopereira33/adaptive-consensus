@@ -1,5 +1,7 @@
 package stubborn
 
+/*** Exported methods ***/
+
 // SReceive is the method that receives the messages through the channel
 func (c *Channel) SReceive() (pack *Package) {    
     for {
@@ -14,6 +16,8 @@ func (c *Channel) SReceive() (pack *Package) {
         }
     }
 }
+
+/*** Auxiliares Functions ***/
 
 func (c *Channel) ack(id int) {
     pack := newPackage(c.PeerID, nil, true)

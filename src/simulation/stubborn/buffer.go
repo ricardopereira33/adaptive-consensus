@@ -47,6 +47,8 @@ func newPackage(id int, data []byte, isAck bool) (pack *Package) {
     return 
 }
 
+/*** Exported methods ***/
+
 // InsertElem insert a package to the buffer
 func (b *BufferStruct) InsertElem(id int, p *Package) {
     b.Mutex.Lock()
@@ -91,7 +93,7 @@ func (p Package) PrintPacket() {
     log.Println("-----------")
 }
 
-// Auxiliary Funtions 
+/*** Auxiliary Funtions ***/
 
 func bytesToPackage(data []byte) (pack *Package) {
     err := json.Unmarshal(data, &pack)

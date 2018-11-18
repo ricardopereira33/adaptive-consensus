@@ -1,6 +1,11 @@
 package stubborn
 
-import "strconv"
+import (
+	"time"
+	"strconv"
+)
+
+/*** Exported methods ***/
 
 // SSendAll is the method that sends a message to all participants
 func (c *Channel) SSendAll(message []byte) {
@@ -22,17 +27,25 @@ func (c *Channel) SSend(idDest int, message []byte) {
     }
 }
 
+/*** Auxiliares Functions ***/
+
 func (c *Channel) send(idDest int) {
     message := c.OutBuffer.GetElem(idDest)
     go c.sendDirect(idDest, message)
 }
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
-    coefficient := int(1/c.consInfo.PercentMiss) * 100
+    // 
+    coefficient := int(1/c.consInfo.PercentMiss) * 100          
+    //
     numberMsg   := (c.consInfo.GetMsg()+1) % coefficient
+    //
     percentMsg  := float64(100)/float64(numberMsg)
 
     if percentMsg != c.consInfo.PercentMiss {
+        // Simulate the message delay
+        time.Sleep(time.Second)
+
         c.sendToBuffer(idDest, message)
         c.consInfo.IncMsg()
     }

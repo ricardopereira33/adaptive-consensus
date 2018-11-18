@@ -62,7 +62,7 @@ func (c *Channel) delta(id int) bool {
 
 func (c *Channel) retransmission() {
     tries := 0
-    // make a copy of c.Peers
+
     for {
         time.Sleep(DefaultDelta)	
         for id := 1; id <= c.NParticipants; id++ {
@@ -79,6 +79,11 @@ func (c *Channel) retransmission() {
 }
 
 /*** Exported methods ***/
+
+// Init is the method that start receipt of the message 
+func (c *Channel) Init() {
+    go c.retransmission()
+}
 
 // GetPeerID returns the peer ID
 func (c *Channel) GetPeerID() int {
@@ -140,11 +145,6 @@ func (c *Channel) SetCoordinator(coordID int) {
 // SetPercentageMiss sets percentMiss value
 func (c *Channel) SetPercentageMiss(miss float64) {
     c.consInfo.PercentMiss = miss
-}
-
-// Init is the method that start receipt of the message 
-func (c *Channel) Init() {
-    go c.retransmission()
 }
 
 // Print prints a message
