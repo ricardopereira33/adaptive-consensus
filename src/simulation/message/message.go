@@ -30,6 +30,8 @@ func NewMessage(peerID int, round int, phase int, voters map[int] bool, estimate
     return
 }
 
+/*** Exported Methods ***/
+
 // MessageToBytes convert a Message to Bytes
 func (message *Message) MessageToBytes() (data []byte) {
     data, err := json.Marshal(message)
@@ -59,7 +61,7 @@ func PackageToMessage(pack *stb.Package) (message *Message) {
     return 
 }
 
-// Axiliary Functions 
+/*** Axiliary Functions ***/
 
 func toString(integer int) string { 
     return strconv.Itoa(integer)
