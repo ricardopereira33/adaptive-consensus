@@ -34,6 +34,7 @@ type Channel struct {
     consInfo      *con.ConsensusInfo
     PeerID        int
     NParticipants int
+    Metrics       *Metrics
 }
 
 func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
@@ -43,6 +44,7 @@ func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap) (channel *C
     channel.PeerID        = peerID
     channel.consInfo      = con.NewConsensusInfo()
     channel.NParticipants = nParticipants
+    channel.Metrics       = NewMetrics(nParticipants)
     
     value, prs := peers.Get(strconv.Itoa(peerID))
     if prs {

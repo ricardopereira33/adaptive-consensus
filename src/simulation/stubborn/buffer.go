@@ -44,7 +44,7 @@ func newPackage(id int, data []byte, isAck bool) (pack *Package) {
     pack.IsACK   = isAck
     pack.Arrived = false
 
-    return 
+    return
 }
 
 /*** Exported methods ***/
@@ -52,16 +52,16 @@ func newPackage(id int, data []byte, isAck bool) (pack *Package) {
 // InsertElem insert a package to the buffer
 func (b *BufferStruct) InsertElem(id int, p *Package) {
     b.Mutex.Lock()
-    b.Data[id] = p 
+    b.Data[id] = p
     b.Mutex.Unlock()
 }
 
 // GetElem get a package for the process "id"
 func (b BufferStruct) GetElem(id int) *Package {
-    b.Mutex.Lock()    
+    b.Mutex.Lock()
     elem, prs := b.Data[id]
     b.Mutex.Unlock()
-    
+
     if prs {
         return elem
     }
@@ -81,7 +81,7 @@ func (p Package) GetData() []byte {
 
 // PrintPacket prints all information in the Package
 func (p Package) PrintPacket() {
-    log.Println("-----------")	
+    log.Println("-----------")
     log.Print("ID: ")
     log.Println(p.ID)
     log.Print("Arrived: ")
@@ -89,7 +89,7 @@ func (p Package) PrintPacket() {
     log.Print("isACK: ")
     log.Println(p.IsACK)
     log.Println("Data: ")
-    log.Println(p.Data)	
+    log.Println(p.Data)
     log.Println("-----------")
 }
 

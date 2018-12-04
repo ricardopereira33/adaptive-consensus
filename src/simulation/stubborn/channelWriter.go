@@ -5,8 +5,6 @@ import (
 	"strconv"
 )
 
-/*** Exported methods ***/
-
 // SSendAll is the method that sends a message to all participants
 func (c *Channel) SSendAll(message []byte) {
     for id := 1; id <= c.NParticipants; id++ {
@@ -27,8 +25,6 @@ func (c *Channel) SSend(idDest int, message []byte) {
     }
 }
 
-/*** Auxiliares Functions ***/
-
 func (c *Channel) send(idDest int) {
     message := c.OutBuffer.GetElem(idDest)
     go c.sendDirect(idDest, message)
@@ -36,14 +32,14 @@ func (c *Channel) send(idDest int) {
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
     coefficient := int(1/c.consInfo.PercentMiss) * 100
-    missingMsg  := (c.consInfo.GetMsg()+1) % coefficient
+    missingMsg  := (c.Metrics.GetSendedMsg(idDest) + 1) % coefficient
 
     if missingMsg != 0 {
         // Simulate the message delay
         time.Sleep(time.Second)
 
         c.sendToBuffer(idDest, message)
-        c.consInfo.IncMsg()
+        c.Metrics.IncSendedMsg(idDest)
     }
 }
 
