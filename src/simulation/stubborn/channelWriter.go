@@ -35,14 +35,10 @@ func (c *Channel) send(idDest int) {
 }
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
-    // 
-    coefficient := int(1/c.consInfo.PercentMiss) * 100          
-    //
-    numberMsg   := (c.consInfo.GetMsg()+1) % coefficient
-    //
-    percentMsg  := float64(100)/float64(numberMsg)
+    coefficient := int(1/c.consInfo.PercentMiss) * 100
+    missingMsg  := (c.consInfo.GetMsg()+1) % coefficient
 
-    if percentMsg != c.consInfo.PercentMiss {
+    if missingMsg != 0 {
         // Simulate the message delay
         time.Sleep(time.Second)
 
