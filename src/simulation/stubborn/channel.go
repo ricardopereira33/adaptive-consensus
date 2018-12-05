@@ -5,7 +5,7 @@ import (
     "log"
     "fmt"
     "strconv"
-    con "simulation/consensusinfo"
+    con "simulation/consensusInfo"
     cmap "github.com/orcaman/concurrent-map"
 )	
 
@@ -77,6 +77,11 @@ func (c *Channel) retransmission() {
 // Init is the method that start receipt of the message 
 func (c *Channel) Init() {
     go c.retransmission()
+}
+
+// Results returns the metrics results
+func (c *Channel) Results() map[string] string {
+    return c.Metrics.results()
 }
 
 // Finish is the method that finish the consensus protocol

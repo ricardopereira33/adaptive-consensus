@@ -5,7 +5,7 @@ import (
     "log"
     "encoding/json"
     stb "simulation/stubborn"
-    con "simulation/consensusinfo"
+    con "simulation/consensusInfo"
     ex "simulation/exception"
 )
 

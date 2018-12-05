@@ -2,7 +2,7 @@ package stubborn
 
 import (
     "strconv"
-    con "simulation/consensusinfo"
+    con "simulation/consensusInfo"
     cmap "github.com/orcaman/concurrent-map"
 )
 
@@ -10,22 +10,23 @@ import (
 type StubChannel interface {
     SReceive() *Package
     SSend(int, []byte)
-    SSendAll([]byte)					  
-    Init()	
+    SSendAll([]byte)
+    Init()
+    Results() map[string] string
     Finish()
 
     // Sets
-    SetDelta0(f func(int, *Package) bool)	
+    SetDelta0(f func(int, *Package) bool)
     SetDelta(f func(int) bool)
     SetMaxTries(int)
     SetDefaultDelta(int)
-    SetCoordinator(int)	
+    SetCoordinator(int)
     SetPercentageMiss(float64)
     
     // Gets
     GetPeerID()            int
     GetCoordID()           int
-    GetNParticipants()     int 	
+    GetNParticipants()     int	
     GetConsensusDecision() string
     GetPackage(int)        *Package
     GetConsensusInfo()     *con.ConsensusInfo

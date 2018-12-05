@@ -3,7 +3,7 @@ package main
 import (
     stb "simulation/stubborn"
     msg "simulation/message"
-    con "simulation/consensusinfo"
+    con "simulation/consensusInfo"
 )
 
 func handleMessages(channel stb.StubChannel) {

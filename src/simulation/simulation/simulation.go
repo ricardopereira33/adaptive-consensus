@@ -1,13 +1,14 @@
 package main
 
 import (
+	"log"
     "fmt"
     "flag"
     "os"
-    "log"
     "strconv"
-    mut "simulation/mutation"
     ex "simulation/exception"
+    con "simulation/consensusInfo"
+    mut "simulation/mutation"
     stb "simulation/stubborn"
     cmap "github.com/orcaman/concurrent-map"
 )
@@ -23,26 +24,36 @@ var (
 
 func propose(value string) {
     channels  := stb.Channels(nParticipants)
-    responses := make(chan string)
+    responses := make(chan *con.Results)
     
     for id := 1; id <= nParticipants; id++ {
         go runPeer(id, value, responses, channels)
     }
 
+    log.Println("go runPeers")
+    list := make(map[int] *con.Results)
+   
     for id := 1; id <= nParticipants; id++ {
         response := <-responses
-        log.Println("END - " + response)
+        list[response.PeerID] = response
+    }
+    log.Println("all received")
+    file, err := os.Create("/tmp/results.txt")
+    ex.CheckError(err)
+
+    for _, value := range list {
+        value.Write(file)
     }
 }
 
-func runPeer(peerID int, value string, response chan string, channels cmap.ConcurrentMap) {
+func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap) {
     channel := stb.NewStubChannel(peerID, nParticipants, channels)
     configChannel(channel)
 
     go consensus(channel, value)
     handleMessages(channel)
 
-    response <- "[Peer " + strconv.Itoa(channel.GetPeerID()) + "] " + channel.GetConsensusDecision()
+    response <- con.NewResults(channel.GetPeerID(), channel.Results())
 }
 
 func configChannel(channel stb.StubChannel) {
