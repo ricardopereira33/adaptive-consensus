@@ -54,7 +54,7 @@ func (m *Metrics) getSendedMsg(peerID int) int {
 func (m *Metrics) results() map[string] string {
     list := make(map[string] string)
     
-    for index, id := range m.receivedMsg.Keys() {
+    for _, id := range m.receivedMsg.Keys() {
         receivedMsg, _ := m.receivedMsg.Get(id)
         sendedMsg, _   := m.sendedMsg.Get(id)
         
@@ -65,7 +65,7 @@ func (m *Metrics) results() map[string] string {
             "|F: " + m.decision.String()
     }
 
-    return 
+    return list
 } 
 
 func newMap(nPeers int) (channels cmap.ConcurrentMap){
