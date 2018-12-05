@@ -34,12 +34,12 @@ func handleMessages(channel stb.StubChannel) {
         }
         if len(c.Voters) > nParticipants/2 {
             if checkPhase(message, c) { 
+                channel.Finish()
                 break 
             }
         }
     }
 }
-
 
 func checkRound(message *msg.Message, cInfo *con.ConsensusInfo) {
     if cInfo.Round < message.Round {
@@ -65,9 +65,6 @@ func checkPhase(message *msg.Message, cInfo *con.ConsensusInfo) bool {
     cInfo.Voters = make(map[int] bool)
     return false
 }
-
-
-// Auxiliary Funtions 
 
 func containsNewVoters(senderVoters map[int] bool, cInfo *con.ConsensusInfo) bool {
     for id := range senderVoters {

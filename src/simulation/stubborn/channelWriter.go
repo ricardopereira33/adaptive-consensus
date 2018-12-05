@@ -32,14 +32,14 @@ func (c *Channel) send(idDest int) {
 
 func (c *Channel) sendDirect(idDest int, message *Package) {
     coefficient := int(1/c.consInfo.PercentMiss) * 100
-    missingMsg  := (c.Metrics.GetSendedMsg(idDest) + 1) % coefficient
+    missingMsg  := (c.Metrics.getSendedMsg(idDest) + 1) % coefficient
 
     if missingMsg != 0 {
         // Simulate the message delay
         time.Sleep(time.Second)
 
         c.sendToBuffer(idDest, message)
-        c.Metrics.IncSendedMsg(idDest)
+        c.Metrics.incSendedMsg(idDest)
     }
 }
 

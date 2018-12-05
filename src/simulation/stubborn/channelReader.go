@@ -1,12 +1,10 @@
 package stubborn
 
-/*** Exported methods ***/
-
 // SReceive is the method that receives the messages through the channel
 func (c *Channel) SReceive() (pack *Package) {    
     for {
         pack := <-c.InBuffer
-        c.Metrics.IncReceivedMsg(pack.ID)
+        c.Metrics.incReceivedMsg(pack.ID)
         if pack.IsACK {
             oldPack        := c.OutBuffer.GetElem(pack.ID)
             oldPack.Arrived = true
@@ -17,8 +15,6 @@ func (c *Channel) SReceive() (pack *Package) {
         }
     }
 }
-
-/*** Auxiliares Functions ***/
 
 func (c *Channel) ack(id int) {
     pack := newPackage(c.PeerID, nil, true)

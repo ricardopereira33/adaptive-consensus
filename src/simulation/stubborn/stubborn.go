@@ -12,6 +12,7 @@ type StubChannel interface {
     SSend(int, []byte)
     SSendAll([]byte)					  
     Init()	
+    Finish()
 
     // Sets
     SetDelta0(f func(int, *Package) bool)	

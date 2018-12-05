@@ -9,7 +9,6 @@ type ConsensusInfo struct {
     Estimate    *Estimate
     CDecision   string
     PercentMiss float64
-    NMessages   uint64
 }
 
 // Estimate is the estimate value for a consensus

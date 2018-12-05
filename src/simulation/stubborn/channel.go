@@ -7,14 +7,8 @@ import (
     "strconv"
     con "simulation/consensusinfo"
     cmap "github.com/orcaman/concurrent-map"
-)
-
-const ( 
-    // MaxDatagramSize is the maximum size of a datagram packet
-    MaxDatagramSize = 2048  
 )	
 
-// Default value (adaptive) 
 var ( 
     // MaxTries is the maximum value of tries 
     MaxTries     = 3
@@ -80,11 +74,14 @@ func (c *Channel) retransmission() {
     }
 }
 
-/*** Exported methods ***/
-
 // Init is the method that start receipt of the message 
 func (c *Channel) Init() {
     go c.retransmission()
+}
+
+// Finish is the method that finish the consensus protocol
+func (c *Channel) Finish() {
+    c.Metrics.finish()
 }
 
 // GetPeerID returns the peer ID

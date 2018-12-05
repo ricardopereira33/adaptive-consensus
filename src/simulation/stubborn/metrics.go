@@ -10,7 +10,7 @@ import (
 type Metrics struct {
     receivedMsg cmap.ConcurrentMap
     sendedMsg   cmap.ConcurrentMap
-    firstMsg    time.Time
+    // firstMsg    time.Time
     start       time.Time 
     decision    time.Time 
 }
@@ -25,28 +25,48 @@ func NewMetrics(nPeers int) (metrics *Metrics) {
     return 
 }
 
-// IncReceivedMsg increments the number of received messages
-func (m *Metrics) IncReceivedMsg(peerID int) {
+func (m *Metrics) finish() {
+    m.decision = time.Now()
+}
+
+// incReceivedMsg increments the number of received messages
+func (m *Metrics) incReceivedMsg(peerID int) {
     strID    := strconv.Itoa(peerID)
     value, _ := m.receivedMsg.Get(strID)
     m.receivedMsg.Set(strID, value.(int) + 1)
 }
 
-// IncSendedMsg increments the number of sended messages
-func (m *Metrics) IncSendedMsg(peerID int) {
+// incSendedMsg increments the number of sended messages
+func (m *Metrics) incSendedMsg(peerID int) {
     strID    := strconv.Itoa(peerID)
     value, _ := m.sendedMsg.Get(strID)
     m.sendedMsg.Set(strID, value.(int) + 1)
 }
 
-// GetSendedMsg returns the number of received messages 
-func (m *Metrics) GetSendedMsg(peerID int) int {
+// getSendedMsg returns the number of received messages 
+func (m *Metrics) getSendedMsg(peerID int) int {
     strID    := strconv.Itoa(peerID)
     value, _ := m.sendedMsg.Get(strID)
 
     return value.(int)
 }
 
+func (m *Metrics) results() map[string] string {
+    list := make(map[string] string)
+    
+    for index, id := range m.receivedMsg.Keys() {
+        receivedMsg, _ := m.receivedMsg.Get(id)
+        sendedMsg, _   := m.sendedMsg.Get(id)
+        
+        list[id] = 
+            "RM: " + strconv.Itoa(receivedMsg.(int)) + 
+            "|SM: " + strconv.Itoa(sendedMsg.(int)) +
+            "|S: " + m.start.String() +
+            "|F: " + m.decision.String()
+    }
+
+    return 
+} 
 
 func newMap(nPeers int) (channels cmap.ConcurrentMap){
     channels = cmap.New()
