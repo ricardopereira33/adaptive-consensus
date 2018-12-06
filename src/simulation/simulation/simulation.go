@@ -15,7 +15,8 @@ import (
 
 var (
     debug         bool
-    mutation      int
+    mutation      string
+    mutationCode  int
     nParticipants int
     defaultDelta  int
     maxTries      int
@@ -38,7 +39,7 @@ func propose(value string) {
         list[response.PeerID] = response
     }
     log.Println("all received")
-    file, err := os.Create("/tmp/results.txt")
+    file, err := os.Create("/Users/Ricardo/Desktop/"+ mutation + "_" + strconv.Itoa(nParticipants) + ".txt")
     ex.CheckError(err)
 
     for _, value := range list {
@@ -62,7 +63,7 @@ func configChannel(channel stb.StubChannel) {
     channel.SetDefaultDelta(defaultDelta)
     channel.SetPercentageMiss(percentMiss)
 
-    mut := mut.NewMutation(channel, mutation)
+    mut := mut.NewMutation(channel, mutationCode)
     channel.SetDelta0(mut.Delta0)
     channel.SetDelta(mut.Delta)
 }
@@ -88,7 +89,8 @@ func main() {
     argsInfo(len(args))
 
     var err error
-    mutation,      err = mut.Find(args[0])	
+    mutation           = args[0]
+    mutationCode,  err = mut.Find(mutation)	
     nParticipants, err = strconv.Atoi(args[1])
     defaultDelta,  err = strconv.Atoi(args[2])
     maxTries,      err = strconv.Atoi(args[3])

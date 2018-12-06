@@ -59,10 +59,10 @@ func (m *Metrics) results() map[string] string {
         sendedMsg, _   := m.sendedMsg.Get(id)
         
         list[id] = 
-            "RM: " + strconv.Itoa(receivedMsg.(int)) + 
-            "|SM: " + strconv.Itoa(sendedMsg.(int)) +
-            "|S: " + m.start.String() +
-            "|F: " + m.decision.String()
+            "[" + strconv.Itoa(receivedMsg.(int)) + 
+            ", " + strconv.Itoa(sendedMsg.(int)) +
+            ", " + m.start.Format("15:04:05") +
+            ", " + m.decision.Format("15:04:05") + "]"
     }
 
     return list
