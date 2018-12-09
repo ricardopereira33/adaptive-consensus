@@ -4,7 +4,7 @@ package stubborn
 func (c *Channel) SReceive() (pack *Package) {    
     for {
         pack := <-c.InBuffer
-        c.Metrics.incReceivedMsg(pack.ID)
+        c.Metrics.incMsgReceived(pack.ID)
         if pack.IsACK {
             oldPack        := c.OutBuffer.GetElem(pack.ID)
             oldPack.Arrived = true

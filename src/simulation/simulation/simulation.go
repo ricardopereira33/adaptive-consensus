@@ -39,12 +39,7 @@ func propose(value string) {
         list[response.PeerID] = response
     }
     log.Println("all received")
-    file, err := os.Create("/Users/Ricardo/Desktop/"+ mutation + "_" + strconv.Itoa(nParticipants) + ".txt")
-    ex.CheckError(err)
-
-    for _, value := range list {
-        value.Write(file)
-    }
+    drawResults(list, mutation)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap) {
@@ -54,7 +49,8 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
     go consensus(channel, value)
     handleMessages(channel)
 
-    response <- con.NewResults(channel.GetPeerID(), channel.Results())
+    received, sended := channel.Results()
+    response <- con.NewResults(received, sended, channel.GetPeerID())
 }
 
 func configChannel(channel stb.StubChannel) {

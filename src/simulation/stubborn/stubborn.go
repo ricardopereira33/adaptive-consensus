@@ -12,7 +12,7 @@ type StubChannel interface {
     SSend(int, []byte)
     SSendAll([]byte)
     Init()
-    Results() map[string] string
+    Results() ([]float64, []float64)
     Finish()
 
     // Sets

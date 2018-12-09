@@ -80,7 +80,7 @@ func (c *Channel) Init() {
 }
 
 // Results returns the metrics results
-func (c *Channel) Results() map[string] string {
+func (c *Channel) Results() ([]float64, []float64) {
     return c.Metrics.results()
 }
 
