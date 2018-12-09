@@ -15,8 +15,15 @@ simulation:
 	go install ./src/simulation/stubborn/
 	go install ./src/simulation/simulation/
 
+test:
+	./bin/simulation early 100 3 3 1
+	./bin/simulation ring 100 3 3 1
+	./bin/simulation centralized 100 3 3 1
+	./bin/simulation gossip 100 3 3 1
+
 install:
 	go get "github.com/orcaman/concurrent-map"
+	go get gonum.org/v1/plot/...
 
 run:
 	./bin/peer
@@ -24,3 +31,4 @@ run:
 clean:
 	rm -rf ./bin
 	rm -rf ./pkg
+	 
