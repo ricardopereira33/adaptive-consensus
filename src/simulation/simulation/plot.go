@@ -61,7 +61,7 @@ func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
 }
 
 func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
-    plot.Title.Text = "Number of Nodes that decide over time"
+    plot.Title.Text = "Number of Nodes that decide, over time"
 	plot.X.Label.Text = "Time"
     plot.Y.Label.Text = "# Nodes"
     

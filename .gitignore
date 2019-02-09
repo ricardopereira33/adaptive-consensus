@@ -7,3 +7,4 @@ src/github.com/
 src/golang.org/
 src/gonum.org/
 src/rsc.io/
+*.png
