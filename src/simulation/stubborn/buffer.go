@@ -1,103 +1,103 @@
 package stubborn
 
 import (
-    "log"
-    "sync"
-    "encoding/json"
-    ex "simulation/exception"
+	"encoding/json"
+	"log"
+	ex "simulation/exception"
+	"sync"
 )
 
 // Buffer is a interface to absract the buffer implementation
 type Buffer interface {
-    InsertElem(int, *Package)
-    GetElem(int) *Package
+	InsertElem(int, *Package)
+	GetElem(int) *Package
 }
 
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
-    Size   int
-    Data   map[int] *Package
-    Mutex  *sync.Mutex
+	Size  int
+	Data  map[int]*Package
+	Mutex *sync.Mutex
 }
 
 // Package is a struct to represent a package received via UDP.
 type Package struct {
-    ID      int
-    Data    []byte
-    Arrived bool
-    IsACK   bool
+	ID      int
+	Data    []byte
+	Arrived bool
+	IsACK   bool
 }
 
 func newBuffer(size int) (buffer *BufferStruct) {
-    buffer       = new(BufferStruct)
-    buffer.Size  = size
-    buffer.Data  = make(map[int] *Package, size)
-    buffer.Mutex = new(sync.Mutex)
+	buffer = new(BufferStruct)
+	buffer.Size = size
+	buffer.Data = make(map[int]*Package, size)
+	buffer.Mutex = new(sync.Mutex)
 
-    return
+	return
 }
 
 func newPackage(id int, data []byte, isAck bool) (pack *Package) {
-    pack         = new(Package)
-    pack.ID      = id
-    pack.Data    = data
-    pack.IsACK   = isAck
-    pack.Arrived = false
+	pack = new(Package)
+	pack.ID = id
+	pack.Data = data
+	pack.IsACK = isAck
+	pack.Arrived = false
 
-    return
+	return
 }
 
 /*** Exported methods ***/
 
 // InsertElem insert a package to the buffer
 func (b *BufferStruct) InsertElem(id int, p *Package) {
-    b.Mutex.Lock()
-    b.Data[id] = p
-    b.Mutex.Unlock()
+	b.Mutex.Lock()
+	b.Data[id] = p
+	b.Mutex.Unlock()
 }
 
 // GetElem get a package for the process "id"
 func (b BufferStruct) GetElem(id int) *Package {
-    b.Mutex.Lock()
-    elem, prs := b.Data[id]
-    b.Mutex.Unlock()
+	b.Mutex.Lock()
+	elem, prs := b.Data[id]
+	b.Mutex.Unlock()
 
-    if prs {
-        return elem
-    }
-    
-    return nil
+	if prs {
+		return elem
+	}
+
+	return nil
 }
 
 // GetID returns the peer ID that sends the package
 func (p Package) GetID() int {
-    return p.ID
+	return p.ID
 }
 
 // GetData returns the data in the Package
 func (p Package) GetData() []byte {
-    return p.Data
+	return p.Data
 }
 
 // PrintPacket prints all information in the Package
 func (p Package) PrintPacket() {
-    log.Println("-----------")
-    log.Print("ID: ")
-    log.Println(p.ID)
-    log.Print("Arrived: ")
-    log.Println(p.Arrived)
-    log.Print("isACK: ")
-    log.Println(p.IsACK)
-    log.Println("Data: ")
-    log.Println(p.Data)
-    log.Println("-----------")
+	log.Println("-----------")
+	log.Print("ID: ")
+	log.Println(p.ID)
+	log.Print("Arrived: ")
+	log.Println(p.Arrived)
+	log.Print("isACK: ")
+	log.Println(p.IsACK)
+	log.Println("Data: ")
+	log.Println(p.Data)
+	log.Println("-----------")
 }
 
 /*** Auxiliary Funtions ***/
 
 func bytesToPackage(data []byte) (pack *Package) {
-    err := json.Unmarshal(data, &pack)
-    ex.CheckError(err)
+	err := json.Unmarshal(data, &pack)
+	ex.CheckError(err)
 
-    return
+	return
 }

@@ -4,19 +4,19 @@ package consensusinfo
 
 // Results is the struct that contains the consensus results
 type Results struct {
-    PeerID   int
-    Sent     []float64
-    Received []float64
+	PeerID   int
+	Sent     []float64
+	Received []float64
 }
 
 // NewResults creates a new estimate
-func NewResults(sent, received[] float64, id int) (results *Results) {
-    results          = new(Results)
-    results.PeerID   = id
-    results.Sent     = sent
-    results.Received = received
+func NewResults(sent, received []float64, id int) (results *Results) {
+	results = new(Results)
+	results.PeerID = id
+	results.Sent = sent
+	results.Received = received
 
-    return
+	return
 }
 
 // Write writes all results into the file
