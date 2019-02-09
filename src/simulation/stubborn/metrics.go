@@ -10,8 +10,7 @@ import (
 type Metrics struct {
 	msgReceived cmap.ConcurrentMap
 	msgSent     cmap.ConcurrentMap
-	start    time.Time
-	decision time.Time
+	decision    time.Time
 }
 
 // NewMetrics creates a new metrics struct
@@ -19,7 +18,6 @@ func NewMetrics(nPeers int) (metrics *Metrics) {
 	metrics = new(Metrics)
 	metrics.msgReceived = newMap(nPeers)
 	metrics.msgSent = newMap(nPeers)
-	metrics.start = time.Now()
 
 	return
 }
@@ -50,7 +48,7 @@ func (m *Metrics) getMsgSent(peerID int) int {
 	return value.(int)
 }
 
-func (m *Metrics) results() ([]float64, []float64) {
+func (m *Metrics) results() ([]float64, []float64, time.Time) {
 	size := m.msgReceived.Count()
 	sent := make([]float64, size)
 	received := make([]float64, size)
@@ -64,7 +62,7 @@ func (m *Metrics) results() ([]float64, []float64) {
 		received[id-1] = float64(msgReceived.(int))
 	}
 
-	return sent, received
+	return sent, received, m.decision
 }
 
 func newMap(nPeers int) (channels cmap.ConcurrentMap) {
@@ -76,8 +74,3 @@ func newMap(nPeers int) (channels cmap.ConcurrentMap) {
 
 	return
 }
-
-// "[" + strconv.Itoa(receivedMsg.(int)) +
-// ", " + strconv.Itoa(sendedMsg.(int)) +
-// ", " + m.start.Format("15:04:05") +
-// ", " + m.decision.Format("15:04:05") + "]"

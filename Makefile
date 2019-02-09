@@ -17,10 +17,10 @@ simulation:
 	go install ./src/simulation/mutation/
 
 test:
-	./bin/simulation early 100 3 3 1
-	./bin/simulation ring 100 3 3 1
-	./bin/simulation centralized 100 3 3 1
-	./bin/simulation gossip 100 3 3 1
+	./bin/simulation early 50 3 3 1
+	./bin/simulation ring 50 3 3 1
+	./bin/simulation centralized 50 3 3 1
+	./bin/simulation gossip 50 3 3 1
 
 format:
 	go fmt ./src/simulation/exception/

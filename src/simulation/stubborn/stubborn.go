@@ -3,7 +3,8 @@ package stubborn
 import (
 	cmap "github.com/orcaman/concurrent-map"
 	con "simulation/consensusInfo"
-	"strconv"
+    "strconv"
+    "time"
 )
 
 // StubChannel is an interface to abstract the channel
@@ -12,7 +13,7 @@ type StubChannel interface {
 	SSend(int, []byte)
 	SSendAll([]byte)
 	Init()
-	Results() ([]float64, []float64)
+	Results() ([]float64, []float64, time.Time)
 	Finish()
 
 	// Sets
