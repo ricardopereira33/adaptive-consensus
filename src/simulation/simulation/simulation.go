@@ -15,44 +15,46 @@ import (
 )
 
 var (
-	debug         bool
-	mutation      string
-	mutationCode  int
-	nParticipants int
-	defaultDelta  int
-	maxTries      int
-	percentMiss   float64
+	debug              bool
+	mutation           string
+	mutationCode       int
+	numberParticipants int
+	defaultDelta       int
+	maxTries           int
+	percentMiss        float64
 )
 
 func propose(value string) {
-	channels := stb.Channels(nParticipants)
+	channels := stb.Channels(numberParticipants)
     responses := make(chan *con.Results)
     startTime := time.Now()
 
-	for id := 1; id <= nParticipants; id++ {
+	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels)
 	}
 
-	log.Println("go runPeers")
+    log.Println("--------------")
+    log.Println("Running peers...")
+    
 	list := make(map[int]*con.Results)
 
-	for id := 1; id <= nParticipants; id++ {
+	for id := 1; id <= numberParticipants; id++ {
 		response := <-responses
 		list[response.PeerID] = response
     }
     
-	log.Println("all received")
+    log.Println("All received!")
+    log.Println("--------------")
+
 	drawResults(list, startTime, mutation)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap) {
-	channel := stb.NewStubChannel(peerID, nParticipants, channels)
+	channel := stb.NewStubChannel(peerID, numberParticipants, channels)
 	configChannel(channel)
 
 	go consensus(channel, value)
 	handleMessages(channel)
-
-    channel.Finish()
 
 	received, sended, decisionTime := channel.Results()
 	response <- con.NewResults(received, sended, decisionTime, channel.GetPeerID())
@@ -93,7 +95,7 @@ func main() {
     
 	mutation = args[0]
 	mutationCode, err = mut.Find(mutation)
-	nParticipants, err = strconv.Atoi(args[1])
+	numberParticipants, err = strconv.Atoi(args[1])
 	defaultDelta, err = strconv.Atoi(args[2])
 	maxTries, err = strconv.Atoi(args[3])
 	percentMiss, err = strconv.ParseFloat(args[4], 64)

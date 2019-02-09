@@ -2,15 +2,14 @@ package stubborn
 
 import (
 	"encoding/json"
-	"log"
-	ex "simulation/exception"
 	"sync"
+	ex "simulation/exception"
 )
 
 // Buffer is a interface to absract the buffer implementation
 type Buffer interface {
-	InsertElem(int, *Package)
-	GetElem(int) *Package
+	InsertElement(int, *Package)
+	GetElement(int) *Package
 }
 
 // BufferStruct is a struct where we keep the messages
@@ -49,48 +48,34 @@ func newPackage(id int, data []byte, isAck bool) (pack *Package) {
 
 /*** Exported methods ***/
 
-// InsertElem insert a package to the buffer
-func (b *BufferStruct) InsertElem(id int, p *Package) {
-	b.Mutex.Lock()
-	b.Data[id] = p
-	b.Mutex.Unlock()
+// InsertElement insert a package to the buffer
+func (buffer *BufferStruct) InsertElement(id int, pack *Package) {
+	buffer.Mutex.Lock()
+	buffer.Data[id] = pack
+	buffer.Mutex.Unlock()
 }
 
-// GetElem get a package for the process "id"
-func (b BufferStruct) GetElem(id int) *Package {
-	b.Mutex.Lock()
-	elem, prs := b.Data[id]
-	b.Mutex.Unlock()
+// GetElement get a package for the process "id"
+func (buffer BufferStruct) GetElement(id int) *Package {
+	buffer.Mutex.Lock()
+	pack, present := buffer.Data[id]
+	buffer.Mutex.Unlock()
 
-	if prs {
-		return elem
+	if present {
+		return pack
 	}
 
 	return nil
 }
 
 // GetID returns the peer ID that sends the package
-func (p Package) GetID() int {
-	return p.ID
+func (pack Package) GetID() int {
+	return pack.ID
 }
 
 // GetData returns the data in the Package
-func (p Package) GetData() []byte {
-	return p.Data
-}
-
-// PrintPacket prints all information in the Package
-func (p Package) PrintPacket() {
-	log.Println("-----------")
-	log.Print("ID: ")
-	log.Println(p.ID)
-	log.Print("Arrived: ")
-	log.Println(p.Arrived)
-	log.Print("isACK: ")
-	log.Println(p.IsACK)
-	log.Println("Data: ")
-	log.Println(p.Data)
-	log.Println("-----------")
+func (pack Package) GetData() []byte {
+	return pack.Data
 }
 
 /*** Auxiliary Funtions ***/

@@ -1,23 +1,23 @@
 package stubborn
 
 // SReceive is the method that receives the messages through the channel
-func (c *Channel) SReceive() (pack *Package) {
+func (channel *Channel) SReceive() (pack *Package) {
 	for {
-		pack := <-c.InBuffer
-		c.Metrics.incMsgReceived(pack.ID)
+		pack := <-channel.InputBuffer
+		channel.Metrics.incrementMessagesReceived(pack.ID)
 		if pack.IsACK {
-			oldPack := c.OutBuffer.GetElem(pack.ID)
+			oldPack := channel.OutputBuffer.GetElement(pack.ID)
 			oldPack.Arrived = true
-			c.OutBuffer.InsertElem(pack.ID, oldPack)
+			channel.OutputBuffer.InsertElement(pack.ID, oldPack)
 		} else {
-			go c.ack(pack.ID)
+			go channel.ack(pack.ID)
 			return pack
 		}
 	}
 }
 
-func (c *Channel) ack(id int) {
-	pack := newPackage(c.PeerID, nil, true)
+func (channel *Channel) ack(id int) {
+	pack := newPackage(channel.PeerID, nil, true)
 
-	c.sendDirect(id, pack)
+	channel.sendDirect(id, pack)
 }

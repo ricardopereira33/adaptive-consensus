@@ -7,46 +7,47 @@ import (
 
 // Gossip is a mutation type
 type Gossip struct {
-	channel stb.StubChannel
-	permut  []int
-	c       int
-	turn    int
-	fanout  int
+	channel         stb.StubChannel
+	permut          []int
+	turn            int
+	fanout          int
+	processesToSkip int
 }
 
 // NewGossip creates a new gossip mutation
-func NewGossip(channel stb.StubChannel) (g *Gossip) {
-	g = new(Gossip)
-	g.channel = channel
-	g.permut = perm(channel.GetNParticipants())
-	g.c = 1
-	g.turn = 0
-	g.fanout = 5
+func NewGossip(channel stb.StubChannel) (gossip *Gossip) {
+	gossip = new(Gossip)
+	gossip.channel = channel
+	gossip.permut = perm(channel.GetNumberParticipants())
+	gossip.processesToSkip = 1
+	gossip.turn = 0
+	gossip.fanout = 5
 
-	return g
+	return 
 }
 
 // Delta0 is the delta0 implementation
-func (g Gossip) Delta0(id int, message *stb.Package) bool {
-	return g.Delta(id)
+func (gossip Gossip) Delta0(id int, message *stb.Package) bool {
+	return gossip.Delta(id)
 }
 
 // Delta is the delta implementation
-func (g Gossip) Delta(id int) bool {
-	nParticipants := len(g.permut)
-	g.turn++
+func (gossip Gossip) Delta(id int) bool {
+	numberParticipants := len(gossip.permut)
+	gossip.turn++
 
-	if g.turn == nParticipants {
-		g.c = g.c + g.fanout
-		g.turn = 0
-	}
-	l := 0
-
-	for l < g.fanout {
-		if g.permut[(l+g.c)%nParticipants] == id {
+	if gossip.turn == numberParticipants {
+		gossip.processesToSkip += gossip.fanout
+		gossip.turn = 0
+    }
+    
+    processIndex := 0
+    
+	for processIndex < gossip.fanout {
+		if gossip.permut[(processIndex + gossip.processesToSkip) % numberParticipants] == id {
 			return true
 		}
-		l++
+		processIndex++
 	}
 
 	return false
@@ -54,11 +55,11 @@ func (g Gossip) Delta(id int) bool {
 
 // Auxiliary Functions
 
-func perm(nParticipants int) (list []int) {
-	list = rand.Perm(nParticipants)
+func perm(numberParticipants int) (list []int) {
+	list = rand.Perm(numberParticipants)
 
-	for i := range list {
-		list[i]++
+	for index := range list {
+		list[index]++
 	}
 
 	return

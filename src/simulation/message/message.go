@@ -2,11 +2,10 @@ package message
 
 import (
 	"encoding/json"
-	"log"
+	"strconv"
 	con "simulation/consensusInfo"
 	ex "simulation/exception"
 	stb "simulation/stubborn"
-	"strconv"
 )
 
 // Message sent out to the server
@@ -38,18 +37,6 @@ func (message *Message) MessageToBytes() (data []byte) {
 	ex.CheckError(err)
 
 	return
-}
-
-// PrintMessage prints the message
-func (message *Message) PrintMessage() {
-	log.Println("----------------------")
-	log.Println("[ " + toString(message.PeerID) + " ] Message")
-	log.Println("R: " + toString(message.Round) + "| Ph: " + toString(message.Phase))
-	log.Print("Voters: ")
-	log.Println(message.Voters)
-	log.Print("Estimate: ")
-	log.Println(message.Estimate)
-	log.Println("----------------------")
 }
 
 // PackageToMessage convert a Package to a Message

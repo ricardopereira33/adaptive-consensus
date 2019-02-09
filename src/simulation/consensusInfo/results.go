@@ -24,14 +24,14 @@ func NewResults(sent, received []float64, decisionTime time.Time, id int) (resul
 	return
 }
 
-func (p DurationSlice) Len() int {
-    return len(p)
+func (ds DurationSlice) Len() int {
+    return len(ds)
 }
 
-func (p DurationSlice) Less(i, j int) bool {
-    return p[i].Nanoseconds() < p[j].Nanoseconds()
+func (ds DurationSlice) Less(i, j int) bool {
+    return ds[i].Nanoseconds() < ds[j].Nanoseconds()
 }
 
-func (p DurationSlice) Swap(i, j int) {
-    p[i], p[j] = p[j], p[i]
+func (ds DurationSlice) Swap(i, j int) {
+    ds[i], ds[j] = ds[j], ds[i]
 }

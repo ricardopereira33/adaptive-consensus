@@ -8,26 +8,26 @@ type Centralized struct {
 }
 
 // NewCentralized creates a new centralized mutation
-func NewCentralized(channel stubborn.StubChannel) (c *Centralized) {
-	c = new(Centralized)
-	c.channel = channel
+func NewCentralized(channel stubborn.StubChannel) (centralized *Centralized) {
+	centralized = new(Centralized)
+	centralized.channel = channel
 
-	return c
+	return
 }
 
 // Delta0 is the delta0 implementation
-func (c Centralized) Delta0(id int, pack *stubborn.Package) bool {
-	coordID := c.channel.GetCoordID()
-	peerID := c.channel.GetPeerID()
+func (centralized Centralized) Delta0(id int, pack *stubborn.Package) bool {
+	coordID := centralized.channel.GetCoordID()
+	peerID := centralized.channel.GetPeerID()
 
 	isCoord := id == coordID || peerID == coordID
-	isFresh := fresh(c.channel.GetPackage(id), pack)
-	isMajority := majority(pack, c.channel.GetNParticipants())
+	isFresh := fresh(centralized.channel.GetPackage(id), pack)
+	isMajority := majority(pack, centralized.channel.GetNumberParticipants())
 
 	return isCoord && (isFresh || isMajority)
 }
 
 // Delta is the delta implementation
-func (c Centralized) Delta(id int) bool {
+func (centralized Centralized) Delta(id int) bool {
 	return true
 }

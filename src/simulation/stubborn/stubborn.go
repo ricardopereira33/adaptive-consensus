@@ -1,10 +1,10 @@
 package stubborn
 
 import (
-	cmap "github.com/orcaman/concurrent-map"
-	con "simulation/consensusInfo"
     "strconv"
     "time"
+	cmap "github.com/orcaman/concurrent-map"
+	con "simulation/consensusInfo"
 )
 
 // StubChannel is an interface to abstract the channel
@@ -27,24 +27,24 @@ type StubChannel interface {
 	// Gets
 	GetPeerID() int
 	GetCoordID() int
-	GetNParticipants() int
+	GetNumberParticipants() int
 	GetConsensusDecision() string
 	GetPackage(int) *Package
 	GetConsensusInfo() *con.ConsensusInfo
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(peerID, nParticipantes int, peers cmap.ConcurrentMap) (channel StubChannel) {
-	channel = newChannel(peerID, nParticipantes, peers)
+func NewStubChannel(peerID, numberParticipantes int, peers cmap.ConcurrentMap) (channel StubChannel) {
+	channel = newChannel(peerID, numberParticipantes, peers)
     
     return
 }
 
 // Channels returns a map with all input channel
-func Channels(nPeers int) (channels cmap.ConcurrentMap) {
+func Channels(numberParticipantes int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
-	for id := 1; id <= nPeers; id++ {
+	for id := 1; id <= numberParticipantes; id++ {
 		channels.Set(strconv.Itoa(id), make(chan *Package))
 	}
 

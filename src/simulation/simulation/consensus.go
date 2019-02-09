@@ -7,22 +7,22 @@ import (
 )
 
 func consensus(channel stb.StubChannel, value string) {
-	c := channel.GetConsensusInfo()
-	c.Voters = make(map[int]bool)
-	c.Round = 1
-	c.Phase = 1
-	c.Estimate = con.NewEstimate(value, channel.GetPeerID())
-	c.CoordID = (c.Round % channel.GetNParticipants()) + 1
 	peerID := channel.GetPeerID()
+	consensusInfo := channel.GetConsensusInfo()
+	consensusInfo.Voters = make(map[int]bool)
+	consensusInfo.Round = 1
+	consensusInfo.Phase = 1
+	consensusInfo.Estimate = con.NewEstimate(value, channel.GetPeerID())
+	consensusInfo.CoordID = (consensusInfo.Round % channel.GetNumberParticipants()) + 1
 
 	if peerID == channel.GetCoordID() {
-		c.Voters[peerID] = true
-		c.Estimate.PeerID = peerID
+		consensusInfo.Voters[peerID] = true
+		consensusInfo.Estimate.PeerID = peerID
 
-		message := msg.NewMessage(peerID, c.Round, c.Phase, c.Voters, c.Estimate)
+		message := msg.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 		data := message.MessageToBytes()
 
-		channel.SetCoordinator(c.CoordID)
+		channel.SetCoordinator(consensusInfo.CoordID)
 		channel.SSendAll(data)
 	}
 }

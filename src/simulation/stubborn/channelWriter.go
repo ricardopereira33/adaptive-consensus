@@ -6,48 +6,48 @@ import (
 )
 
 // SSendAll is the method that sends a message to all participants
-func (c *Channel) SSendAll(message []byte) {
-	for id := 1; id <= c.NParticipants; id++ {
-		if id != c.GetPeerID() {
-			go c.SSend(id, message)
+func (channel *Channel) SSendAll(message []byte) {
+	for id := 1; id <= channel.NumberParticipants; id++ {
+		if id != channel.GetPeerID() {
+			go channel.SSend(id, message)
 		}
 	}
 }
 
 // SSend is the method that sends the messages through the channel
-func (c *Channel) SSend(idDest int, message []byte) {
-	packageMsg := newPackage(c.PeerID, message, false)
-	isToSend := c.delta0(idDest, packageMsg)
-	c.OutBuffer.InsertElem(idDest, packageMsg)
+func (channel *Channel) SSend(idDestination int, message []byte) {
+	packageMsg := newPackage(channel.PeerID, message, false)
+	isToSend := channel.delta0(idDestination, packageMsg)
+	channel.OutputBuffer.InsertElement(idDestination, packageMsg)
 
 	if isToSend {
-		c.send(idDest)
+		channel.send(idDestination)
 	}
 }
 
-func (c *Channel) send(idDest int) {
-	message := c.OutBuffer.GetElem(idDest)
-	go c.sendDirect(idDest, message)
+func (channel *Channel) send(idDestination int) {
+	message := channel.OutputBuffer.GetElement(idDestination)
+	go channel.sendDirect(idDestination, message)
 }
 
-func (c *Channel) sendDirect(idDest int, message *Package) {
-	coefficient := int(1/c.consInfo.PercentMiss) * 100
-	missingMsg := (c.Metrics.getMsgSent(idDest) + 1) % coefficient
+func (channel *Channel) sendDirect(idDestination int, message *Package) {
+	coefficient := int(1 / channel.consensusInfo.PercentMiss) * 100
+	missingMsg := (channel.Metrics.getMessagesSent(idDestination) + 1) % coefficient
 
 	if missingMsg != 0 {
 		// Simulate the message delay
 		time.Sleep(time.Second)
 
-		c.sendToBuffer(idDest, message)
-		c.Metrics.incMsgSent(idDest)
+		channel.sendToBuffer(idDestination, message)
+		channel.Metrics.incrementMessagesSent(idDestination)
 	}
 }
 
-func (c *Channel) sendToBuffer(id int, pack *Package) {
-	value, prs := c.Peers.Get(strconv.Itoa(id))
+func (channel *Channel) sendToBuffer(id int, pack *Package) {
+	value, present := channel.Peers.Get(strconv.Itoa(id))
 
-	if prs {
-		channel := value.(chan *Package)
-		channel <- pack
+	if present {
+		peerChannel := value.(chan *Package)
+		peerChannel <- pack
 	}
 }

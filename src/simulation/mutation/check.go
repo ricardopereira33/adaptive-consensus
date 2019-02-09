@@ -21,10 +21,10 @@ func fresh(oldPack *stubborn.Package, newPack *stubborn.Package) bool {
 	return true
 }
 
-func majority(pack *stubborn.Package, nPeers int) bool {
+func majority(pack *stubborn.Package, numberParticipants int) bool {
 	message := msg.PackageToMessage(pack)
 
-	if len(message.Voters) > nPeers/2 {
+	if len(message.Voters) > numberParticipants/2 {
 		return true
 	}
 

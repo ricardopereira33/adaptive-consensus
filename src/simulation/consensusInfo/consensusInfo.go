@@ -7,7 +7,7 @@ type ConsensusInfo struct {
 	Round       int
 	Phase       int
 	Estimate    *Estimate
-	CDecision   string
+	Decision    string
 	PercentMiss float64
 }
 
@@ -18,10 +18,10 @@ type Estimate struct {
 }
 
 // NewConsensusInfo creates a new consensusInfo
-func NewConsensusInfo() *ConsensusInfo {
-	consensusInfo := new(ConsensusInfo)
+func NewConsensusInfo() (consensusInfo *ConsensusInfo) {
+	consensusInfo = new(ConsensusInfo)
 
-	return consensusInfo
+	return 
 }
 
 // NewEstimate creates a new estimate

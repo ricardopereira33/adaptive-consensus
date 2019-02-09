@@ -1,74 +1,74 @@
 package stubborn
 
 import (
-	cmap "github.com/orcaman/concurrent-map"
-	"strconv"
+    "strconv"
 	"time"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 // Metrics contains all the metrics of a simulation for 1 peer
 type Metrics struct {
-	msgReceived cmap.ConcurrentMap
-	msgSent     cmap.ConcurrentMap
-	decision    time.Time
+	messagesReceived cmap.ConcurrentMap
+	messagesSent     cmap.ConcurrentMap
+	decision         time.Time
 }
 
 // NewMetrics creates a new metrics struct
-func NewMetrics(nPeers int) (metrics *Metrics) {
+func NewMetrics(numberParticipants int) (metrics *Metrics) {
 	metrics = new(Metrics)
-	metrics.msgReceived = newMap(nPeers)
-	metrics.msgSent = newMap(nPeers)
+	metrics.messagesReceived = newMap(numberParticipants)
+	metrics.messagesSent = newMap(numberParticipants)
 
 	return
 }
 
-func (m *Metrics) finish() {
-	m.decision = time.Now()
+func (metrics *Metrics) finish() {
+	metrics.decision = time.Now()
 }
 
-// incReceivedMsg increments the number of received messages
-func (m *Metrics) incMsgReceived(peerID int) {
+// incrementMessagesReceived increments the number of received messages
+func (metrics *Metrics) incrementMessagesReceived(peerID int) {
 	strID := strconv.Itoa(peerID)
-	value, _ := m.msgReceived.Get(strID)
-	m.msgReceived.Set(strID, value.(int)+1)
+	value, _ := metrics.messagesReceived.Get(strID)
+	metrics.messagesReceived.Set(strID, value.(int)+1)
 }
 
-// incSendedMsg increments the number of sended messages
-func (m *Metrics) incMsgSent(peerID int) {
+// incrementMessagesSent increments the number of sended messages
+func (metrics *Metrics) incrementMessagesSent(peerID int) {
 	strID := strconv.Itoa(peerID)
-	value, _ := m.msgSent.Get(strID)
-	m.msgSent.Set(strID, value.(int)+1)
+	value, _ := metrics.messagesSent.Get(strID)
+	metrics.messagesSent.Set(strID, value.(int)+1)
 }
 
-// getSendedMsg returns the number of received messages
-func (m *Metrics) getMsgSent(peerID int) int {
+// getMessagesSent returns the number of received messages
+func (metrics *Metrics) getMessagesSent(peerID int) int {
 	strID := strconv.Itoa(peerID)
-	value, _ := m.msgSent.Get(strID)
+	value, _ := metrics.messagesSent.Get(strID)
 
 	return value.(int)
 }
 
-func (m *Metrics) results() ([]float64, []float64, time.Time) {
-	size := m.msgReceived.Count()
+func (metrics *Metrics) results() ([]float64, []float64, time.Time) {
+	size := metrics.messagesReceived.Count()
 	sent := make([]float64, size)
 	received := make([]float64, size)
 
-	for _, id := range m.msgReceived.Keys() {
-		msgReceived, _ := m.msgReceived.Get(id)
-		msgSent, _ := m.msgSent.Get(id)
+	for _, id := range metrics.messagesReceived.Keys() {
+		messageReceived, _ := metrics.messagesReceived.Get(id)
+		messageSent, _ := metrics.messagesSent.Get(id)
 		id, _ := strconv.Atoi(id)
 
-		sent[id-1] = float64(msgSent.(int))
-		received[id-1] = float64(msgReceived.(int))
+		sent[id-1] = float64(messageSent.(int))
+		received[id-1] = float64(messageReceived.(int))
 	}
 
-	return sent, received, m.decision
+	return sent, received, metrics.decision
 }
 
-func newMap(nPeers int) (channels cmap.ConcurrentMap) {
+func newMap(numberParticipantes int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
-	for id := 1; id <= nPeers; id++ {
+	for id := 1; id <= numberParticipantes; id++ {
 		channels.Set(strconv.Itoa(id), 0)
 	}
 

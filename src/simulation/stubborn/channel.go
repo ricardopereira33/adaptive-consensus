@@ -2,11 +2,11 @@ package stubborn
 
 import (
 	"fmt"
-	cmap "github.com/orcaman/concurrent-map"
 	"log"
-	con "simulation/consensusInfo"
 	"strconv"
 	"time"
+	cmap "github.com/orcaman/concurrent-map"
+	con "simulation/consensusInfo"
 )
 
 var (
@@ -20,53 +20,53 @@ var (
 
 // Channel to send and receive messages between peers
 type Channel struct {
-	Peers         cmap.ConcurrentMap
-	OutBuffer     Buffer
-	InBuffer      chan *Package
-	Delta0Func    func(int, *Package) bool
-	DeltaFunc     func(int) bool
-	consInfo      *con.ConsensusInfo
-	PeerID        int
-	NParticipants int
-	Metrics       *Metrics
+	Peers              cmap.ConcurrentMap
+	OutputBuffer       Buffer
+	InputBuffer        chan *Package
+	Delta0Func         func(int, *Package) bool
+	DeltaFunc          func(int) bool
+	PeerID             int
+	Metrics            *Metrics
+	consensusInfo      *con.ConsensusInfo
+	NumberParticipants int
 }
 
-func newChannel(peerID, nParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
+func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
 	channel = new(Channel)
 	channel.Peers = peers
-	channel.OutBuffer = newBuffer(nParticipants)
+	channel.OutputBuffer = newBuffer(numberParticipants)
 	channel.PeerID = peerID
-	channel.consInfo = con.NewConsensusInfo()
-	channel.NParticipants = nParticipants
-	channel.Metrics = NewMetrics(nParticipants)
+	channel.consensusInfo = con.NewConsensusInfo()
+	channel.NumberParticipants = numberParticipants
+	channel.Metrics = NewMetrics(numberParticipants)
 
-	value, prs := peers.Get(strconv.Itoa(peerID))
-	if prs {
-		channel.InBuffer = value.(chan *Package)
+	value, present := peers.Get(strconv.Itoa(peerID))
+	if present {
+		channel.InputBuffer = value.(chan *Package)
 	}
 
 	return
 }
 
-func (c *Channel) delta0(id int, pack *Package) bool {
-	return c.Delta0Func(id, pack)
+func (channel *Channel) delta0(id int, pack *Package) bool {
+	return channel.Delta0Func(id, pack)
 }
 
-func (c *Channel) delta(id int) bool {
-	return c.DeltaFunc(id)
+func (channel *Channel) delta(id int) bool {
+	return channel.DeltaFunc(id)
 }
 
-func (c *Channel) retransmission() {
+func (channel *Channel) retransmission() {
 	tries := 0
 
 	for {
 		time.Sleep(DefaultDelta)
-		for id := 1; id <= c.NParticipants; id++ {
-			if c.delta(id) || tries > MaxTries {
-				pack := c.OutBuffer.GetElem(id)
+		for id := 1; id <= channel.NumberParticipants; id++ {
+			if channel.delta(id) || tries > MaxTries {
+				pack := channel.OutputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-					c.send(id)
+					channel.send(id)
 				}
 			}
 			tries++
@@ -75,91 +75,91 @@ func (c *Channel) retransmission() {
 }
 
 // Init is the method that start receipt of the message
-func (c *Channel) Init() {
-	go c.retransmission()
+func (channel *Channel) Init() {
+	go channel.retransmission()
 }
 
 // Results returns the metrics results
-func (c *Channel) Results() ([]float64, []float64, time.Time) {
-	return c.Metrics.results()
+func (channel *Channel) Results() ([]float64, []float64, time.Time) {
+	return channel.Metrics.results()
 }
 
 // Finish is the method that finish the consensus protocol
-func (c *Channel) Finish() {
-	c.Metrics.finish()
+func (channel *Channel) Finish() {
+	channel.Metrics.finish()
 }
 
 // GetPeerID returns the peer ID
-func (c *Channel) GetPeerID() int {
-	return c.PeerID
+func (channel *Channel) GetPeerID() int {
+	return channel.PeerID
 }
 
 // GetPackage returns the last package sent to id
-func (c *Channel) GetPackage(id int) *Package {
-	pack := c.OutBuffer.GetElem(id)
+func (channel *Channel) GetPackage(id int) *Package {
+	pack := channel.OutputBuffer.GetElement(id)
 
 	return pack
 }
 
-// GetNParticipants returns the number of participants
-func (c *Channel) GetNParticipants() int {
-	return c.NParticipants
+// GetNumberParticipants returns the number of participants
+func (channel *Channel) GetNumberParticipants() int {
+	return channel.NumberParticipants
 }
 
 // GetCoordID returns the coordinator ID
-func (c *Channel) GetCoordID() int {
-	return c.consInfo.CoordID
+func (channel *Channel) GetCoordID() int {
+	return channel.consensusInfo.CoordID
 }
 
 // GetConsensusDecision returns the consensus decision value
-func (c *Channel) GetConsensusDecision() string {
-	return c.consInfo.CDecision
+func (channel *Channel) GetConsensusDecision() string {
+	return channel.consensusInfo.Decision
 }
 
 // GetConsensusInfo returns the consensus information
-func (c *Channel) GetConsensusInfo() *con.ConsensusInfo {
-	return c.consInfo
+func (channel *Channel) GetConsensusInfo() *con.ConsensusInfo {
+	return channel.consensusInfo
 }
 
 // SetMaxTries sets the MaxTries value.
-func (c *Channel) SetMaxTries(max int) {
+func (channel *Channel) SetMaxTries(max int) {
 	MaxTries = max
 }
 
 // SetDefaultDelta sets the DefaultDelta value.
-func (c *Channel) SetDefaultDelta(ddelta int) {
+func (channel *Channel) SetDefaultDelta(ddelta int) {
 	DefaultDelta = time.Second * time.Duration(ddelta)
 }
 
 // SetDelta0 is the method to define the delta0 implemention
-func (c *Channel) SetDelta0(f func(int, *Package) bool) {
-	c.Delta0Func = f
+func (channel *Channel) SetDelta0(f func(int, *Package) bool) {
+	channel.Delta0Func = f
 }
 
 // SetDelta is the method to define the delta0 implemention
-func (c *Channel) SetDelta(f func(int) bool) {
-	c.DeltaFunc = f
+func (channel *Channel) SetDelta(f func(int) bool) {
+	channel.DeltaFunc = f
 }
 
 // SetCoordinator saves the coordainator ID
-func (c *Channel) SetCoordinator(coordID int) {
-	c.consInfo.CoordID = coordID
+func (channel *Channel) SetCoordinator(coordID int) {
+	channel.consensusInfo.CoordID = coordID
 }
 
 // SetPercentageMiss sets percentMiss value
-func (c *Channel) SetPercentageMiss(miss float64) {
-	c.consInfo.PercentMiss = miss
+func (channel *Channel) SetPercentageMiss(miss float64) {
+	channel.consensusInfo.PercentMiss = miss
 }
 
 // Print prints a message
-func (c Channel) print(message interface{}) {
-	fmt.Print("[Peer " + strconv.Itoa(c.GetPeerID()) + "] ")
+func (channel Channel) print(message interface{}) {
+	fmt.Print("[Peer " + strconv.Itoa(channel.GetPeerID()) + "] ")
 	log.Println(message)
 }
 
-func (c Channel) printStatus() {
-	log.Println(c.Peers)
-	log.Println(c.OutBuffer)
-	log.Println(c.Delta0Func != nil)
-	log.Println(c.DeltaFunc != nil)
+func (channel Channel) printStatus() {
+	log.Println(channel.Peers)
+	log.Println(channel.OutputBuffer)
+	log.Println(channel.Delta0Func != nil)
+	log.Println(channel.DeltaFunc != nil)
 }

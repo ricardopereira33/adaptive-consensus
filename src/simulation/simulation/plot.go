@@ -18,7 +18,7 @@ import (
 // INTERVALS is the constant that indicates the time interval in the cumulative graph
 var INTERVALS = float64(50)
 
-// XY is a struct
+// coordinates is a struct that represents the 2D coordinates
 type coordinates struct {
     x float64
     y float64
@@ -49,7 +49,7 @@ func drawResults(results map[int]*con.Results, startTime time.Time, mutation str
 }
 
 func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
-	plot.Title.Text = "#Messages " + label
+	plot.Title.Text = "# Messages " + label
 	plot.X.Label.Text = "Node"
 	plot.Y.Label.Text = "Node"
 
@@ -72,7 +72,7 @@ func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
 }
 
 func newBubbles(data plotter.XYZs) *plotter.Scatter {
-	sc, err := plotter.NewScatter(data)
+	scatter, err := plotter.NewScatter(data)
 	ex.CheckError(err)
 
 	minZ, maxZ := math.Inf(1), math.Inf(-1)
@@ -85,19 +85,19 @@ func newBubbles(data plotter.XYZs) *plotter.Scatter {
 		}
 	}
 
-	sc.GlyphStyleFunc = func(i int) draw.GlyphStyle {
-		c := color.RGBA{ R: 25, B: 178, A: 255 }
+	scatter.GlyphStyleFunc = func(i int) draw.GlyphStyle {
+		color := color.RGBA{ R: 25, B: 178, A: 255 }
 		minRadius, maxRadius := vg.Points(0), vg.Points(10)
         
-        rng := maxRadius - minRadius
+        rangeRadius := maxRadius - minRadius
 		_, _, z := data.XYZ(i)
-		d := (z - minZ) / (maxZ - minZ)
-		r := vg.Length(d) * rng + minRadius
+		diameter := (z - minZ) / (maxZ - minZ)
+		radius := vg.Length(diameter) * rangeRadius + minRadius
         
-        return draw.GlyphStyle{ Color: c, Radius: r, Shape: draw.CircleGlyph{} }
+        return draw.GlyphStyle{ Color: color, Radius: radius, Shape: draw.CircleGlyph{} }
 	}
 
-	return sc
+	return scatter
 }
 
 func newTriple(data map[int]*con.Results, set string) plotter.XYZs {

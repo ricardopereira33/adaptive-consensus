@@ -10,30 +10,30 @@ func handleMessages(channel stb.StubChannel) {
 	for {
 		pack := channel.SReceive()
 		message := msg.PackageToMessage(pack)
-		c := channel.GetConsensusInfo()
-		nParticipants := channel.GetNParticipants()
+		consensusInfo := channel.GetConsensusInfo()
+		numberParticipants := channel.GetNumberParticipants()
 		peerID := channel.GetPeerID()
 
-		if len(c.Voters) <= nParticipants/2 {
-			checkRound(message, c)
-			existsNewVoters := (c.Round == message.Round) && containsNewVoters(message.Voters, c)
-			isMajority := (c.Phase == 1) && (len(message.Voters) > nParticipants/2)
+		if len(consensusInfo.Voters) <= numberParticipants/2 {
+			checkRound(message, consensusInfo)
+			existsNewVoters := (consensusInfo.Round == message.Round) && containsNewVoters(message.Voters, consensusInfo)
+			isMajority := (consensusInfo.Phase == 1) && (len(message.Voters) > numberParticipants/2)
 
 			if existsNewVoters || isMajority {
 				message.Voters[peerID] = true
-				c.Voters = union(c.Voters, message.Voters)
+				consensusInfo.Voters = union(consensusInfo.Voters, message.Voters)
 
-				if message.Estimate.PeerID == ((c.Round % nParticipants) + 1) {
-					c.Estimate = message.Estimate
+				if message.Estimate.PeerID == ((consensusInfo.Round % numberParticipants) + 1) {
+					consensusInfo.Estimate = message.Estimate
 				}
 
-				message := msg.NewMessage(peerID, c.Round, c.Phase, c.Voters, c.Estimate)
+				message := msg.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 				data := message.MessageToBytes()
 				channel.SSendAll(data)
 			}
 		}
-		if len(c.Voters) > nParticipants/2 {
-			if checkPhase(message, c) {
+		if len(consensusInfo.Voters) > numberParticipants/2 {
+			if checkPhase(message, consensusInfo) {
 				channel.Finish()
 				break
 			}
@@ -41,34 +41,34 @@ func handleMessages(channel stb.StubChannel) {
 	}
 }
 
-func checkRound(message *msg.Message, cInfo *con.ConsensusInfo) {
-	if cInfo.Round < message.Round {
-		cInfo.Estimate = message.Estimate
-		cInfo.Round = message.Round
-		cInfo.Phase = message.Phase
-		cInfo.Voters = make(map[int]bool)
+func checkRound(message *msg.Message, consensusInfo *con.ConsensusInfo) {
+	if consensusInfo.Round < message.Round {
+		consensusInfo.Estimate = message.Estimate
+		consensusInfo.Round = message.Round
+		consensusInfo.Phase = message.Phase
+		consensusInfo.Voters = make(map[int]bool)
 	}
-	if cInfo.Round == message.Round && cInfo.Phase < message.Phase {
-		cInfo.Phase = message.Phase
-		cInfo.Voters = make(map[int]bool)
+	if consensusInfo.Round == message.Round && consensusInfo.Phase < message.Phase {
+		consensusInfo.Phase = message.Phase
+		consensusInfo.Voters = make(map[int]bool)
 	}
 }
 
-func checkPhase(message *msg.Message, cInfo *con.ConsensusInfo) bool {
-	if cInfo.Phase == 1 {
-		cInfo.CDecision = message.Estimate.Value
+func checkPhase(message *msg.Message, consensusInfo *con.ConsensusInfo) bool {
+	if consensusInfo.Phase == 1 {
+		consensusInfo.Decision = message.Estimate.Value
 		return true
 	}
 
-	cInfo.Round++
-	cInfo.Phase = 1
-	cInfo.Voters = make(map[int]bool)
+	consensusInfo.Round++
+	consensusInfo.Phase = 1
+	consensusInfo.Voters = make(map[int]bool)
 	return false
 }
 
-func containsNewVoters(senderVoters map[int]bool, cInfo *con.ConsensusInfo) bool {
+func containsNewVoters(senderVoters map[int]bool, consensusInfo *con.ConsensusInfo) bool {
 	for id := range senderVoters {
-		_, isPresent := cInfo.Voters[id]
+		_, isPresent := consensusInfo.Voters[id]
 		if !isPresent {
 			return true
 		}

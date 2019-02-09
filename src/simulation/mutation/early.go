@@ -8,22 +8,22 @@ type Early struct {
 }
 
 // NewEarly creates a new early mutation
-func NewEarly(channel stubborn.StubChannel) (e *Early) {
-	e = new(Early)
-	e.channel = channel
+func NewEarly(channel stubborn.StubChannel) (early *Early) {
+	early = new(Early)
+	early.channel = channel
 
-	return e
+	return 
 }
 
 // Delta0 is the delta0 implementation
-func (e Early) Delta0(id int, pack *stubborn.Package) bool {
-	isFresh := fresh(e.channel.GetPackage(id), pack)
-	isMajority := majority(pack, e.channel.GetNParticipants())
+func (early Early) Delta0(id int, pack *stubborn.Package) bool {
+	isFresh := fresh(early.channel.GetPackage(id), pack)
+	isMajority := majority(pack, early.channel.GetNumberParticipants())
 
 	return isFresh || isMajority
 }
 
 // Delta is the delta implementation
-func (e Early) Delta(id int) bool {
+func (early Early) Delta(id int) bool {
 	return true
 }
