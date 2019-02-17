@@ -34,17 +34,17 @@ type StubChannel interface {
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(peerID, numberParticipantes int, peers cmap.ConcurrentMap) (channel StubChannel) {
-	channel = newChannel(peerID, numberParticipantes, peers)
-    
+func NewStubChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (channel StubChannel) {
+	channel = newChannel(peerID, numberParticipants, peers)
+
     return
 }
 
 // Channels returns a map with all input channel
-func Channels(numberParticipantes int) (channels cmap.ConcurrentMap) {
+func Channels(numberParticipants int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
-	for id := 1; id <= numberParticipantes; id++ {
+	for id := 1; id <= numberParticipants; id++ {
 		channels.Set(strconv.Itoa(id), make(chan *Package))
 	}
 

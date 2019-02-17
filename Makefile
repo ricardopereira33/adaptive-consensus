@@ -15,6 +15,7 @@ simulation:
 	go install ./src/simulation/stubborn/
 	go install ./src/simulation/simulation/
 	go install ./src/simulation/mutation/
+	go install ./src/simulation/failuredetection/
 
 test:
 	./bin/simulation early 100 3 3 1
@@ -29,9 +30,11 @@ format:
 	go fmt ./src/simulation/stubborn/
 	go fmt ./src/simulation/simulation/
 	go fmt ./src/simulation/mutation/
+	go fmt ./src/simulation/failuredetection/
 
 install:
 	go get "github.com/orcaman/concurrent-map"
+	go get "github.com/joa/failuredetector"
 	go get gonum.org/v1/plot/...
 
 run:

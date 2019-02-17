@@ -68,8 +68,8 @@ func checkPhase(message *msg.Message, consensusInfo *con.ConsensusInfo) bool {
 
 func containsNewVoters(senderVoters map[int]bool, consensusInfo *con.ConsensusInfo) bool {
 	for id := range senderVoters {
-		_, isPresent := consensusInfo.Voters[id]
-		if !isPresent {
+		_, present := consensusInfo.Voters[id]
+		if !present {
 			return true
 		}
 	}

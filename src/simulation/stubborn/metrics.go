@@ -65,10 +65,10 @@ func (metrics *Metrics) results() ([]float64, []float64, time.Time) {
 	return sent, received, metrics.decision
 }
 
-func newMap(numberParticipantes int) (channels cmap.ConcurrentMap) {
+func newMap(numberParticipants int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
-	for id := 1; id <= numberParticipantes; id++ {
+	for id := 1; id <= numberParticipants; id++ {
 		channels.Set(strconv.Itoa(id), 0)
 	}
 
