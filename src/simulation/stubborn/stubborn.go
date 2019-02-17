@@ -3,8 +3,10 @@ package stubborn
 import (
     "strconv"
     "time"
-	cmap "github.com/orcaman/concurrent-map"
+
+    fd "simulation/failuredetection"
 	con "simulation/consensusInfo"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 // StubChannel is an interface to abstract the channel
@@ -14,16 +16,17 @@ type StubChannel interface {
 	SSendAll([]byte)
     Init()
     IsAlive() bool
-	Results() ([]float64, []float64, time.Time)
-	Finish()
+    Results() ([]float64, []float64, time.Time)
+    Finish()
 
 	// Sets
-	SetDelta0(f func(int, *Package) bool)
-	SetDelta(f func(int) bool)
+	SetDelta0(func(int, *Package) bool)
+	SetDelta(func(int) bool)
 	SetMaxTries(int)
 	SetDefaultDelta(int)
 	SetCoordinator(int)
-	SetPercentageMiss(float64)
+    SetPercentageMiss(float64)
+    SetSuspectedFunc(func(int, StubChannel))
 
 	// Gets
 	GetPeerID() int
@@ -35,13 +38,13 @@ type StubChannel interface {
 }
 
 // NewStubChannel is the constructor of a stubborn channel
-func NewStubChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (channel StubChannel) {
-	channel = newChannel(peerID, numberParticipants, peers)
+func NewStubChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (channel StubChannel) {
+	channel = newChannel(peerID, numberParticipants, peers, detectors)
 
     return
 }
 
-// Channels returns a map with all input channel
+// Channels returns a map with all input channels
 func Channels(numberParticipants int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 

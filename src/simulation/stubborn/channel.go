@@ -8,7 +8,8 @@ import (
     "math/rand"
 
 	cmap "github.com/orcaman/concurrent-map"
-	con "simulation/consensusInfo"
+    con "simulation/consensusInfo"
+    fd "simulation/failuredetection"
 )
 
 var (
@@ -26,15 +27,17 @@ type Channel struct {
 	OutputBuffer       Buffer
 	InputBuffer        chan *Package
 	Delta0Func         func(int, *Package) bool
-	DeltaFunc          func(int) bool
+    DeltaFunc          func(int) bool
+    SuspectedFunc      func(int, StubChannel)
 	PeerID             int
 	Metrics            *Metrics
 	consensusInfo      *con.ConsensusInfo
     NumberParticipants int
+    Detectors          *fd.Detectors
     alive              bool
 }
 
-func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
+func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (channel *Channel) {
 	channel = new(Channel)
 	channel.Peers = peers
 	channel.OutputBuffer = newBuffer(numberParticipants)
@@ -42,10 +45,12 @@ func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (chann
 	channel.consensusInfo = con.NewConsensusInfo()
 	channel.NumberParticipants = numberParticipants
     channel.Metrics = NewMetrics(numberParticipants)
+    channel.Detectors = detectors
     channel.alive = true
 
 	value, present := peers.Get(strconv.Itoa(peerID))
-	if present {
+
+    if present {
 		channel.InputBuffer = value.(chan *Package)
 	}
 
@@ -58,6 +63,10 @@ func (channel *Channel) delta0(id int, pack *Package) bool {
 
 func (channel *Channel) delta(id int) bool {
 	return channel.DeltaFunc(id)
+}
+
+func (channel *Channel) suspected(id int) {
+    channel.SuspectedFunc(id, channel)
 }
 
 func (channel *Channel) retransmission() {
@@ -79,8 +88,8 @@ func (channel *Channel) retransmission() {
 }
 
 func (channel *Channel) triggerFailure() {
-    numberParticipants := channel.NumberParticipants
     peerID := channel.PeerID
+    numberParticipants := channel.NumberParticipants
 
     for {
         id := rand.Intn(numberParticipants) + 1
@@ -94,9 +103,33 @@ func (channel *Channel) triggerFailure() {
     }
 }
 
+func (channel *Channel) handleFailures() {
+    peerID := channel.PeerID
+    detectors := channel.Detectors
+    detector := detectors.GetDetector(peerID)
+    numberParticipants := channel.NumberParticipants
+
+    for {
+        detector.Heartbeat()
+        id := rand.Intn(numberParticipants) + 1
+
+        if !detectors.Ping(id) {
+            message := newSuspect(id, true)
+            channel.sendDirect(peerID, message)
+        }
+
+        if !channel.IsAlive() {
+            break
+        }
+
+        time.Sleep(100 * time.Millisecond)
+    }
+}
+
 // Init is the method that start receipt of the message
 func (channel *Channel) Init() {
     go channel.retransmission()
+    go channel.handleFailures()
     go channel.triggerFailure()
 }
 
@@ -158,13 +191,18 @@ func (channel *Channel) SetDefaultDelta(ddelta int) {
 }
 
 // SetDelta0 is the method to define the delta0 implemention
-func (channel *Channel) SetDelta0(f func(int, *Package) bool) {
-	channel.Delta0Func = f
+func (channel *Channel) SetDelta0(function func(int, *Package) bool) {
+	channel.Delta0Func = function
 }
 
 // SetDelta is the method to define the delta0 implemention
-func (channel *Channel) SetDelta(f func(int) bool) {
-	channel.DeltaFunc = f
+func (channel *Channel) SetDelta(function func(int) bool) {
+	channel.DeltaFunc = function
+}
+
+// SetSuspectedFunc is the method to define the suspected implementation
+func (channel *Channel) SetSuspectedFunc(function func(int, StubChannel)) {
+    channel.SuspectedFunc = function
 }
 
 // SetCoordinator saves the coordainator ID

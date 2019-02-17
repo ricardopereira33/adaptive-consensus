@@ -8,7 +8,7 @@ type ConsensusInfo struct {
 	Phase       int
 	Estimate    *Estimate
 	Decision    string
-	PercentMiss float64
+    PercentMiss float64
 }
 
 // Estimate is the estimate value for a consensus
@@ -21,7 +21,7 @@ type Estimate struct {
 func NewConsensusInfo() (consensusInfo *ConsensusInfo) {
 	consensusInfo = new(ConsensusInfo)
 
-	return 
+	return
 }
 
 // NewEstimate creates a new estimate

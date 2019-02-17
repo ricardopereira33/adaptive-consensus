@@ -21,10 +21,12 @@ type BufferStruct struct {
 
 // Package is a struct to represent a package received via UDP.
 type Package struct {
-	ID      int
-	Data    []byte
-	Arrived bool
-	IsACK   bool
+	ID           int
+	Data         []byte
+	Arrived      bool
+    Ack          bool
+    Suspicious   bool
+    SuspiciousID int
 }
 
 func newBuffer(size int) (buffer *BufferStruct) {
@@ -36,14 +38,22 @@ func newBuffer(size int) (buffer *BufferStruct) {
 	return
 }
 
-func newPackage(id int, data []byte, isAck bool) (pack *Package) {
+func newPackage(id int, data []byte, ack bool) (pack *Package) {
 	pack = new(Package)
 	pack.ID = id
 	pack.Data = data
-	pack.IsACK = isAck
+	pack.Ack = ack
 	pack.Arrived = false
 
 	return
+}
+
+func newSuspect(suspiciousID int, suspicious bool) (pack *Package) {
+    pack = new(Package)
+    pack.SuspiciousID = suspiciousID
+    pack.Suspicious = suspicious
+
+    return
 }
 
 /*** Exported methods ***/

@@ -1,39 +1,14 @@
 package main
 
 import (
-    "time"
-    "math/rand"
-
-    fd "simulation/failuredetection"
     stb "simulation/stubborn"
     msg "simulation/message"
 )
 
-func handleFailures(channel stb.StubChannel, detectors *fd.Detectors) {
+func suspected(id int, channel stb.StubChannel) {
     peerID := channel.GetPeerID()
-    detector := detectors.GetDetector(peerID)
-    numberParticipants := channel.GetNumberParticipants()
-
-    for {
-        detector.Heartbeat()
-        id := rand.Intn(numberParticipants) + 1
-
-        if !detectors.Ping(id) {
-            go suspected(channel, id)
-        }
-
-        if !channel.IsAlive() {
-            break
-        }
-
-        time.Sleep(100 * time.Millisecond)
-    }
-}
-
-func suspected(channel stb.StubChannel, id int) {
     consensusInfo := channel.GetConsensusInfo()
     numberParticipants := channel.GetNumberParticipants()
-    peerID := channel.GetPeerID()
 
     if id == ((consensusInfo.Round % numberParticipants) + 1) && consensusInfo.Round == 1 {
         consensusInfo.Round = 2

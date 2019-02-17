@@ -31,12 +31,18 @@ func handleMessages(channel stb.StubChannel) {
 				data := message.MessageToBytes()
 				channel.SSendAll(data)
 			}
-		}
+        }
+
 		if len(consensusInfo.Voters) > numberParticipants/2 {
-			if checkPhase(message, consensusInfo) || !channel.IsAlive() {
+			if checkPhase(message, consensusInfo) {
 				channel.Finish()
 				break
 			}
+        }
+
+        if !channel.IsAlive() {
+            channel.Finish()
+			break
         }
 	}
 }

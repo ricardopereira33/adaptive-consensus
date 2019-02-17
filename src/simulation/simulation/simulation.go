@@ -57,11 +57,10 @@ func propose(value string) {
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
-	channel := stb.NewStubChannel(peerID, numberParticipants, channels)
+	channel := stb.NewStubChannel(peerID, numberParticipants, channels, detectors)
 	configChannel(channel)
 
     go consensus(channel, value)
-    go handleFailures(channel, detectors)
     handleMessages(channel)
 
 	received, sent, decisionTime := channel.Results()
@@ -74,6 +73,7 @@ func configChannel(channel stb.StubChannel) {
 	channel.SetMaxTries(maxTries)
 	channel.SetDefaultDelta(defaultDelta)
 	channel.SetPercentageMiss(percentMiss)
+    channel.SetSuspectedFunc(suspected)
 
 	mut := mut.NewMutation(channel, mutationCode)
 	channel.SetDelta0(mut.Delta0)
