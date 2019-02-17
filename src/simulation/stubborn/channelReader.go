@@ -3,6 +3,7 @@ package stubborn
 // SReceive is the method that receives the messages through the channel
 func (channel *Channel) SReceive() (pack *Package) {
 	for {
+
 		pack := <-channel.InputBuffer
 		channel.Metrics.incrementMessagesReceived(pack.ID)
 		if pack.IsACK {

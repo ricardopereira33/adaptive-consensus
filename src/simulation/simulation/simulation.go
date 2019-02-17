@@ -62,11 +62,11 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 
     go consensus(channel, value)
     go handleFailures(channel, detectors)
-
     handleMessages(channel)
 
 	received, sent, decisionTime := channel.Results()
-	response <- con.NewResults(received, sent, decisionTime, channel.GetPeerID())
+
+    response <- con.NewResults(received, sent, decisionTime, channel.GetPeerID())
 }
 
 func configChannel(channel stb.StubChannel) {

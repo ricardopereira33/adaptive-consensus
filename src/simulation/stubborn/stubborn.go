@@ -12,7 +12,8 @@ type StubChannel interface {
 	SReceive() *Package
 	SSend(int, []byte)
 	SSendAll([]byte)
-	Init()
+    Init()
+    IsAlive() bool
 	Results() ([]float64, []float64, time.Time)
 	Finish()
 

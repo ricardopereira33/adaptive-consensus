@@ -33,11 +33,11 @@ func handleMessages(channel stb.StubChannel) {
 			}
 		}
 		if len(consensusInfo.Voters) > numberParticipants/2 {
-			if checkPhase(message, consensusInfo) {
+			if checkPhase(message, consensusInfo) || !channel.IsAlive() {
 				channel.Finish()
 				break
 			}
-		}
+        }
 	}
 }
 

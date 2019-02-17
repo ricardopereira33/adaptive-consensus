@@ -3,8 +3,10 @@ package stubborn
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
+    "strconv"
+    "math/rand"
+
 	cmap "github.com/orcaman/concurrent-map"
 	con "simulation/consensusInfo"
 )
@@ -28,7 +30,8 @@ type Channel struct {
 	PeerID             int
 	Metrics            *Metrics
 	consensusInfo      *con.ConsensusInfo
-	NumberParticipants int
+    NumberParticipants int
+    alive              bool
 }
 
 func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (channel *Channel) {
@@ -38,7 +41,8 @@ func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap) (chann
 	channel.PeerID = peerID
 	channel.consensusInfo = con.NewConsensusInfo()
 	channel.NumberParticipants = numberParticipants
-	channel.Metrics = NewMetrics(numberParticipants)
+    channel.Metrics = NewMetrics(numberParticipants)
+    channel.alive = true
 
 	value, present := peers.Get(strconv.Itoa(peerID))
 	if present {
@@ -74,9 +78,31 @@ func (channel *Channel) retransmission() {
 	}
 }
 
+func (channel *Channel) triggerFailure() {
+    numberParticipants := channel.NumberParticipants
+    peerID := channel.PeerID
+
+    for {
+        id := rand.Intn(numberParticipants) + 1
+
+        if id == peerID {
+            channel.alive = false
+            break
+        }
+
+        time.Sleep(500 * time.Millisecond)
+    }
+}
+
 // Init is the method that start receipt of the message
 func (channel *Channel) Init() {
-	go channel.retransmission()
+    go channel.retransmission()
+    go channel.triggerFailure()
+}
+
+// IsAlive returns the status of the peer
+func (channel *Channel) IsAlive() bool {
+	return channel.alive
 }
 
 // Results returns the metrics results

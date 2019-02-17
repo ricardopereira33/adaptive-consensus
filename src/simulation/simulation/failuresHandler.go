@@ -22,6 +22,10 @@ func handleFailures(channel stb.StubChannel, detectors *fd.Detectors) {
             go suspected(channel, id)
         }
 
+        if !channel.IsAlive() {
+            break
+        }
+
         time.Sleep(100 * time.Millisecond)
     }
 }
