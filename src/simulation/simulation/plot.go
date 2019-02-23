@@ -11,7 +11,7 @@ import (
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
-	con "simulation/consensusInfo"
+	con "simulation/consensus"
     ex "simulation/exception"
 )
 
@@ -40,7 +40,7 @@ func drawResults(results map[int]*con.Results, startTime time.Time, mutation str
 	sentPlot, err := plot.New()
     receivedPlot, err := plot.New()
     timePlot, err := plot.New()
-    
+
 	ex.CheckError(err)
 
 	drawData(sentPlot, sent, "sent_" + mutation)
@@ -64,7 +64,7 @@ func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
     plot.Title.Text = "Number of Nodes that decide, over time"
 	plot.X.Label.Text = "Time"
     plot.Y.Label.Text = "# Nodes"
-    
+
     err := plotutil.AddLines(plot, mutation, data)
     err = plot.Save(8 * vg.Inch, 8 * vg.Inch, "time_" + mutation + ".png")
 
@@ -88,12 +88,12 @@ func newBubbles(data plotter.XYZs) *plotter.Scatter {
 	scatter.GlyphStyleFunc = func(i int) draw.GlyphStyle {
 		color := color.RGBA{ R: 25, B: 178, A: 255 }
 		minRadius, maxRadius := vg.Points(0), vg.Points(10)
-        
+
         rangeRadius := maxRadius - minRadius
 		_, _, z := data.XYZ(i)
 		diameter := (z - minZ) / (maxZ - minZ)
 		radius := vg.Length(diameter) * rangeRadius + minRadius
-        
+
         return draw.GlyphStyle{ Color: color, Radius: radius, Shape: draw.CircleGlyph{} }
 	}
 
@@ -143,15 +143,15 @@ func newCumulativeData(data map[int]*con.Results, startTime time.Time) plotter.X
         for {
             if float64(duration.Seconds()) <= time {
                 numberNodes++
-                break     
+                break
             } else {
                 coordinates = append(coordinates, newCoordinates(time, numberNodes))
                 time += interval
             }
         }
     }
-    
-    coordinates = append(coordinates, newCoordinates(time, numberNodes)) 
+
+    coordinates = append(coordinates, newCoordinates(time, numberNodes))
     timeList := make(plotter.XYs, len(coordinates))
 
     for index, value := range coordinates {

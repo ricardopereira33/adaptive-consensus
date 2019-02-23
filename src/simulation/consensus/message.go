@@ -1,9 +1,8 @@
-package message
+package consensus
 
 import (
 	"encoding/json"
 	"strconv"
-	con "simulation/consensusInfo"
 	ex "simulation/exception"
 	stb "simulation/stubborn"
 )
@@ -14,11 +13,11 @@ type Message struct {
 	Round    int
 	Phase    int
 	Voters   map[int]bool
-	Estimate *con.Estimate
+	Estimate *Estimate
 }
 
 // NewMessage creates a new message using the parameters passed in and returns it
-func NewMessage(peerID int, round int, phase int, voters map[int]bool, estimate *con.Estimate) (message *Message) {
+func NewMessage(peerID int, round int, phase int, voters map[int]bool, estimate *Estimate) (message *Message) {
 	message = new(Message)
 	message.PeerID = peerID
 	message.Round = round

@@ -1,11 +1,11 @@
 package mutation
 
 import (
-	msg "simulation/message"
-	"simulation/stubborn"
+	msg "simulation/consensus"
+	stb "simulation/stubborn"
 )
 
-func fresh(oldPack *stubborn.Package, newPack *stubborn.Package) bool {
+func fresh(oldPack *stb.Package, newPack *stb.Package) bool {
 	if oldPack != nil {
 		oldMsg := msg.PackageToMessage(oldPack)
 		newMsg := msg.PackageToMessage(newPack)
@@ -21,7 +21,7 @@ func fresh(oldPack *stubborn.Package, newPack *stubborn.Package) bool {
 	return true
 }
 
-func majority(pack *stubborn.Package, numberParticipants int) bool {
+func majority(pack *stb.Package, numberParticipants int) bool {
 	message := msg.PackageToMessage(pack)
 
 	if len(message.Voters) > numberParticipants/2 {

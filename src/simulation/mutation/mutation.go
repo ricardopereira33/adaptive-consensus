@@ -2,7 +2,8 @@ package mutation
 
 import (
 	ex "simulation/exception"
-	stb "simulation/stubborn"
+    con "simulation/consensus"
+    stb "simulation/stubborn"
 )
 
 // kind of enums
@@ -20,19 +21,19 @@ type Mutation interface {
 }
 
 // NewMutation creates a new Mutation.
-func NewMutation(channel stb.StubChannel, mutationType int) Mutation {
+func NewMutation(peer *con.Peer, mutationType int) Mutation {
 	switch mutationType {
 	case EARLY:
-		return NewEarly(channel)
+		return NewEarly(peer)
 	case RING:
-		return NewRing(channel)
+		return NewRing(peer)
 	case GOSSIP:
-		return NewGossip(channel)
+		return NewGossip(peer)
 	case CENTRALIZED:
-		return NewCentralized(channel)
+		return NewCentralized(peer)
 	}
 
-	return NewEarly(channel)
+	return NewEarly(peer)
 }
 
 // Find returns the constant number for a mutation.

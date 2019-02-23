@@ -1,28 +1,32 @@
 package mutation
 
-import "simulation/stubborn"
+import (
+    con "simulation/consensus"
+    stb "simulation/stubborn"
+)
 
 // Centralized is a mutation type
 type Centralized struct {
-	channel stubborn.StubChannel
+	peer *con.Peer
 }
 
 // NewCentralized creates a new centralized mutation
-func NewCentralized(channel stubborn.StubChannel) (centralized *Centralized) {
+func NewCentralized(peer *con.Peer) (centralized *Centralized) {
 	centralized = new(Centralized)
-	centralized.channel = channel
+	centralized.peer = peer
 
 	return
 }
 
 // Delta0 is the delta0 implementation
-func (centralized Centralized) Delta0(id int, pack *stubborn.Package) bool {
-	coordID := centralized.channel.GetCoordID()
-	peerID := centralized.channel.GetPeerID()
+func (centralized Centralized) Delta0(id int, pack *stb.Package) bool {
+	coordID := centralized.peer.GetCoordID()
+	peerID := centralized.peer.GetPeerID()
 
+    channel := centralized.peer.GetChannel()
 	isCoord := id == coordID || peerID == coordID
-	isFresh := fresh(centralized.channel.GetPackage(id), pack)
-	isMajority := majority(pack, centralized.channel.GetNumberParticipants())
+	isFresh := fresh(channel.GetPackage(id), pack)
+	isMajority := majority(pack, centralized.peer.GetNumberParticipants())
 
 	return isCoord && (isFresh || isMajority)
 }

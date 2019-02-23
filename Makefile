@@ -10,8 +10,7 @@ compile:
 
 simulation:
 	go install ./src/simulation/exception/
-	go install ./src/simulation/consensusInfo/
-	go install ./src/simulation/message/
+	go install ./src/simulation/consensus/
 	go install ./src/simulation/stubborn/
 	go install ./src/simulation/simulation/
 	go install ./src/simulation/mutation/
@@ -25,8 +24,7 @@ test:
 
 format:
 	go fmt ./src/simulation/exception/
-	go fmt ./src/simulation/consensusInfo/
-	go fmt ./src/simulation/message/
+	go fmt ./src/simulation/consensus/
 	go fmt ./src/simulation/stubborn/
 	go fmt ./src/simulation/simulation/
 	go fmt ./src/simulation/mutation/

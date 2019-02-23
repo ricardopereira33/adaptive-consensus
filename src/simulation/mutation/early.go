@@ -1,24 +1,28 @@
 package mutation
 
-import "simulation/stubborn"
+import (
+    stb "simulation/stubborn"
+    con "simulation/consensus"
+)
 
 // Early is a mutation type
 type Early struct {
-	channel stubborn.StubChannel
+	peer *con.Peer
 }
 
 // NewEarly creates a new early mutation
-func NewEarly(channel stubborn.StubChannel) (early *Early) {
+func NewEarly(peer *con.Peer) (early *Early) {
 	early = new(Early)
-	early.channel = channel
+	early.peer = peer
 
-	return 
+	return
 }
 
 // Delta0 is the delta0 implementation
-func (early Early) Delta0(id int, pack *stubborn.Package) bool {
-	isFresh := fresh(early.channel.GetPackage(id), pack)
-	isMajority := majority(pack, early.channel.GetNumberParticipants())
+func (early Early) Delta0(id int, pack *stb.Package) bool {
+    channel := early.peer.GetChannel()
+	isFresh := fresh(channel.GetPackage(id), pack)
+	isMajority := majority(pack, early.peer.GetNumberParticipants())
 
 	return isFresh || isMajority
 }

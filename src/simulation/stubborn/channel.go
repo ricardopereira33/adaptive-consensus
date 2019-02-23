@@ -1,85 +1,75 @@
 package stubborn
 
 import (
-	"fmt"
-	"log"
 	"time"
     "strconv"
-    "math/rand"
 
 	cmap "github.com/orcaman/concurrent-map"
-    con "simulation/consensusInfo"
-    fd "simulation/failuredetection"
 )
 
 var (
 	// MaxTries is the maximum value of tries
 	MaxTries = 3
-	// DefaultDelta is the default time to relay the messages to the others peers
-	DefaultDelta = time.Second * 3
 	// Debug flag, when it is true, prints some debug infos
-	Debug = true
+    Debug = true
 )
 
 // Channel to send and receive messages between peers
 type Channel struct {
-	Peers              cmap.ConcurrentMap
-	OutputBuffer       Buffer
-	InputBuffer        chan *Package
-	Delta0Func         func(int, *Package) bool
-    DeltaFunc          func(int) bool
-    SuspectedFunc      func(int, StubChannel)
-	PeerID             int
-	Metrics            *Metrics
-	consensusInfo      *con.ConsensusInfo
-    NumberParticipants int
-    Detectors          *fd.Detectors
-    alive              bool
+    peerID             int
+    numberParticipants int
+    peer               interface{}
+    peers              cmap.ConcurrentMap
+	outputBuffer       Buffer
+	inputBuffer        chan *Package
+    metrics            *Metrics
+    percentMiss        float64
+    suspectedFunc      func(int, interface{})
+    delta0Func         func(int, *Package) bool
+    deltaFunc          func(int) bool
 }
 
-func newChannel(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (channel *Channel) {
-	channel = new(Channel)
-	channel.Peers = peers
-	channel.OutputBuffer = newBuffer(numberParticipants)
-	channel.PeerID = peerID
-	channel.consensusInfo = con.NewConsensusInfo()
-	channel.NumberParticipants = numberParticipants
-    channel.Metrics = NewMetrics(numberParticipants)
-    channel.Detectors = detectors
-    channel.alive = true
+func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
+    channel = new(Channel)
+    channel.peerID = peerID
+    channel.peers = peers
+    channel.peer = peer
+	channel.outputBuffer = newBuffer(numberParticipants)
+	channel.numberParticipants = numberParticipants
+    channel.metrics = NewMetrics(numberParticipants)
 
 	value, present := peers.Get(strconv.Itoa(peerID))
 
     if present {
-		channel.InputBuffer = value.(chan *Package)
+		channel.inputBuffer = value.(chan *Package)
 	}
 
 	return
 }
 
 func (channel *Channel) delta0(id int, pack *Package) bool {
-	return channel.Delta0Func(id, pack)
+	return channel.delta0Func(id, pack)
 }
 
 func (channel *Channel) delta(id int) bool {
-	return channel.DeltaFunc(id)
+	return channel.deltaFunc(id)
 }
 
 func (channel *Channel) suspected(id int) {
-    channel.SuspectedFunc(id, channel)
+    channel.suspectedFunc(id, channel.peer)
 }
 
-func (channel *Channel) retransmission() {
+func (channel *Channel) retransmission(defaultDelta time.Duration) {
 	tries := 0
 
 	for {
-		time.Sleep(DefaultDelta)
-		for id := 1; id <= channel.NumberParticipants; id++ {
+		time.Sleep(defaultDelta)
+		for id := 1; id <= channel.numberParticipants; id++ {
 			if channel.delta(id) || tries > MaxTries {
-				pack := channel.OutputBuffer.GetElement(id)
+				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-					channel.send(id)
+					channel.sendMessage(id)
 				}
 			}
 			tries++
@@ -87,97 +77,26 @@ func (channel *Channel) retransmission() {
 	}
 }
 
-func (channel *Channel) triggerFailure() {
-    peerID := channel.PeerID
-    numberParticipants := channel.NumberParticipants
-
-    for {
-        id := rand.Intn(numberParticipants) + 1
-
-        if id == peerID {
-            channel.alive = false
-            break
-        }
-
-        time.Sleep(500 * time.Millisecond)
-    }
-}
-
-func (channel *Channel) handleFailures() {
-    peerID := channel.PeerID
-    detectors := channel.Detectors
-    detector := detectors.GetDetector(peerID)
-    numberParticipants := channel.NumberParticipants
-
-    for {
-        detector.Heartbeat()
-        id := rand.Intn(numberParticipants) + 1
-
-        if !detectors.Ping(id) {
-            message := newSuspect(id, true)
-            channel.sendDirect(peerID, message)
-        }
-
-        if !channel.IsAlive() {
-            break
-        }
-
-        time.Sleep(100 * time.Millisecond)
-    }
-}
-
-// Init is the method that start receipt of the message
-func (channel *Channel) Init() {
-    go channel.retransmission()
-    go channel.handleFailures()
-    go channel.triggerFailure()
-}
-
-// IsAlive returns the status of the peer
-func (channel *Channel) IsAlive() bool {
-	return channel.alive
+//Init starts the channel
+func (channel *Channel) Init(deltaDefault time.Duration){
+    go channel.retransmission(deltaDefault)
 }
 
 // Results returns the metrics results
 func (channel *Channel) Results() ([]float64, []float64, time.Time) {
-	return channel.Metrics.results()
+	return channel.metrics.results()
 }
 
 // Finish is the method that finish the consensus protocol
 func (channel *Channel) Finish() {
-	channel.Metrics.finish()
-}
-
-// GetPeerID returns the peer ID
-func (channel *Channel) GetPeerID() int {
-	return channel.PeerID
+	channel.metrics.finish()
 }
 
 // GetPackage returns the last package sent to id
 func (channel *Channel) GetPackage(id int) *Package {
-	pack := channel.OutputBuffer.GetElement(id)
+	pack := channel.outputBuffer.GetElement(id)
 
 	return pack
-}
-
-// GetNumberParticipants returns the number of participants
-func (channel *Channel) GetNumberParticipants() int {
-	return channel.NumberParticipants
-}
-
-// GetCoordID returns the coordinator ID
-func (channel *Channel) GetCoordID() int {
-	return channel.consensusInfo.CoordID
-}
-
-// GetConsensusDecision returns the consensus decision value
-func (channel *Channel) GetConsensusDecision() string {
-	return channel.consensusInfo.Decision
-}
-
-// GetConsensusInfo returns the consensus information
-func (channel *Channel) GetConsensusInfo() *con.ConsensusInfo {
-	return channel.consensusInfo
 }
 
 // SetMaxTries sets the MaxTries value.
@@ -185,45 +104,22 @@ func (channel *Channel) SetMaxTries(max int) {
 	MaxTries = max
 }
 
-// SetDefaultDelta sets the DefaultDelta value.
-func (channel *Channel) SetDefaultDelta(ddelta int) {
-	DefaultDelta = time.Second * time.Duration(ddelta)
-}
-
 // SetDelta0 is the method to define the delta0 implemention
 func (channel *Channel) SetDelta0(function func(int, *Package) bool) {
-	channel.Delta0Func = function
+	channel.delta0Func = function
 }
 
-// SetDelta is the method to define the delta0 implemention
+// SetDelta is the method to define the delta implemention
 func (channel *Channel) SetDelta(function func(int) bool) {
-	channel.DeltaFunc = function
+	channel.deltaFunc = function
 }
 
 // SetSuspectedFunc is the method to define the suspected implementation
-func (channel *Channel) SetSuspectedFunc(function func(int, StubChannel)) {
-    channel.SuspectedFunc = function
-}
-
-// SetCoordinator saves the coordainator ID
-func (channel *Channel) SetCoordinator(coordID int) {
-	channel.consensusInfo.CoordID = coordID
+func (channel *Channel) SetSuspectedFunc(function func(int, interface{})) {
+    channel.suspectedFunc = function
 }
 
 // SetPercentageMiss sets percentMiss value
 func (channel *Channel) SetPercentageMiss(miss float64) {
-	channel.consensusInfo.PercentMiss = miss
-}
-
-// Print prints a message
-func (channel Channel) print(message interface{}) {
-	fmt.Print("[Peer " + strconv.Itoa(channel.GetPeerID()) + "] ")
-	log.Println(message)
-}
-
-func (channel Channel) printStatus() {
-	log.Println(channel.Peers)
-	log.Println(channel.OutputBuffer)
-	log.Println(channel.Delta0Func != nil)
-	log.Println(channel.DeltaFunc != nil)
+	channel.percentMiss = miss
 }

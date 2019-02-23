@@ -1,30 +1,34 @@
 package mutation
 
-import stb "simulation/stubborn"
+import (
+    stb "simulation/stubborn"
+    con "simulation/consensus"
+)
 
 // Ring is a mutation of a ring
 type Ring struct {
-	channel stb.StubChannel
+	peer *con.Peer
 }
 
 // NewRing creates a new ring
-func NewRing(channel stb.StubChannel) (ring *Ring) {
+func NewRing(peer *con.Peer) (ring *Ring) {
 	ring = new(Ring)
-	ring.channel = channel
+	ring.peer = peer
 
-	return 
+	return
 }
 
 // Delta0 is the delta0 implementation
 func (ring Ring) Delta0(id int, pack *stb.Package) bool {
-	isFresh := fresh(ring.channel.GetPackage(id), pack)
-	isMajority := majority(pack, ring.channel.GetNumberParticipants())
-	isIDEqual := id == ((ring.channel.GetPeerID() % ring.channel.GetNumberParticipants()) + 1)
+    channel := ring.peer.GetChannel()
+	isFresh := fresh(channel.GetPackage(id), pack)
+	isMajority := majority(pack, ring.peer.GetNumberParticipants())
+	isIDEqual := id == ((ring.peer.GetPeerID() % ring.peer.GetNumberParticipants()) + 1)
 
 	return isIDEqual && (isFresh || isMajority)
 }
 
 // Delta is the delta implementation
 func (ring Ring) Delta(id int) bool {
-	return id == ((ring.channel.GetPeerID() % ring.channel.GetNumberParticipants()) + 1)
+	return id == ((ring.peer.GetPeerID() % ring.peer.GetNumberParticipants()) + 1)
 }

@@ -12,7 +12,7 @@ import (
     fd "simulation/failuredetection"
 	mut "simulation/mutation"
     stb "simulation/stubborn"
-	con "simulation/consensusInfo"
+	con "simulation/consensus"
 	cmap "github.com/orcaman/concurrent-map"
 )
 
@@ -23,7 +23,7 @@ var (
 	numberParticipants int
 	defaultDelta       int
 	maxTries           int
-	percentMiss        float64
+    percentMiss        float64
 )
 
 func propose(value string) {
@@ -57,27 +57,30 @@ func propose(value string) {
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
-	channel := stb.NewStubChannel(peerID, numberParticipants, channels, detectors)
-	configChannel(channel)
+    peer := con.NewPeer(peerID, numberParticipants, channels, detectors)
+	configurePeer(peer)
 
-    go consensus(channel, value)
-    handleMessages(channel)
+    go consensus(peer, value)
+    handleMessages(peer)
 
+    channel := peer.GetChannel()
 	received, sent, decisionTime := channel.Results()
 
-    response <- con.NewResults(received, sent, decisionTime, channel.GetPeerID())
+    response <- con.NewResults(received, sent, decisionTime, peer.GetPeerID())
 }
 
-func configChannel(channel stb.StubChannel) {
-	channel.Init()
-	channel.SetMaxTries(maxTries)
-	channel.SetDefaultDelta(defaultDelta)
-	channel.SetPercentageMiss(percentMiss)
-    channel.SetSuspectedFunc(suspected)
+func configurePeer(peer *con.Peer) {
+    channel := peer.GetChannel()
+    mut := mut.NewMutation(peer, mutationCode)
 
-	mut := mut.NewMutation(channel, mutationCode)
+    channel.SetSuspectedFunc(suspected)
+	channel.SetMaxTries(maxTries)
+	channel.SetPercentageMiss(percentMiss)
 	channel.SetDelta0(mut.Delta0)
-	channel.SetDelta(mut.Delta)
+    channel.SetDelta(mut.Delta)
+
+	peer.SetDefaultDelta(defaultDelta)
+    peer.Init()
 }
 
 func argsInfo(nArgs int) {

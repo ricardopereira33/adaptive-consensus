@@ -1,14 +1,13 @@
-package consensusinfo
+package consensus
 
-// ConsensusInfo is the struct that contains the information about consensus
-type ConsensusInfo struct {
+// Info is the struct that contains the information about consensus
+type Info struct {
 	CoordID     int
 	Voters      map[int]bool
 	Round       int
 	Phase       int
 	Estimate    *Estimate
 	Decision    string
-    PercentMiss float64
 }
 
 // Estimate is the estimate value for a consensus
@@ -18,8 +17,8 @@ type Estimate struct {
 }
 
 // NewConsensusInfo creates a new consensusInfo
-func NewConsensusInfo() (consensusInfo *ConsensusInfo) {
-	consensusInfo = new(ConsensusInfo)
+func NewConsensusInfo() (consensusInfo *Info) {
+	consensusInfo = new(Info)
 
 	return
 }

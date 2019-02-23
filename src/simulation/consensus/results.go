@@ -1,4 +1,4 @@
-package consensusinfo
+package consensus
 
 import "time"
 

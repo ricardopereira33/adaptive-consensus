@@ -2,12 +2,13 @@ package mutation
 
 import (
 	"math/rand"
-	stb "simulation/stubborn"
+    stb "simulation/stubborn"
+    con "simulation/consensus"
 )
 
 // Gossip is a mutation type
 type Gossip struct {
-	channel         stb.StubChannel
+	peer            *con.Peer
 	permut          []int
 	turn            int
 	fanout          int
@@ -15,15 +16,15 @@ type Gossip struct {
 }
 
 // NewGossip creates a new gossip mutation
-func NewGossip(channel stb.StubChannel) (gossip *Gossip) {
+func NewGossip(peer *con.Peer) (gossip *Gossip) {
 	gossip = new(Gossip)
-	gossip.channel = channel
-	gossip.permut = perm(channel.GetNumberParticipants())
+	gossip.peer = peer
+	gossip.permut = perm(peer.GetNumberParticipants())
 	gossip.processesToSkip = 1
 	gossip.turn = 0
 	gossip.fanout = 5
 
-	return 
+	return
 }
 
 // Delta0 is the delta0 implementation
@@ -40,9 +41,9 @@ func (gossip Gossip) Delta(id int) bool {
 		gossip.processesToSkip += gossip.fanout
 		gossip.turn = 0
     }
-    
+
     processIndex := 0
-    
+
 	for processIndex < gossip.fanout {
 		if gossip.permut[(processIndex + gossip.processesToSkip) % numberParticipants] == id {
 			return true
