@@ -27,6 +27,7 @@ func (channel *Channel) Send(idDestination int, message []byte) {
 	channel.outputBuffer.InsertElement(idDestination, packageMsg)
 
 	if isToSend {
+        channel.metrics.logDelay(idDestination, time.Duration(0))
 		channel.sendMessage(idDestination)
 	}
 }

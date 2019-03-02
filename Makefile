@@ -38,7 +38,12 @@ install:
 run:
 	./bin/peer
 
+clean_results:
+	rm *.csv
+	rm *.png
+
 clean:
 	rm -rf ./bin
 	rm -rf ./pkg
+	rm *.csv
 	rm *.png

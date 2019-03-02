@@ -7,6 +7,7 @@ type Results struct {
 	PeerID       int
 	Sent         []float64
     Received     []float64
+    Delays       []float64
     DecisionTime time.Time
 }
 
@@ -22,6 +23,15 @@ func NewResults(sent, received []float64, decisionTime time.Time, id int) (resul
     results.DecisionTime = decisionTime
 
 	return
+}
+
+// NewResultsOfDelays creates a new estimate
+func NewResultsOfDelays(delays []float64, peerID int) (results *Results) {
+    results = new(Results)
+    results.PeerID = peerID
+    results.Delays = delays
+
+    return
 }
 
 func (ds DurationSlice) Len() int {

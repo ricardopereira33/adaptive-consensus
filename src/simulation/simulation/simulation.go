@@ -2,7 +2,7 @@ package main
 
 import (
     "strconv"
-    "time"
+    // "time"
 	"flag"
 	"fmt"
 	"log"
@@ -30,7 +30,7 @@ func propose(value string) {
 	channels := stb.Channels(numberParticipants)
     responses := make(chan *con.Results)
     detectors := fd.NewDetectors(3.3, 10, numberParticipants)
-    startTime := time.Now()
+    // startTime := time.Now()
 
 	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels, detectors)
@@ -53,7 +53,8 @@ func propose(value string) {
         log.Println("--------------")
     }
 
-	drawResults(list, startTime, mutation)
+    // drawResults(list, startTime, mutation)
+    save(list, mutation)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
@@ -64,9 +65,10 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
     handleMessages(peer)
 
     channel := peer.GetChannel()
-	received, sent, decisionTime := channel.Results()
+	// received, sent, decisionTime := channel.Results()
+    delays := channel.ResultsOfDelays()
 
-    response <- con.NewResults(received, sent, decisionTime, peer.GetPeerID())
+    response <- con.NewResultsOfDelays(delays, peer.GetPeerID())
 }
 
 func configurePeer(peer *con.Peer) {

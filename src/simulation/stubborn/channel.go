@@ -71,7 +71,12 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 				if pack != nil && !pack.Arrived {
 					channel.sendMessage(id)
 				}
-			}
+			} else {
+                delay := channel.metrics.getDelay(id)
+                delayTime := (delay.Seconds() + defaultDelta.Seconds())
+                delay = time.Duration(delayTime) * time.Second
+                channel.metrics.logDelay(id, delay)
+            }
 			tries++
 		}
 	}
@@ -85,6 +90,11 @@ func (channel *Channel) Init(deltaDefault time.Duration){
 // Results returns the metrics results
 func (channel *Channel) Results() ([]float64, []float64, time.Time) {
 	return channel.metrics.results()
+}
+
+// ResultsOfDelays returns the metrics results of delays
+func (channel *Channel) ResultsOfDelays() []float64 {
+	return channel.metrics.resultsOfDelays()
 }
 
 // Finish is the method that finish the consensus protocol

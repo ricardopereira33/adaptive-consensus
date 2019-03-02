@@ -2,22 +2,25 @@ package stubborn
 
 import (
     "strconv"
-	"time"
+    "time"
+
 	cmap "github.com/orcaman/concurrent-map"
 )
 
 // Metrics contains all the metrics of a simulation for 1 peer
 type Metrics struct {
 	messagesReceived cmap.ConcurrentMap
-	messagesSent     cmap.ConcurrentMap
+    messagesSent     cmap.ConcurrentMap
+    delays           cmap.ConcurrentMap
 	decision         time.Time
 }
 
 // NewMetrics creates a new metrics struct
 func NewMetrics(numberParticipants int) (metrics *Metrics) {
 	metrics = new(Metrics)
-	metrics.messagesReceived = newMap(numberParticipants)
-	metrics.messagesSent = newMap(numberParticipants)
+	metrics.messagesReceived = newMap(numberParticipants, 0)
+	metrics.messagesSent = newMap(numberParticipants, 0)
+    metrics.delays = newMap(numberParticipants, time.Duration(-1))
 
 	return
 }
@@ -48,10 +51,24 @@ func (metrics *Metrics) getMessagesSent(peerID int) int {
 	return value.(int)
 }
 
+// logDelay log a delay for a given peer
+func (metrics *Metrics) logDelay(peerID int, delay time.Duration) {
+    strID := strconv.Itoa(peerID)
+    metrics.delays.Set(strID, delay)
+}
+
+// getDelay returns the delay for a given peer
+func (metrics *Metrics) getDelay(peerID int) time.Duration {
+    strID := strconv.Itoa(peerID)
+	value, _ := metrics.delays.Get(strID)
+
+	return value.(time.Duration)
+}
+
 func (metrics *Metrics) results() ([]float64, []float64, time.Time) {
 	size := metrics.messagesReceived.Count()
 	sent := make([]float64, size)
-	received := make([]float64, size)
+    received := make([]float64, size)
 
 	for _, id := range metrics.messagesReceived.Keys() {
 		messageReceived, _ := metrics.messagesReceived.Get(id)
@@ -65,11 +82,25 @@ func (metrics *Metrics) results() ([]float64, []float64, time.Time) {
 	return sent, received, metrics.decision
 }
 
-func newMap(numberParticipants int) (channels cmap.ConcurrentMap) {
+func (metrics *Metrics) resultsOfDelays() (delays []float64) {
+    size := metrics.messagesSent.Count()
+    delays = make([]float64, size)
+
+    for _, id := range metrics.delays.Keys() {
+		delay, _ := metrics.delays.Get(id)
+		id, _ := strconv.Atoi(id)
+
+		delays[id-1] = float64(delay.(time.Duration)) / float64(time.Millisecond)
+	}
+
+    return
+}
+
+func newMap(numberParticipants int, value interface{}) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
 	for id := 1; id <= numberParticipants; id++ {
-		channels.Set(strconv.Itoa(id), 0)
+		channels.Set(strconv.Itoa(id), value)
 	}
 
 	return

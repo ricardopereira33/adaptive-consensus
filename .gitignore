@@ -1,10 +1,14 @@
 .DS_Store
 .vscode
+
 misc
 bin
 pkg
+
 src/github.com/
 src/golang.org/
 src/gonum.org/
 src/rsc.io/
+
+*.csv
 *.png

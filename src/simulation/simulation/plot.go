@@ -1,10 +1,12 @@
 package main
 
 import (
-	"image/color"
+    "image/color"
+    "fmt"
     "math"
     "sort"
     "time"
+    "os"
 
     "gonum.org/v1/plot"
     "gonum.org/v1/plot/plotutil"
@@ -173,4 +175,35 @@ func calculateDurationsList(data map[int]*con.Results, startTime time.Time) con.
     sort.Sort(list)
 
     return list
+}
+
+func save(data map[int]*con.Results, mutation string) {
+    file, err := os.Create("output_" + mutation + ".csv")
+    ex.CheckError(err)
+    defer file.Close()
+
+    for _, results := range data {
+        length := len(results.Delays)
+
+        for _, result := range results.Delays[:length] {
+            value := ensureValue(result)
+            file.WriteString(value + ", ")
+        }
+
+        lastResult := results.Delays[length - 1]
+        value := ensureValue(lastResult)
+        file.WriteString(value + "\n")
+    }
+}
+
+func ensureValue(value float64) string {
+    var result string
+
+    if value < 0 {
+        result = "-"
+    } else {
+        result = fmt.Sprintf("%f", value)
+    }
+
+    return result
 }
