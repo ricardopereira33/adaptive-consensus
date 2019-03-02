@@ -13,8 +13,7 @@ type SChannel interface {
 	Send(int, []byte)
     SendAll([]byte)
     SendSuspicion(int, int)
-    Results() ([]float64, []float64, time.Time)
-    ResultsOfDelays() []float64
+    Results() ([]float64, []float64, time.Time, []float64)
     Init(time.Duration)
     Finish()
 

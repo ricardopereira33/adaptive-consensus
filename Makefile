@@ -16,11 +16,14 @@ simulation:
 	go install ./src/simulation/mutation/
 	go install ./src/simulation/failuredetection/
 
+run_mutation:
+	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+
 test:
-	./bin/simulation early 100 3 3 1
-	./bin/simulation ring 100 3 3 1
-	./bin/simulation centralized 100 3 3 1
-	./bin/simulation gossip 100 3 3 1
+	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
 
 format:
 	go fmt ./src/simulation/exception/

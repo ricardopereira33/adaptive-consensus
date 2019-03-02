@@ -65,35 +65,24 @@ func (metrics *Metrics) getDelay(peerID int) time.Duration {
 	return value.(time.Duration)
 }
 
-func (metrics *Metrics) results() ([]float64, []float64, time.Time) {
+func (metrics *Metrics) results() ([]float64, []float64, time.Time, []float64) {
 	size := metrics.messagesReceived.Count()
 	sent := make([]float64, size)
     received := make([]float64, size)
+    delays := make([]float64, size)
 
 	for _, id := range metrics.messagesReceived.Keys() {
 		messageReceived, _ := metrics.messagesReceived.Get(id)
-		messageSent, _ := metrics.messagesSent.Get(id)
+        messageSent, _ := metrics.messagesSent.Get(id)
+        delay, _ := metrics.delays.Get(id)
 		id, _ := strconv.Atoi(id)
 
 		sent[id-1] = float64(messageSent.(int))
-		received[id-1] = float64(messageReceived.(int))
+        received[id-1] = float64(messageReceived.(int))
+        delays[id-1] = float64(delay.(time.Duration)) / float64(time.Millisecond)
 	}
 
-	return sent, received, metrics.decision
-}
-
-func (metrics *Metrics) resultsOfDelays() (delays []float64) {
-    size := metrics.messagesSent.Count()
-    delays = make([]float64, size)
-
-    for _, id := range metrics.delays.Keys() {
-		delay, _ := metrics.delays.Get(id)
-		id, _ := strconv.Atoi(id)
-
-		delays[id-1] = float64(delay.(time.Duration)) / float64(time.Millisecond)
-	}
-
-    return
+	return sent, received, metrics.decision, delays
 }
 
 func newMap(numberParticipants int, value interface{}) (channels cmap.ConcurrentMap) {

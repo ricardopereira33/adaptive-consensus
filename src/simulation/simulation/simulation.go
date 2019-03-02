@@ -2,7 +2,7 @@ package main
 
 import (
     "strconv"
-    // "time"
+    "time"
 	"flag"
 	"fmt"
 	"log"
@@ -24,13 +24,14 @@ var (
 	defaultDelta       int
 	maxTries           int
     percentMiss        float64
+    withMetrics        bool
 )
 
 func propose(value string) {
 	channels := stb.Channels(numberParticipants)
     responses := make(chan *con.Results)
     detectors := fd.NewDetectors(3.3, 10, numberParticipants)
-    // startTime := time.Now()
+    startTime := time.Now()
 
 	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels, detectors)
@@ -53,7 +54,10 @@ func propose(value string) {
         log.Println("--------------")
     }
 
-    // drawResults(list, startTime, mutation)
+    if withMetrics {
+        drawResults(list, startTime, mutation)
+    }
+
     save(list, mutation)
 }
 
@@ -65,10 +69,9 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
     handleMessages(peer)
 
     channel := peer.GetChannel()
-	// received, sent, decisionTime := channel.Results()
-    delays := channel.ResultsOfDelays()
+	received, sent, decisionTime, delays := channel.Results()
 
-    response <- con.NewResultsOfDelays(delays, peer.GetPeerID())
+    response <- con.NewResults(sent, received, decisionTime, delays, peerID)
 }
 
 func configurePeer(peer *con.Peer) {
@@ -86,8 +89,8 @@ func configurePeer(peer *con.Peer) {
 }
 
 func argsInfo(nArgs int) {
-	if nArgs < 2 {
-		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS>")
+	if nArgs < 6 {
+		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <WITH_ALL_METRICS>")
 		os.Exit(1)
 	}
 }
@@ -112,7 +115,8 @@ func main() {
 	numberParticipants, err = strconv.Atoi(args[1])
 	defaultDelta, err = strconv.Atoi(args[2])
 	maxTries, err = strconv.Atoi(args[3])
-	percentMiss, err = strconv.ParseFloat(args[4], 64)
+    percentMiss, err = strconv.ParseFloat(args[4], 64)
+    withMetrics, err = strconv.ParseBool(args[5])
 	ex.CheckError(err)
 
 	propose("accept")

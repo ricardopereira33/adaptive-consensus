@@ -88,13 +88,8 @@ func (channel *Channel) Init(deltaDefault time.Duration){
 }
 
 // Results returns the metrics results
-func (channel *Channel) Results() ([]float64, []float64, time.Time) {
+func (channel *Channel) Results() ([]float64, []float64, time.Time, []float64) {
 	return channel.metrics.results()
-}
-
-// ResultsOfDelays returns the metrics results of delays
-func (channel *Channel) ResultsOfDelays() []float64 {
-	return channel.metrics.resultsOfDelays()
 }
 
 // Finish is the method that finish the consensus protocol

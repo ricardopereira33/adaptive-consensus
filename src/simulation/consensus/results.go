@@ -15,12 +15,13 @@ type Results struct {
 type DurationSlice []time.Duration
 
 // NewResults creates a new estimate
-func NewResults(sent, received []float64, decisionTime time.Time, id int) (results *Results) {
+func NewResults(sent, received []float64, decisionTime time.Time, delays []float64, id int) (results *Results) {
 	results = new(Results)
 	results.PeerID = id
 	results.Sent = sent
     results.Received = received
     results.DecisionTime = decisionTime
+    results.Delays = delays
 
 	return
 }
