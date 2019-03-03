@@ -15,10 +15,10 @@ func handleMessages(peer *con.Peer) {
 
 		if len(consensusInfo.Voters) <= numberParticipants/2 {
 			checkRound(message, consensusInfo)
-			existsNewVoters := (consensusInfo.Round == message.Round) && containsNewVoters(message.Voters, consensusInfo)
+			withNewVoters := (consensusInfo.Round == message.Round) && containsNewVoters(message.Voters, consensusInfo)
 			isMajority := (consensusInfo.Phase == 1) && (len(message.Voters) > numberParticipants/2)
 
-			if existsNewVoters || isMajority {
+			if withNewVoters || isMajority {
 				message.Voters[peerID] = true
 				consensusInfo.Voters = union(consensusInfo.Voters, message.Voters)
 

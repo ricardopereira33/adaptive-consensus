@@ -15,12 +15,18 @@ type Metrics struct {
 	decision         time.Time
 }
 
+// Delay contains all relevant info
+type Delay struct {
+    lastRegister time.Time
+    value        time.Duration
+}
+
 // NewMetrics creates a new metrics struct
 func NewMetrics(numberParticipants int) (metrics *Metrics) {
 	metrics = new(Metrics)
 	metrics.messagesReceived = newMap(numberParticipants, 0)
-	metrics.messagesSent = newMap(numberParticipants, 0)
-    metrics.delays = newMap(numberParticipants, time.Duration(-1))
+    metrics.messagesSent = newMap(numberParticipants, 0)
+    metrics.delays = newMap(numberParticipants, defaultDelay())
 
 	return
 }
@@ -52,17 +58,19 @@ func (metrics *Metrics) getMessagesSent(peerID int) int {
 }
 
 // logDelay log a delay for a given peer
-func (metrics *Metrics) logDelay(peerID int, delay time.Duration) {
+func (metrics *Metrics) initialDelay(peerID int) {
     strID := strconv.Itoa(peerID)
-    metrics.delays.Set(strID, delay)
+    metrics.delays.Set(strID, defaultDelay())
 }
 
-// getDelay returns the delay for a given peer
-func (metrics *Metrics) getDelay(peerID int) time.Duration {
+// logDelay log a delay for a given peer
+func (metrics *Metrics) logDelay(peerID int) {
     strID := strconv.Itoa(peerID)
-	value, _ := metrics.delays.Get(strID)
+    oldDelay, _ := metrics.delays.Get(strID)
+    newDelay := defaultDelay()
+    newDelay.value = newDelay.lastRegister.Sub(oldDelay.(*Delay).lastRegister)
 
-	return value.(time.Duration)
+    metrics.delays.Set(strID, newDelay)
 }
 
 func (metrics *Metrics) results() ([]float64, []float64, time.Time, []float64) {
@@ -79,10 +87,18 @@ func (metrics *Metrics) results() ([]float64, []float64, time.Time, []float64) {
 
 		sent[id-1] = float64(messageSent.(int))
         received[id-1] = float64(messageReceived.(int))
-        delays[id-1] = float64(delay.(time.Duration)) / float64(time.Millisecond)
+        delays[id-1] = float64(delay.(*Delay).value) / float64(time.Millisecond)
 	}
 
 	return sent, received, metrics.decision, delays
+}
+
+func defaultDelay() (delay *Delay) {
+    delay = new(Delay)
+    delay.lastRegister = time.Now()
+    delay.value = time.Duration(-1)
+
+    return
 }
 
 func newMap(numberParticipants int, value interface{}) (channels cmap.ConcurrentMap) {
