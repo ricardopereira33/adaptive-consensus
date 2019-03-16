@@ -3,6 +3,7 @@ package main
 import (
     "image/color"
     "fmt"
+    "strconv"
     "math"
     "sort"
     "time"
@@ -15,6 +16,13 @@ import (
 	"gonum.org/v1/plot/vg/draw"
 	con "simulation/consensus"
     ex "simulation/exception"
+)
+
+const (
+    // DIRCSV is the directory for csv datasets
+    DIRCSV = "results/csv-datasets/"
+    // DIRPNG is the directory for plots in png formate
+    DIRPNG = "results/png-plots/"
 )
 
 // INTERVALS is the constant that indicates the time interval in the cumulative graph
@@ -58,7 +66,7 @@ func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
 	bubbles := newBubbles(data)
 	plot.Add(bubbles)
 
-	err := plot.Save(20 * vg.Inch, 20 * vg.Inch, label + ".png")
+	err := plot.Save(20 * vg.Inch, 20 * vg.Inch, DIRPNG + label + ".png")
 	ex.CheckError(err)
 }
 
@@ -68,7 +76,7 @@ func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
     plot.Y.Label.Text = "# Nodes"
 
     err := plotutil.AddLines(plot, mutation, data)
-    err = plot.Save(8 * vg.Inch, 8 * vg.Inch, "time_" + mutation + ".png")
+    err = plot.Save(8 * vg.Inch, 8 * vg.Inch, DIRPNG + "time_" + mutation + ".png")
 
     ex.CheckError(err)
 }
@@ -178,7 +186,13 @@ func calculateDurationsList(data map[int]*con.Results, startTime time.Time) con.
 }
 
 func save(data map[int]*con.Results, mutation string) {
-    file, err := os.Create("output_" + mutation + ".csv")
+    file, err := os.Create(DIRCSV +
+        mutation + "_" +
+        strconv.Itoa(defaultDelta) + "_" +
+        strconv.Itoa(maxTries) + "_" +
+        strconv.FormatFloat(percentMiss,'f', 2, 64) + "_" +
+        ".csv")
+
     ex.CheckError(err)
     defer file.Close()
 

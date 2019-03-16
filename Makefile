@@ -44,6 +44,7 @@ run:
 clean_results:
 	rm *.csv
 	rm *.png
+	rm -rf ./results
 
 clean:
 	rm -rf ./bin
