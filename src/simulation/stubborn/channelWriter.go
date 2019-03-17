@@ -2,7 +2,8 @@ package stubborn
 
 import (
 	"strconv"
-	"time"
+    "time"
+    "math"
 )
 
 // SendAll is the method that sends a message to all participants
@@ -39,10 +40,11 @@ func (channel *Channel) sendMessage(idDestination int) {
 }
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
-	coefficient := int(1 / channel.percentMiss) * 100
-	missingMsg := (channel.metrics.getMessagesSent(idDestination) + 1) % coefficient
+    coefficient := 100.0 / float64(channel.percentMiss)
+    msgSent := float64(channel.metrics.getMessagesSent(idDestination) + 1)
+	missingMsg := math.Mod(msgSent, coefficient)
 
-	if missingMsg != 0 {
+    if int(missingMsg) != 0 {
 		// Simulate the message delay
 		time.Sleep(time.Second)
 

@@ -119,5 +119,7 @@ func main() {
     withMetrics, err = strconv.ParseBool(args[5])
 	ex.CheckError(err)
 
+    println(mutation + " - " + strconv.Itoa(defaultDelta) + " - " + strconv.Itoa(maxTries) + " - " + strconv.FormatFloat(percentMiss,'f', 2, 64))
+
 	propose("accept")
 }

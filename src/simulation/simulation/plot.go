@@ -199,7 +199,7 @@ func save(data map[int]*con.Results, mutation string) {
     for _, results := range data {
         length := len(results.Delays)
 
-        for _, result := range results.Delays[:length] {
+        for _, result := range results.Delays[:(length - 1)] {
             value := ensureValue(result)
             file.WriteString(value + ", ")
         }
@@ -214,7 +214,7 @@ func ensureValue(value float64) string {
     var result string
 
     if value < 0 {
-        result = "-"
+        result = "0"
     } else {
         result = fmt.Sprintf("%f", value)
     }
