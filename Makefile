@@ -17,13 +17,13 @@ simulation:
 	go install ./src/simulation/failuredetection/
 
 run_mutation:
-	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
 
 test:
-	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
-	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
-	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
-	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_ALL_METRICS}
+	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
 
 format:
 	go fmt ./src/simulation/exception/
