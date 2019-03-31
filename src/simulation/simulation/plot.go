@@ -221,3 +221,20 @@ func ensureValue(value float64) string {
 
     return result
 }
+
+func saveResult(mutation string, numberParticipants int, defaultDelta int, maxTries int, percentMiss float64, endTime time.Time, startTime time.Time) {
+    file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
+    ex.CheckError(err)
+    defer file.Close()
+
+    // file.WriteString("#Nodes, default delta, max tries, percentage of miss (messages), mutation, result time")
+
+    duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
+
+    file.WriteString(strconv.Itoa(numberParticipants) + ", " +
+        strconv.Itoa(defaultDelta) + ", " +
+        strconv.Itoa(maxTries) + ", " +
+        fmt.Sprintf("%f", percentMiss) + ", " +
+        mutation + ", " +
+        fmt.Sprintf("%f", duration) + "\n")
+}

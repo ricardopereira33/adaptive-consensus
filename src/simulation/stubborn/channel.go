@@ -69,7 +69,7 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-                    channel.metrics.logDelay(id)
+                    // channel.metrics.logDelay(id)
 					channel.sendMessage(id)
 				}
 			}

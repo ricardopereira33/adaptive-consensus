@@ -8,7 +8,7 @@ func (channel *Channel) Receive() (pack *Package) {
         if pack.Suspicious {
             channel.suspected(pack.SuspiciousID)
         } else {
-            channel.metrics.incrementMessagesReceived(pack.ID)
+            // channel.metrics.incrementMessagesReceived(pack.ID)
 
             if pack.Ack {
                 oldPack := channel.outputBuffer.GetElement(pack.ID)

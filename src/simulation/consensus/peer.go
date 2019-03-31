@@ -92,11 +92,13 @@ func (peer *Peer) handleFailures() {
 }
 
 // Init is the method that starts routines which handle failures
-func (peer *Peer) Init() {
+func (peer *Peer) Init(withFaults bool) {
     peer.channel.Init(DefaultDelta)
 
-    go peer.handleFailures()
-    go peer.triggerFailure()
+    if withFaults {
+        go peer.handleFailures()
+        go peer.triggerFailure()
+    }
 }
 
 // IsAlive returns the status of the peer

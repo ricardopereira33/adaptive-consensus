@@ -19,6 +19,7 @@ type Metrics struct {
 type Delay struct {
     lastRegister time.Time
     value        time.Duration
+    alreadySent  bool
 }
 
 // NewMetrics creates a new metrics struct
@@ -26,7 +27,7 @@ func NewMetrics(numberParticipants int) (metrics *Metrics) {
 	metrics = new(Metrics)
 	metrics.messagesReceived = newMap(numberParticipants, 0)
     metrics.messagesSent = newMap(numberParticipants, 0)
-    metrics.delays = newMap(numberParticipants, defaultDelay())
+    // metrics.delays = newMap(numberParticipants, defaultDelay())
 
 	return
 }
@@ -46,7 +47,13 @@ func (metrics *Metrics) incrementMessagesReceived(peerID int) {
 func (metrics *Metrics) incrementMessagesSent(peerID int) {
 	strID := strconv.Itoa(peerID)
 	value, _ := metrics.messagesSent.Get(strID)
-	metrics.messagesSent.Set(strID, value.(int)+1)
+    delayInterface, _ := metrics.delays.Get(strID)
+    delay := delayInterface.(*Delay)
+
+    metrics.messagesSent.Set(strID, value.(int)+1)
+
+    delay.alreadySent = true
+    metrics.delays.Set(strID, delay)
 }
 
 // getMessagesSent returns the number of received messages
@@ -82,12 +89,17 @@ func (metrics *Metrics) results() ([]float64, []float64, time.Time, []float64) {
 	for _, id := range metrics.messagesReceived.Keys() {
 		messageReceived, _ := metrics.messagesReceived.Get(id)
         messageSent, _ := metrics.messagesSent.Get(id)
-        delay, _ := metrics.delays.Get(id)
+        // delay, _ := metrics.delays.Get(id)
 		id, _ := strconv.Atoi(id)
 
 		sent[id-1] = float64(messageSent.(int))
         received[id-1] = float64(messageReceived.(int))
-        delays[id-1] = float64(delay.(*Delay).value) / float64(time.Millisecond)
+
+        // if delay.(*Delay).alreadySent {
+        //     delays[id-1] = float64(delay.(*Delay).value) / float64(time.Millisecond)
+        // } else {
+        //     delays[id-1] = 0.0
+        // }
 	}
 
 	return sent, received, metrics.decision, delays

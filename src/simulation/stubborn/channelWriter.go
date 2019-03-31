@@ -3,7 +3,7 @@ package stubborn
 import (
 	"strconv"
     "time"
-    "math"
+    "math/rand"
 )
 
 // SendAll is the method that sends a message to all participants
@@ -29,9 +29,10 @@ func (channel *Channel) Send(idDestination int, message []byte) {
 
 	if isToSend {
         channel.sendMessage(idDestination)
-	} else {
-        channel.metrics.initialDelay(idDestination)
     }
+    // else {
+    //     channel.metrics.initialDelay(idDestination)
+    // }
 }
 
 func (channel *Channel) sendMessage(idDestination int) {
@@ -40,16 +41,12 @@ func (channel *Channel) sendMessage(idDestination int) {
 }
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
-    coefficient := 100.0 / float64(channel.percentMiss)
-    msgSent := float64(channel.metrics.getMessagesSent(idDestination) + 1)
-	missingMsg := math.Mod(msgSent, coefficient)
-
-    if int(missingMsg) != 0 {
+    if successMessage(channel.percentMiss) {
 		// Simulate the message delay
 		time.Sleep(time.Second)
 
 		channel.sendToBuffer(idDestination, message)
-		channel.metrics.incrementMessagesSent(idDestination)
+        // channel.metrics.incrementMessagesSent(idDestination)
 	}
 }
 
@@ -60,4 +57,15 @@ func (channel *Channel) sendToBuffer(id int, pack *Package) {
 		peerChannel := value.(chan *Package)
 		peerChannel <- pack
 	}
+}
+
+func successMessage(percentMiss float64) bool {
+    randomValue := rand.Float64()
+    percentageMiss := percentMiss / 100
+
+    if randomValue < percentageMiss {
+        return false
+    }
+
+    return true
 }

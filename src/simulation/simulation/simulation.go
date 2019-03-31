@@ -25,6 +25,7 @@ var (
 	maxTries           int
     percentMiss        float64
     withMetrics        bool
+    withFaults         bool
 )
 
 func propose(value string) {
@@ -49,6 +50,8 @@ func propose(value string) {
 		list[response.PeerID] = response
     }
 
+    endTime := time.Now()
+
     if debug {
         log.Println("All received!")
         log.Println("--------------")
@@ -58,7 +61,8 @@ func propose(value string) {
         drawResults(list, startTime, mutation)
     }
 
-    save(list, mutation)
+    // save(list, mutation)
+    saveResult(mutation, numberParticipants, defaultDelta, maxTries, percentMiss, endTime, startTime)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
@@ -85,12 +89,12 @@ func configurePeer(peer *con.Peer) {
     channel.SetDelta(mut.Delta)
 
 	peer.SetDefaultDelta(defaultDelta)
-    peer.Init()
+    peer.Init(withFaults)
 }
 
 func argsInfo(nArgs int) {
-	if nArgs < 6 {
-		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <WITH_ALL_METRICS>")
+	if nArgs < 7 {
+		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <WITH_FAULTS> <WITH_ALL_METRICS>")
 		os.Exit(1)
 	}
 }
@@ -116,7 +120,8 @@ func main() {
 	defaultDelta, err = strconv.Atoi(args[2])
 	maxTries, err = strconv.Atoi(args[3])
     percentMiss, err = strconv.ParseFloat(args[4], 64)
-    withMetrics, err = strconv.ParseBool(args[5])
+    withFaults, err = strconv.ParseBool(args[5])
+    withMetrics, err = strconv.ParseBool(args[6])
 	ex.CheckError(err)
 
     println(mutation + " - " + strconv.Itoa(defaultDelta) + " - " + strconv.Itoa(maxTries) + " - " + strconv.FormatFloat(percentMiss,'f', 2, 64))
