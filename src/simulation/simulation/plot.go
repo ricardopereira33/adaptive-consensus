@@ -187,9 +187,9 @@ func calculateDurationsList(data map[int]*con.Results, startTime time.Time) con.
 
 func save(data map[int]*con.Results, mutation string) {
     file, err := os.Create(DIRCSV +
-        mutation + "_" +
-        strconv.Itoa(defaultDelta) + "_" +
-        strconv.Itoa(maxTries) + "_" +
+        mutation                                    + "_" +
+        fmt.Sprintf("%f", defaultDelta)             + "_" +
+        strconv.Itoa(maxTries)                      + "_" +
         strconv.FormatFloat(percentMiss,'f', 2, 64) + "_" +
         ".csv")
 
@@ -222,7 +222,7 @@ func ensureValue(value float64) string {
     return result
 }
 
-func saveResult(mutation string, numberParticipants int, defaultDelta int, maxTries int, percentMiss float64, endTime time.Time, startTime time.Time) {
+func saveResult(endTime time.Time, startTime time.Time) {
     file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
     ex.CheckError(err)
     defer file.Close()
@@ -232,9 +232,9 @@ func saveResult(mutation string, numberParticipants int, defaultDelta int, maxTr
     duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
     file.WriteString(strconv.Itoa(numberParticipants) + ", " +
-        strconv.Itoa(defaultDelta) + ", " +
-        strconv.Itoa(maxTries) + ", " +
-        fmt.Sprintf("%f", percentMiss) + ", " +
-        mutation + ", " +
-        fmt.Sprintf("%f", duration) + "\n")
+        fmt.Sprintf("%f", defaultDelta) + ", " +
+        strconv.Itoa(maxTries)          + ", " +
+        fmt.Sprintf("%f", percentMiss)  + ", " +
+        mutation                        + ", " +
+        fmt.Sprintf("%f", duration)     + "\n")
 }

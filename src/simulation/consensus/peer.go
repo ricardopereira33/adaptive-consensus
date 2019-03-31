@@ -142,6 +142,6 @@ func (peer *Peer) SetCoordinator(coordID int) {
 }
 
 // SetDefaultDelta sets the value of DefaultDelta
-func (peer *Peer) SetDefaultDelta(defaultDelta int) {
-    DefaultDelta = time.Second * time.Duration(defaultDelta)
+func (peer *Peer) SetDefaultDelta(defaultDelta float64) {
+    DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta * 1000))
 }

@@ -19,7 +19,6 @@ type SChannel interface {
 
     GetPackage(id int) *Package
 
-
     SetMaxTries(int)
     SetPercentageMiss(float64)
     SetDelta0(function func(int, *Package) bool)

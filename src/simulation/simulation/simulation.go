@@ -21,8 +21,8 @@ var (
 	mutation           string
 	mutationCode       int
 	numberParticipants int
-	defaultDelta       int
 	maxTries           int
+	defaultDelta       float64
     percentMiss        float64
     withMetrics        bool
     withFaults         bool
@@ -62,7 +62,7 @@ func propose(value string) {
     }
 
     // save(list, mutation)
-    saveResult(mutation, numberParticipants, defaultDelta, maxTries, percentMiss, endTime, startTime)
+    saveResult(endTime, startTime)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
@@ -117,14 +117,12 @@ func main() {
 	mutation = args[0]
 	mutationCode, err = mut.Find(mutation)
 	numberParticipants, err = strconv.Atoi(args[1])
-	defaultDelta, err = strconv.Atoi(args[2])
+	defaultDelta, err = strconv.ParseFloat(args[2], 64)
 	maxTries, err = strconv.Atoi(args[3])
     percentMiss, err = strconv.ParseFloat(args[4], 64)
     withFaults, err = strconv.ParseBool(args[5])
     withMetrics, err = strconv.ParseBool(args[6])
 	ex.CheckError(err)
-
-    println(mutation + " - " + strconv.Itoa(defaultDelta) + " - " + strconv.Itoa(maxTries) + " - " + strconv.FormatFloat(percentMiss,'f', 2, 64))
 
 	propose("accept")
 }
