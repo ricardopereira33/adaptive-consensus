@@ -231,11 +231,11 @@ func saveResult(endTime time.Time, startTime time.Time) {
 
     duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
-    file.WriteString(strconv.Itoa(numberParticipants) + ", " +
-        fmt.Sprintf("%f", defaultDelta) + ", " +
-        strconv.Itoa(maxTries)          + ", " +
-        fmt.Sprintf("%f", percentMiss)  + ", " +
-        mutation                        + ", " +
-        strconv.FormatBool(withFaults)  + ", " +
+    file.WriteString(strconv.Itoa(numberParticipants) + "," +
+        fmt.Sprintf("%f", defaultDelta) + "," +
+        strconv.Itoa(maxTries)          + "," +
+        fmt.Sprintf("%f", percentMiss)  + "," +
+        mutation                        + "," +
+        strconv.FormatBool(withFaults)  + "," +
         fmt.Sprintf("%f", duration)     + "\n")
 }
