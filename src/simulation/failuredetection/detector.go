@@ -24,8 +24,8 @@ func NewDetectors(threshold float64, maxSampleSize int, numberParticipants int) 
 
         ex.CheckError(err)
 
-		detectors.Peers.Set(strconv.Itoa(id), value)
-	}
+        detectors.Peers.Set(strconv.Itoa(id), value)
+    }
 
     return
 }

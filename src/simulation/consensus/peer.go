@@ -11,7 +11,7 @@ import (
 
 var (
     // DefaultDelta is the default time to relay the messages to the others peers
-	DefaultDelta = time.Second * 5
+    DefaultDelta = time.Second * 5
 )
 
 // IPeer is an interface for a peer
@@ -43,9 +43,9 @@ type Peer struct {
 // NewPeer creates a new Peer
 func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (peer *Peer) {
     peer = new(Peer)
-	peer.id = peerID
-	peer.numberParticipants = numberParticipants
-	peer.consensusInfo = NewConsensusInfo()
+    peer.id = peerID
+    peer.numberParticipants = numberParticipants
+    peer.consensusInfo = NewConsensusInfo()
     peer.detectors = detectors
     peer.alive = true
     peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers)
@@ -103,42 +103,42 @@ func (peer *Peer) Init(withFaults bool) {
 
 // IsAlive returns the status of the peer
 func (peer *Peer) IsAlive() bool {
-	return peer.alive
+    return peer.alive
 }
 
 // GetPeerID returns the peer ID
 func (peer *Peer) GetPeerID() int {
-	return peer.id
+    return peer.id
 }
 
 // GetNumberParticipants returns the number of participants
 func (peer *Peer) GetNumberParticipants() int {
-	return peer.numberParticipants
+    return peer.numberParticipants
 }
 
 // GetCoordID returns the coordinator ID
 func (peer *Peer) GetCoordID() int {
-	return peer.consensusInfo.CoordID
+    return peer.consensusInfo.CoordID
 }
 
 // GetConsensusDecision returns the consensus decision value
 func (peer *Peer) GetConsensusDecision() string {
-	return peer.consensusInfo.Decision
+    return peer.consensusInfo.Decision
 }
 
 // GetConsensusInfo returns the consensus information
 func (peer *Peer) GetConsensusInfo() *Info {
-	return peer.consensusInfo
+    return peer.consensusInfo
 }
 
 // GetChannel returns the channel
 func (peer *Peer) GetChannel() stb.SChannel {
-	return peer.channel
+    return peer.channel
 }
 
 // SetCoordinator saves the coordainator ID
 func (peer *Peer) SetCoordinator(coordID int) {
-	peer.consensusInfo.CoordID = coordID
+    peer.consensusInfo.CoordID = coordID
 }
 
 // SetDefaultDelta sets the value of DefaultDelta

@@ -4,13 +4,13 @@ import (
     "strconv"
     "time"
 
-	cmap "github.com/orcaman/concurrent-map"
+    cmap "github.com/orcaman/concurrent-map"
 )
 
 // SChannel is an interface to abstract the channel
 type SChannel interface {
-	Receive() *Package
-	Send(int, []byte)
+    Receive() *Package
+    Send(int, []byte)
     SendAll([]byte)
     SendSuspicion(int, int)
     Results() ([]float64, []float64, time.Time, []float64)
@@ -28,18 +28,18 @@ type SChannel interface {
 
 // NewSChannel is the constructor of a stubborn channel
 func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel SChannel) {
-	channel = newChannel(peerID, numberParticipants, peer, peers)
+    channel = newChannel(peerID, numberParticipants, peer, peers)
 
     return
 }
 
 // Channels returns a map with all input channels
 func Channels(numberParticipants int) (channels cmap.ConcurrentMap) {
-	channels = cmap.New()
+    channels = cmap.New()
 
-	for id := 1; id <= numberParticipants; id++ {
-		channels.Set(strconv.Itoa(id), make(chan *Package))
-	}
+    for id := 1; id <= numberParticipants; id++ {
+        channels.Set(strconv.Itoa(id), make(chan *Package))
+    }
 
-	return
+    return
 }

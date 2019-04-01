@@ -4,8 +4,8 @@ import "time"
 
 // Results is the struct that contains the consensus results
 type Results struct {
-	PeerID       int
-	Sent         []float64
+    PeerID       int
+    Sent         []float64
     Received     []float64
     Delays       []float64
     DecisionTime time.Time
@@ -16,14 +16,14 @@ type DurationSlice []time.Duration
 
 // NewResults creates a new estimate
 func NewResults(sent, received []float64, decisionTime time.Time, delays []float64, id int) (results *Results) {
-	results = new(Results)
-	results.PeerID = id
-	results.Sent = sent
+    results = new(Results)
+    results.PeerID = id
+    results.Sent = sent
     results.Received = received
     results.DecisionTime = decisionTime
     results.Delays = delays
 
-	return
+    return
 }
 
 // NewResultsOfDelays creates a new estimate

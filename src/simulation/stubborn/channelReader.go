@@ -2,7 +2,7 @@ package stubborn
 
 // Receive is the method that receives the messages through the channel
 func (channel *Channel) Receive() (pack *Package) {
-	for {
+    for {
         pack := <-channel.inputBuffer
 
         if pack.Suspicious {
@@ -19,11 +19,11 @@ func (channel *Channel) Receive() (pack *Package) {
                 return pack
             }
         }
-	}
+    }
 }
 
 func (channel *Channel) ack(id int) {
-	pack := newPackage(channel.peerID, nil, true)
+    pack := newPackage(channel.peerID, nil, true)
 
-	channel.sendDirect(id, pack)
+    channel.sendDirect(id, pack)
 }

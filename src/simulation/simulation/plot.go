@@ -11,10 +11,10 @@ import (
 
     "gonum.org/v1/plot"
     "gonum.org/v1/plot/plotutil"
-	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg"
-	"gonum.org/v1/plot/vg/draw"
-	con "simulation/consensus"
+    "gonum.org/v1/plot/plotter"
+    "gonum.org/v1/plot/vg"
+    "gonum.org/v1/plot/vg/draw"
+    con "simulation/consensus"
     ex "simulation/exception"
 )
 
@@ -43,36 +43,36 @@ func newCoordinates(x float64, y float64) *coordinates {
 }
 
 func drawResults(results map[int]*con.Results, startTime time.Time, mutation string) {
-	sent := newTriple(results, "sent")
+    sent := newTriple(results, "sent")
     received := newTriple(results, "received")
     time := newCumulativeData(results, startTime)
 
-	sentPlot, err := plot.New()
+    sentPlot, err := plot.New()
     receivedPlot, err := plot.New()
     timePlot, err := plot.New()
 
-	ex.CheckError(err)
+    ex.CheckError(err)
 
-	drawData(sentPlot, sent, "sent_" + mutation)
+    drawData(sentPlot, sent, "sent_" + mutation)
     drawData(receivedPlot, received, "received_" + mutation)
     drawTimeData(timePlot, time, mutation)
 }
 
 func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
-	plot.Title.Text = "# Messages " + label
-	plot.X.Label.Text = "Node"
-	plot.Y.Label.Text = "Node"
+    plot.Title.Text = "# Messages " + label
+    plot.X.Label.Text = "Node"
+    plot.Y.Label.Text = "Node"
 
-	bubbles := newBubbles(data)
-	plot.Add(bubbles)
+    bubbles := newBubbles(data)
+    plot.Add(bubbles)
 
-	err := plot.Save(20 * vg.Inch, 20 * vg.Inch, DIRPNG + label + ".png")
-	ex.CheckError(err)
+    err := plot.Save(20 * vg.Inch, 20 * vg.Inch, DIRPNG + label + ".png")
+    ex.CheckError(err)
 }
 
 func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
     plot.Title.Text = "Number of Nodes that decide, over time"
-	plot.X.Label.Text = "Time"
+    plot.X.Label.Text = "Time"
     plot.Y.Label.Text = "# Nodes"
 
     err := plotutil.AddLines(plot, mutation, data)
@@ -82,62 +82,62 @@ func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
 }
 
 func newBubbles(data plotter.XYZs) *plotter.Scatter {
-	scatter, err := plotter.NewScatter(data)
-	ex.CheckError(err)
+    scatter, err := plotter.NewScatter(data)
+    ex.CheckError(err)
 
-	minZ, maxZ := math.Inf(1), math.Inf(-1)
-	for _, xyz := range data {
-		if xyz.Z > maxZ {
-			maxZ = xyz.Z
-		}
-		if xyz.Z < minZ {
-			minZ = xyz.Z
-		}
-	}
+    minZ, maxZ := math.Inf(1), math.Inf(-1)
+    for _, xyz := range data {
+        if xyz.Z > maxZ {
+            maxZ = xyz.Z
+        }
+        if xyz.Z < minZ {
+            minZ = xyz.Z
+        }
+    }
 
-	scatter.GlyphStyleFunc = func(i int) draw.GlyphStyle {
-		color := color.RGBA{ R: 25, B: 178, A: 255 }
-		minRadius, maxRadius := vg.Points(0), vg.Points(10)
+    scatter.GlyphStyleFunc = func(i int) draw.GlyphStyle {
+        color := color.RGBA{ R: 25, B: 178, A: 255 }
+        minRadius, maxRadius := vg.Points(0), vg.Points(10)
 
         rangeRadius := maxRadius - minRadius
-		_, _, z := data.XYZ(i)
-		diameter := (z - minZ) / (maxZ - minZ)
-		radius := vg.Length(diameter) * rangeRadius + minRadius
+        _, _, z := data.XYZ(i)
+        diameter := (z - minZ) / (maxZ - minZ)
+        radius := vg.Length(diameter) * rangeRadius + minRadius
 
         return draw.GlyphStyle{ Color: color, Radius: radius, Shape: draw.CircleGlyph{} }
-	}
+    }
 
-	return scatter
+    return scatter
 }
 
 func newTriple(data map[int]*con.Results, set string) plotter.XYZs {
-	size := len(data) * len(data)
-	triples := make(plotter.XYZs, size)
-	index := 0
+    size := len(data) * len(data)
+    triples := make(plotter.XYZs, size)
+    index := 0
 
-	for idSource, results := range data {
-		switch set {
-		case "sent":
-			index = fillTriple(idSource, results.Sent, triples, index)
-		case "received":
-			index = fillTriple(idSource, results.Received, triples, index)
-		}
-	}
+    for idSource, results := range data {
+        switch set {
+        case "sent":
+            index = fillTriple(idSource, results.Sent, triples, index)
+        case "received":
+            index = fillTriple(idSource, results.Received, triples, index)
+        }
+    }
 
-	return triples
+    return triples
 }
 
 func fillTriple(idSource int, data []float64, triples plotter.XYZs, index int) int {
-	i := index
+    i := index
 
-	for idDestination, value := range data {
-		triples[i].X = float64(idSource)
-		triples[i].Y = float64(idDestination)
-		triples[i].Z = value
-		i++
-	}
+    for idDestination, value := range data {
+        triples[i].X = float64(idSource)
+        triples[i].Y = float64(idDestination)
+        triples[i].Z = value
+        i++
+    }
 
-	return i
+    return i
 }
 
 func newCumulativeData(data map[int]*con.Results, startTime time.Time) plotter.XYs {
