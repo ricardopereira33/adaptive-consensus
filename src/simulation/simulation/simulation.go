@@ -122,7 +122,13 @@ func main() {
     percentMiss, err = strconv.ParseFloat(args[4], 64)
     withFaults, err = strconv.ParseBool(args[5])
     withMetrics, err = strconv.ParseBool(args[6])
-	ex.CheckError(err)
+    ex.CheckError(err)
+
+    println(mutation + " - " +
+        strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
+        strconv.Itoa(maxTries)                        + " - " +
+        strconv.FormatBool(withFaults)                + " - " +
+        strconv.FormatFloat(percentMiss,'f', 2, 64))
 
 	propose("accept")
 }

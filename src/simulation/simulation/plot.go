@@ -236,5 +236,6 @@ func saveResult(endTime time.Time, startTime time.Time) {
         strconv.Itoa(maxTries)          + ", " +
         fmt.Sprintf("%f", percentMiss)  + ", " +
         mutation                        + ", " +
+        strconv.FormatBool(withFaults)  + ", " +
         fmt.Sprintf("%f", duration)     + "\n")
 }

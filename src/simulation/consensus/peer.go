@@ -16,7 +16,7 @@ var (
 
 // IPeer is an interface for a peer
 type IPeer interface {
-    Init()
+    Init(bool)
     IsAlive() bool
 
     GetPeerID() int
