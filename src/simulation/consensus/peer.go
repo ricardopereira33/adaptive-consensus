@@ -27,7 +27,7 @@ type IPeer interface {
     GetChannel() stb.SChannel
 
     SetCoordinator(coordID int)
-    SetDefaultDelta(defaultDelta int)
+    SetDefaultDelta(defaultDelta float64)
 }
 
 // Peer is a struct that represents a peer
