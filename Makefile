@@ -16,14 +16,20 @@ simulation:
 	go install ./src/simulation/mutation/
 	go install ./src/simulation/failuredetection/
 
+install:
+	go get "github.com/orcaman/concurrent-map"
+	go get "github.com/joa/failuredetector"
+	go get gonum.org/v1/plot/...
+	go get "go.uber.org/ratelimit"
+
 run_mutation:
-	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
 
 test:
-	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
-	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
-	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
-	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENT_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
+	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${WITH_FAULTS} ${WITH_ALL_METRICS}
 
 format:
 	go fmt ./src/simulation/exception/
@@ -32,11 +38,6 @@ format:
 	go fmt ./src/simulation/simulation/
 	go fmt ./src/simulation/mutation/
 	go fmt ./src/simulation/failuredetection/
-
-install:
-	go get "github.com/orcaman/concurrent-map"
-	go get "github.com/joa/failuredetector"
-	go get gonum.org/v1/plot/...
 
 run:
 	./bin/peer
