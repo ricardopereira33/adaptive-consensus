@@ -2,7 +2,6 @@ package stubborn
 
 import (
     "strconv"
-    "time"
     "math/rand"
 )
 
@@ -41,9 +40,8 @@ func (channel *Channel) sendMessage(idDestination int) {
 }
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
-    if successMessage(channel.percentMiss) {
-        // Simulate the message delay
-        time.Sleep(time.Second)
+    if successMessage(channel.percentageMiss) {
+        channel.limiter.Take()
 
         channel.sendToBuffer(idDestination, message)
         // channel.metrics.incrementMessagesSent(idDestination)
@@ -59,11 +57,11 @@ func (channel *Channel) sendToBuffer(id int, pack *Package) {
     }
 }
 
-func successMessage(percentMiss float64) bool {
+func successMessage(percentageMiss float64) bool {
     randomValue := rand.Float64()
-    percentageMiss := percentMiss / 100
+    percentage := percentageMiss / 100
 
-    if randomValue < percentageMiss {
+    if randomValue < percentage {
         return false
     }
 

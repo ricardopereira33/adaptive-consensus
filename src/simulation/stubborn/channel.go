@@ -5,6 +5,7 @@ import (
     "strconv"
 
     cmap "github.com/orcaman/concurrent-map"
+    rl "go.uber.org/ratelimit"
 )
 
 var (
@@ -23,13 +24,15 @@ type Channel struct {
     outputBuffer       Buffer
     inputBuffer        chan *Package
     metrics            *Metrics
-    percentMiss        float64
+    percentageMiss     float64
+    percentageFaults   float64
     suspectedFunc      func(int, interface{})
     delta0Func         func(int, *Package) bool
     deltaFunc          func(int) bool
+    limiter            rl.Limiter
 }
 
-func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
+func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, latency float64) (channel *Channel) {
     channel = new(Channel)
     channel.peerID = peerID
     channel.peers = peers
@@ -37,6 +40,7 @@ func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap
     channel.outputBuffer = newBuffer(numberParticipants)
     channel.numberParticipants = numberParticipants
     channel.metrics = NewMetrics(numberParticipants)
+    channel.limiter = rl.New(calculateLatencyConfig(latency))
 
     value, present := peers.Get(strconv.Itoa(peerID))
 
@@ -120,7 +124,19 @@ func (channel *Channel) SetSuspectedFunc(function func(int, interface{})) {
     channel.suspectedFunc = function
 }
 
-// SetPercentageMiss sets percentMiss value
-func (channel *Channel) SetPercentageMiss(miss float64) {
-    channel.percentMiss = miss
+// SetPercentageMiss sets percentageMiss value
+func (channel *Channel) SetPercentageMiss(percentage float64) {
+    channel.percentageMiss = percentage
+}
+
+// SetPercentageFaults sets percentageFaults value
+func (channel *Channel) SetPercentageFaults(percentage float64) {
+    channel.percentageFaults = percentage
+}
+
+func calculateLatencyConfig(latency float64) int {
+    configValue := 1000.0 / latency
+    configValue /= 2
+
+    return int(configValue)
 }

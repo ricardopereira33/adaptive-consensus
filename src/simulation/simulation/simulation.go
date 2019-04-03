@@ -23,7 +23,9 @@ var (
     numberParticipants int
     maxTries           int
     defaultDelta       float64
-    percentMiss        float64
+    percentageMiss     float64
+    percentageFaults   float64
+    latency            float64
     withMetrics        bool
     withFaults         bool
 )
@@ -66,7 +68,7 @@ func propose(value string) {
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
-    peer := con.NewPeer(peerID, numberParticipants, channels, detectors)
+    peer := con.NewPeer(peerID, numberParticipants, channels, detectors, latency)
     configurePeer(peer)
 
     go consensus(peer, value)
@@ -84,7 +86,8 @@ func configurePeer(peer *con.Peer) {
 
     channel.SetSuspectedFunc(suspected)
     channel.SetMaxTries(maxTries)
-    channel.SetPercentageMiss(percentMiss)
+    channel.SetPercentageMiss(percentageMiss)
+    channel.SetPercentageFaults(percentageFaults)
     channel.SetDelta0(mut.Delta0)
     channel.SetDelta(mut.Delta)
 
@@ -119,16 +122,19 @@ func main() {
     numberParticipants, err = strconv.Atoi(args[1])
     defaultDelta, err = strconv.ParseFloat(args[2], 64)
     maxTries, err = strconv.Atoi(args[3])
-    percentMiss, err = strconv.ParseFloat(args[4], 64)
+    percentageMiss, err = strconv.ParseFloat(args[4], 64)
     withFaults, err = strconv.ParseBool(args[5])
     withMetrics, err = strconv.ParseBool(args[6])
+    latency, err = strconv.ParseFloat(args[7], 64)
+    percentageFaults, err = strconv.ParseFloat(args[8], 64)
     ex.CheckError(err)
 
     println(mutation + " - " +
         strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
         strconv.Itoa(maxTries)                        + " - " +
         strconv.FormatBool(withFaults)                + " - " +
-        strconv.FormatFloat(percentMiss,'f', 2, 64))
+        strconv.FormatFloat(latency, 'f', 2, 64)      + " - " +
+        strconv.FormatFloat(percentageMiss,'f', 2, 64))
 
     propose("accept")
 }

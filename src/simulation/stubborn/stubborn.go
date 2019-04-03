@@ -21,14 +21,15 @@ type SChannel interface {
 
     SetMaxTries(int)
     SetPercentageMiss(float64)
+    SetPercentageFaults(float64)
     SetDelta0(function func(int, *Package) bool)
     SetDelta(function func(int) bool)
     SetSuspectedFunc(func(int, interface{}))
 }
 
 // NewSChannel is the constructor of a stubborn channel
-func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel SChannel) {
-    channel = newChannel(peerID, numberParticipants, peer, peers)
+func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, latency float64) (channel SChannel) {
+    channel = newChannel(peerID, numberParticipants, peer, peers, latency)
 
     return
 }

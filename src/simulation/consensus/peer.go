@@ -41,14 +41,14 @@ type Peer struct {
 }
 
 // NewPeer creates a new Peer
-func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (peer *Peer) {
+func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors, latency float64) (peer *Peer) {
     peer = new(Peer)
     peer.id = peerID
     peer.numberParticipants = numberParticipants
     peer.consensusInfo = NewConsensusInfo()
     peer.detectors = detectors
     peer.alive = true
-    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers)
+    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
 
     return
 }
