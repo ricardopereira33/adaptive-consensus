@@ -235,7 +235,7 @@ func saveResult(endTime time.Time, startTime time.Time) {
 		fmt.Sprintf("%f", percentageMiss) + "," +
         fmt.Sprintf("%f", percentageFaults) + "," +
         fmt.Sprintf("%f", probabilityToFail) + "," +
+        fmt.Sprintf("%f", latency) + "," +
 		mutation + "," +
-		strconv.FormatBool(withFaults) + "," +
 		fmt.Sprintf("%f", duration) + "\n")
 }
