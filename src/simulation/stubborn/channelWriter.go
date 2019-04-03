@@ -59,7 +59,7 @@ func (channel *Channel) sendToBuffer(id int, pack *Package) {
 
 func successMessage(percentageMiss float64) bool {
 	randomValue := rand.Float64()
-	percentage := percentageMiss / 100
+	percentage := percentageMiss / 100.0
 
 	if randomValue < percentage {
 		return false

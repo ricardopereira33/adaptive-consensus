@@ -227,15 +227,14 @@ func saveResult(endTime time.Time, startTime time.Time) {
 	ex.CheckError(err)
 	defer file.Close()
 
-	// file.WriteString("#Nodes, default delta, max tries, percentage of miss (messages), mutation, result time")
-
 	duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
 	file.WriteString(strconv.Itoa(numberParticipants) + "," +
 		fmt.Sprintf("%f", defaultDelta) + "," +
 		strconv.Itoa(maxTries) + "," +
 		fmt.Sprintf("%f", percentageMiss) + "," +
-		fmt.Sprintf("%f", percentageFaults) + "," +
+        fmt.Sprintf("%f", percentageFaults) + "," +
+        fmt.Sprintf("%f", probabilityToFail) + "," +
 		mutation + "," +
 		strconv.FormatBool(withFaults) + "," +
 		fmt.Sprintf("%f", duration) + "\n")

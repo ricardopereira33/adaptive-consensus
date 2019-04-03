@@ -25,7 +25,8 @@ var (
 	defaultDelta       float64
 	percentageMiss     float64
 	percentageFaults   float64
-	latency            float64
+    latency            float64
+    probabilityToFail  float64
 	withMetrics        bool
 	withFaults         bool
 )
@@ -90,12 +91,13 @@ func configurePeer(peer *con.Peer) {
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 
-	peer.SetDefaultDelta(defaultDelta)
+    peer.SetDefaultDelta(defaultDelta)
+    peer.SetProbabilityToFail(probabilityToFail)
 	peer.Init(withFaults)
 }
 
 func argsInfo(nArgs int) {
-	if nArgs < 7 {
+	if nArgs < 8 {
 		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <WITH_FAULTS> <WITH_ALL_METRICS>")
 		os.Exit(1)
 	}
@@ -111,6 +113,9 @@ func main() {
 
 	var err error
 
+    fmt.Println(len(args))
+    fmt.Println(args)
+
 	mutation = args[0]
 	mutationCode, err = mut.Find(mutation)
 	numberParticipants, err = strconv.Atoi(args[1])
@@ -118,9 +123,10 @@ func main() {
 	maxTries, err = strconv.Atoi(args[3])
 	percentageMiss, err = strconv.ParseFloat(args[4], 64)
 	withFaults, err = strconv.ParseBool(args[5])
-	withMetrics, err = strconv.ParseBool(args[6])
-	latency, err = strconv.ParseFloat(args[7], 64)
-	percentageFaults, err = strconv.ParseFloat(args[8], 64)
+	latency, err = strconv.ParseFloat(args[6], 64)
+    percentageFaults, err = strconv.ParseFloat(args[7], 64)
+    probabilityToFail, err = strconv.ParseFloat(args[8], 64)
+	withMetrics, err = strconv.ParseBool(args[9])
 	ex.CheckError(err)
 
 	println(mutation + " - " +
@@ -128,7 +134,8 @@ func main() {
 		strconv.Itoa(maxTries) + " - " +
 		strconv.FormatBool(withFaults) + " - " +
 		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
-		strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
+        strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
+        strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
 		strconv.FormatFloat(percentageFaults, 'f', 2, 64))
 
 	propose("accept")

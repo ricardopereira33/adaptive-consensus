@@ -27,7 +27,8 @@ type IPeer interface {
 	GetChannel() stb.SChannel
 
 	SetCoordinator(int)
-	SetDefaultDelta(float64)
+    SetDefaultDelta(float64)
+    SetProbabilityToFail(float64)
 }
 
 // Peer is a struct that represents a peer
@@ -35,9 +36,10 @@ type Peer struct {
 	id                 int
 	numberParticipants int
 	alive              bool
+    probabilityToFail  float64
 	channel            stb.SChannel
 	consensusInfo      *Info
-	detectors          *fd.Detectors
+    detectors          *fd.Detectors
 }
 
 // NewPeer creates a new Peer
@@ -48,18 +50,14 @@ func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors
 	peer.consensusInfo = NewConsensusInfo()
 	peer.detectors = detectors
 	peer.alive = true
-	peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
+    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
 
 	return
 }
 
 func (peer *Peer) triggerFailure() {
-	numberParticipants := peer.numberParticipants
-
 	for {
-		id := rand.Intn(numberParticipants) + 1
-
-		if id == peer.id {
+		if peerFailed(peer.probabilityToFail) {
 			peer.alive = false
 			peer.detectors.IncrementFaults()
 
@@ -146,4 +144,20 @@ func (peer *Peer) SetCoordinator(coordID int) {
 // SetDefaultDelta sets the value of DefaultDelta
 func (peer *Peer) SetDefaultDelta(defaultDelta float64) {
 	DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta*1000))
+}
+
+// SetProbabilityToFail sets the value of probabilityToFail
+func (peer *Peer) SetProbabilityToFail(probabilityToFail float64) {
+    peer.probabilityToFail = probabilityToFail
+}
+
+func peerFailed(percentageToFail float64) bool {
+	randomValue := rand.Float64()
+	percentage := percentageToFail / 100.0
+
+	if randomValue < percentage {
+		return false
+	}
+
+	return true
 }

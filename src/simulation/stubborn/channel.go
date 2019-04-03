@@ -130,7 +130,7 @@ func (channel *Channel) SetPercentageMiss(percentage float64) {
 
 func calculateLatencyConfig(latency float64) int {
 	configValue := 1000.0 / latency
-	configValue /= 2
+	configValue *= 2
 
 	return int(configValue)
 }
