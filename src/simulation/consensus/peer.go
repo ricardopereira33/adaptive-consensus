@@ -1,147 +1,149 @@
 package consensus
 
 import (
-    "time"
-    "math/rand"
+	"math/rand"
+	"time"
 
-    cmap "github.com/orcaman/concurrent-map"
-    stb "simulation/stubborn"
-    fd "simulation/failuredetection"
+	cmap "github.com/orcaman/concurrent-map"
+	fd "simulation/failuredetection"
+	stb "simulation/stubborn"
 )
 
 var (
-    // DefaultDelta is the default time to relay the messages to the others peers
-    DefaultDelta = time.Second * 5
+	// DefaultDelta is the default time to relay the messages to the others peers
+	DefaultDelta = time.Second * 5
 )
 
 // IPeer is an interface for a peer
 type IPeer interface {
-    Init(bool)
-    IsAlive() bool
+	Init(bool)
+	IsAlive() bool
 
-    GetPeerID() int
-    GetNumberParticipants() int
-    GetCoordID() int
-    GetConsensusDecision() string
-    GetConsensusInfo() *Info
-    GetChannel() stb.SChannel
+	GetPeerID() int
+	GetNumberParticipants() int
+	GetCoordID() int
+	GetConsensusDecision() string
+	GetConsensusInfo() *Info
+	GetChannel() stb.SChannel
 
-    SetCoordinator(coordID int)
-    SetDefaultDelta(defaultDelta float64)
+	SetCoordinator(int)
+	SetDefaultDelta(float64)
 }
 
 // Peer is a struct that represents a peer
 type Peer struct {
-    id                 int
-    numberParticipants int
-    alive              bool
-    channel            stb.SChannel
-    consensusInfo      *Info
-    detectors          *fd.Detectors
+	id                 int
+	numberParticipants int
+	alive              bool
+	channel            stb.SChannel
+	consensusInfo      *Info
+	detectors          *fd.Detectors
 }
 
 // NewPeer creates a new Peer
 func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors, latency float64) (peer *Peer) {
-    peer = new(Peer)
-    peer.id = peerID
-    peer.numberParticipants = numberParticipants
-    peer.consensusInfo = NewConsensusInfo()
-    peer.detectors = detectors
-    peer.alive = true
-    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
+	peer = new(Peer)
+	peer.id = peerID
+	peer.numberParticipants = numberParticipants
+	peer.consensusInfo = NewConsensusInfo()
+	peer.detectors = detectors
+	peer.alive = true
+	peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
 
-    return
+	return
 }
 
 func (peer *Peer) triggerFailure() {
-    numberParticipants := peer.numberParticipants
+	numberParticipants := peer.numberParticipants
 
-    for {
-        id := rand.Intn(numberParticipants) + 1
+	for {
+		id := rand.Intn(numberParticipants) + 1
 
-        if id == peer.id {
-            peer.alive = false
-            break
-        }
+		if id == peer.id {
+			peer.alive = false
+			peer.detectors.IncrementFaults()
 
-        time.Sleep(500 * time.Millisecond)
-    }
+			break
+		}
+
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func (peer *Peer) handleFailures() {
-    peerID := peer.id
-    channel := peer.channel
-    detectors := peer.detectors
-    detector := detectors.GetDetector(peerID)
-    numberParticipants := peer.numberParticipants
+	peerID := peer.id
+	channel := peer.channel
+	detectors := peer.detectors
+	detector := detectors.GetDetector(peerID)
+	numberParticipants := peer.numberParticipants
 
-    for {
-        detector.Heartbeat()
-        id := rand.Intn(numberParticipants) + 1
+	for {
+		detector.Heartbeat()
+		id := rand.Intn(numberParticipants) + 1
 
-        if !detectors.Ping(id) {
-            channel.SendSuspicion(peerID, id)
-        }
+		if !detectors.IsAvailable(id) {
+			channel.SendSuspicion(peerID, id)
+		}
 
-        if !peer.alive {
-            break
-        }
+		if !peer.alive {
+			break
+		}
 
-        time.Sleep(100 * time.Millisecond)
-    }
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 // Init is the method that starts routines which handle failures
 func (peer *Peer) Init(withFaults bool) {
-    peer.channel.Init(DefaultDelta)
+	peer.channel.Init(DefaultDelta)
 
-    if withFaults {
-        go peer.handleFailures()
-        go peer.triggerFailure()
-    }
+	if withFaults {
+		go peer.handleFailures()
+		go peer.triggerFailure()
+	}
 }
 
 // IsAlive returns the status of the peer
 func (peer *Peer) IsAlive() bool {
-    return peer.alive
+	return peer.alive
 }
 
 // GetPeerID returns the peer ID
 func (peer *Peer) GetPeerID() int {
-    return peer.id
+	return peer.id
 }
 
 // GetNumberParticipants returns the number of participants
 func (peer *Peer) GetNumberParticipants() int {
-    return peer.numberParticipants
+	return peer.numberParticipants
 }
 
 // GetCoordID returns the coordinator ID
 func (peer *Peer) GetCoordID() int {
-    return peer.consensusInfo.CoordID
+	return peer.consensusInfo.CoordID
 }
 
 // GetConsensusDecision returns the consensus decision value
 func (peer *Peer) GetConsensusDecision() string {
-    return peer.consensusInfo.Decision
+	return peer.consensusInfo.Decision
 }
 
 // GetConsensusInfo returns the consensus information
 func (peer *Peer) GetConsensusInfo() *Info {
-    return peer.consensusInfo
+	return peer.consensusInfo
 }
 
 // GetChannel returns the channel
 func (peer *Peer) GetChannel() stb.SChannel {
-    return peer.channel
+	return peer.channel
 }
 
 // SetCoordinator saves the coordainator ID
 func (peer *Peer) SetCoordinator(coordID int) {
-    peer.consensusInfo.CoordID = coordID
+	peer.consensusInfo.CoordID = coordID
 }
 
 // SetDefaultDelta sets the value of DefaultDelta
 func (peer *Peer) SetDefaultDelta(defaultDelta float64) {
-    DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta * 1000))
+	DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta*1000))
 }

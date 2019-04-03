@@ -1,46 +1,45 @@
 package stubborn
 
 import (
-    "strconv"
-    "time"
+	"strconv"
+	"time"
 
-    cmap "github.com/orcaman/concurrent-map"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 // SChannel is an interface to abstract the channel
 type SChannel interface {
-    Receive() *Package
-    Send(int, []byte)
-    SendAll([]byte)
-    SendSuspicion(int, int)
-    Results() ([]float64, []float64, time.Time, []float64)
-    Init(time.Duration)
-    Finish()
+	Receive() *Package
+	Send(int, []byte)
+	SendAll([]byte)
+	SendSuspicion(int, int)
+	Results() ([]float64, []float64, time.Time, []float64)
+	Init(time.Duration)
+	Finish()
 
-    GetPackage(id int) *Package
+	GetPackage(id int) *Package
 
-    SetMaxTries(int)
-    SetPercentageMiss(float64)
-    SetPercentageFaults(float64)
-    SetDelta0(function func(int, *Package) bool)
-    SetDelta(function func(int) bool)
-    SetSuspectedFunc(func(int, interface{}))
+	SetMaxTries(int)
+	SetPercentageMiss(float64)
+	SetDelta0(function func(int, *Package) bool)
+	SetDelta(function func(int) bool)
+	SetSuspectedFunc(func(int, interface{}))
 }
 
 // NewSChannel is the constructor of a stubborn channel
 func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, latency float64) (channel SChannel) {
-    channel = newChannel(peerID, numberParticipants, peer, peers, latency)
+	channel = newChannel(peerID, numberParticipants, peer, peers, latency)
 
-    return
+	return
 }
 
 // Channels returns a map with all input channels
 func Channels(numberParticipants int) (channels cmap.ConcurrentMap) {
-    channels = cmap.New()
+	channels = cmap.New()
 
-    for id := 1; id <= numberParticipants; id++ {
-        channels.Set(strconv.Itoa(id), make(chan *Package))
-    }
+	for id := 1; id <= numberParticipants; id++ {
+		channels.Set(strconv.Itoa(id), make(chan *Package))
+	}
 
-    return
+	return
 }
