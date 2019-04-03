@@ -1,13 +1,13 @@
 import glob, re
-import pandas as pd
-import numpy as np
+import pandas   as pd
+import numpy    as np
 
-from random import shuffle
+from random                  import shuffle
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.svm import LinearSVC
+from sklearn.neighbors       import KNeighborsClassifier
+from sklearn.ensemble        import RandomForestClassifier
+from sklearn.metrics         import accuracy_score
+from sklearn.svm             import LinearSVC
 
 DIR               = "datasets/results/csv-datasets/"
 FILE_EXTENSION    = "*.csv"
@@ -53,8 +53,5 @@ print('> Testing...')
 # Test on the next 100 images:
 print("> Compute predictions")
 predicted = clf.predict(val_X)
-
-print(1 in predicted)
-print(2 in predicted)
 
 print("> Accuracy: ", accuracy_score(val_y, predicted))
