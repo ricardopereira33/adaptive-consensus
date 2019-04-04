@@ -2,7 +2,7 @@ package stubborn
 
 import (
 	"math/rand"
-	"strconv"
+    "strconv"
 )
 
 // SendAll is the method that sends a message to all participants
@@ -41,10 +41,11 @@ func (channel *Channel) sendMessage(idDestination int) {
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
 	if successMessage(channel.percentageMiss) {
-		channel.limiter.Take()
+        channel.limiter.Take()
+        //time.Sleep(time.Second)
 
 		channel.sendToBuffer(idDestination, message)
-		// channel.metrics.incrementMessagesSent(idDestination)
+		channel.metrics.incrementMessagesSent(idDestination)
 	}
 }
 

@@ -28,7 +28,6 @@ var (
     latency            float64
     probabilityToFail  float64
 	withMetrics        bool
-	withFaults         bool
 )
 
 func propose(value string) {
@@ -93,7 +92,7 @@ func configurePeer(peer *con.Peer) {
 
     peer.SetDefaultDelta(defaultDelta)
     peer.SetProbabilityToFail(probabilityToFail)
-	peer.Init(withFaults)
+	peer.Init()
 }
 
 func argsInfo(nArgs int) {
@@ -113,30 +112,28 @@ func main() {
 
 	var err error
 
-    fmt.Println(len(args))
-    fmt.Println(args)
-
 	mutation = args[0]
 	mutationCode, err = mut.Find(mutation)
 	numberParticipants, err = strconv.Atoi(args[1])
 	defaultDelta, err = strconv.ParseFloat(args[2], 64)
 	maxTries, err = strconv.Atoi(args[3])
 	percentageMiss, err = strconv.ParseFloat(args[4], 64)
-	withFaults, err = strconv.ParseBool(args[5])
-	latency, err = strconv.ParseFloat(args[6], 64)
-    percentageFaults, err = strconv.ParseFloat(args[7], 64)
-    probabilityToFail, err = strconv.ParseFloat(args[8], 64)
-	withMetrics, err = strconv.ParseBool(args[9])
-	ex.CheckError(err)
+	latency, err = strconv.ParseFloat(args[5], 64)
+    percentageFaults, err = strconv.ParseFloat(args[6], 64)
+    probabilityToFail, err = strconv.ParseFloat(args[7], 64)
+	withMetrics, err = strconv.ParseBool(args[8])
 
-	println(mutation + " - " +
+    ex.CheckError(err)
+
+    println(mutation + " - " +
+        strconv.Itoa(numberParticipants) + " - " +
 		strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
 		strconv.Itoa(maxTries) + " - " +
-		strconv.FormatBool(withFaults) + " - " +
-		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
         strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
+		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
+		strconv.FormatFloat(percentageFaults, 'f', 2, 64) + " - " +
         strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
-		strconv.FormatFloat(percentageFaults, 'f', 2, 64))
+		strconv.FormatBool(withMetrics))
 
 	propose("accept")
 }

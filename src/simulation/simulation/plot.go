@@ -53,8 +53,8 @@ func drawResults(results map[int]*con.Results, startTime time.Time, mutation str
 
 	ex.CheckError(err)
 
-	drawData(sentPlot, sent, "sent_"+mutation)
-	drawData(receivedPlot, received, "received_"+mutation)
+	drawData(sentPlot, sent, "sent_" + mutation)
+	drawData(receivedPlot, received, "received_" + mutation)
 	drawTimeData(timePlot, time, mutation)
 }
 
@@ -66,7 +66,7 @@ func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
 	bubbles := newBubbles(data)
 	plot.Add(bubbles)
 
-	err := plot.Save(20*vg.Inch, 20*vg.Inch, DIRPNG+label+".png")
+	err := plot.Save(20 * vg.Inch, 20 * vg.Inch, DIRPNG + label + ".png")
 	ex.CheckError(err)
 }
 
@@ -76,7 +76,7 @@ func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
 	plot.Y.Label.Text = "# Nodes"
 
 	err := plotutil.AddLines(plot, mutation, data)
-	err = plot.Save(8*vg.Inch, 8*vg.Inch, DIRPNG+"time_"+mutation+".png")
+	err = plot.Save(8 * vg.Inch, 8 * vg.Inch, DIRPNG + "time_" + mutation + ".png")
 
 	ex.CheckError(err)
 }
@@ -223,7 +223,7 @@ func ensureValue(value float64) string {
 }
 
 func saveResult(endTime time.Time, startTime time.Time) {
-	file, err := os.OpenFile(DIRCSV+"global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
 	ex.CheckError(err)
 	defer file.Close()
 

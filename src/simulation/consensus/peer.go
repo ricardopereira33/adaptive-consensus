@@ -2,7 +2,7 @@ package consensus
 
 import (
 	"math/rand"
-	"time"
+    "time"
 
 	cmap "github.com/orcaman/concurrent-map"
 	fd "simulation/failuredetection"
@@ -16,7 +16,7 @@ var (
 
 // IPeer is an interface for a peer
 type IPeer interface {
-	Init(bool)
+	Init()
 	IsAlive() bool
 
 	GetPeerID() int
@@ -57,11 +57,11 @@ func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors
 
 func (peer *Peer) triggerFailure() {
 	for {
-		if peerFailed(peer.probabilityToFail) {
+		if peer.peerFailed() {
 			peer.alive = false
 			peer.detectors.IncrementFaults()
 
-			break
+            break
 		}
 
 		time.Sleep(500 * time.Millisecond)
@@ -92,13 +92,11 @@ func (peer *Peer) handleFailures() {
 }
 
 // Init is the method that starts routines which handle failures
-func (peer *Peer) Init(withFaults bool) {
+func (peer *Peer) Init() {
 	peer.channel.Init(DefaultDelta)
 
-	if withFaults {
-		go peer.handleFailures()
-		go peer.triggerFailure()
-	}
+    go peer.handleFailures()
+    go peer.triggerFailure()
 }
 
 // IsAlive returns the status of the peer
@@ -151,13 +149,14 @@ func (peer *Peer) SetProbabilityToFail(probabilityToFail float64) {
     peer.probabilityToFail = probabilityToFail
 }
 
-func peerFailed(percentageToFail float64) bool {
+func (peer *Peer) peerFailed() bool {
 	randomValue := rand.Float64()
-	percentage := percentageToFail / 100.0
+    percentage := peer.probabilityToFail / 100.0
+    canPeerDie := peer.detectors.CanPeerDie()
 
-	if randomValue < percentage {
-		return false
+	if randomValue < percentage && canPeerDie {
+		return true
 	}
 
-	return true
+	return false
 }

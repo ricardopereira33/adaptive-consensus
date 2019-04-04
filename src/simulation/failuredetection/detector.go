@@ -50,15 +50,27 @@ func (detectors *Detectors) GetDetector(id int) *fd.PhiAccuralFailureDetector {
 // IsAvailable checks if a peer is still alive
 func (detectors *Detectors) IsAvailable(id int) bool {
 	detector := detectors.GetDetector(id)
-	currentPercentageFaults := float64(detectors.numberFaults) / float64(detectors.numberParticipants)
 
-	if detector != nil && currentPercentageFaults < detectors.percentageFaults {
+	if detector != nil {
 		return detector.IsAvailable()
 	}
 
 	return false
 }
 
-func (detectors *Detectors) IncrementFaults() {
-	detectors.numberFaults++
+// CanPeerDie verifies if a peer can die, taking into account the current number of faults
+func (detectors *Detectors) CanPeerDie() bool {
+    currentPercentageFaults := (float64(detectors.numberFaults) / float64(detectors.numberParticipants)) * 100
+
+    if currentPercentageFaults <= detectors.percentageFaults {
+        return true
+    }
+
+    return false
 }
+
+// IncrementFaults increments the number of faults
+func (detectors *Detectors) IncrementFaults() {
+    detectors.numberFaults++
+}
+

@@ -40,20 +40,20 @@ func (metrics *Metrics) finish() {
 func (metrics *Metrics) incrementMessagesReceived(peerID int) {
 	strID := strconv.Itoa(peerID)
 	value, _ := metrics.messagesReceived.Get(strID)
-	metrics.messagesReceived.Set(strID, value.(int)+1)
+	metrics.messagesReceived.Set(strID, value.(int) + 1)
 }
 
 // incrementMessagesSent increments the number of sended messages
 func (metrics *Metrics) incrementMessagesSent(peerID int) {
 	strID := strconv.Itoa(peerID)
 	value, _ := metrics.messagesSent.Get(strID)
-	delayInterface, _ := metrics.delays.Get(strID)
-	delay := delayInterface.(*Delay)
+	// delayInterface, _ := metrics.delays.Get(strID)
+	// delay := delayInterface.(*Delay)
 
-	metrics.messagesSent.Set(strID, value.(int)+1)
+	metrics.messagesSent.Set(strID, value.(int) + 1)
 
-	delay.alreadySent = true
-	metrics.delays.Set(strID, delay)
+	// delay.alreadySent = true
+	// metrics.delays.Set(strID, delay)
 }
 
 // getMessagesSent returns the number of received messages
