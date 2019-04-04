@@ -19,9 +19,19 @@ nodes.step(100, 20) do |nodes_number|
       initial_percentage_miss.step(10, 2) do |percentage_miss|
         initial_percentage_faults.step(30, 5) do |percentage_fault|
           initial_probability_to_fail.step(12, 2) do |probability_to_fail|
-            initial_latency.step(200, 20) do |latency|
+            initial_latency.step(2000, 20) do |latency|
               mutations.each do |mutation|
-                `./bin/simulation #{mutation} #{nodes_number} #{default_delta} #{max_tries} #{percentage_miss} #{is_faulty} #{latency} #{percentage_fault} #{probability_to_fail} false`
+                command = "./bin/simulation #{mutation} #{nodes_number} #{default_delta} #{max_tries} #{percentage_miss} #{is_faulty} #{latency} #{percentage_fault} #{probability_to_fail} false"
+
+                pid = Process.spawn(command)
+                begin
+                  Timeout.timeout(300) do
+                    Process.wait(pid)
+                  end
+                rescue Timeout::Error
+                  puts "Timeout - #{mutation}"
+                  Process.kill('TERM', pid)
+                end
               end
             end
           end
