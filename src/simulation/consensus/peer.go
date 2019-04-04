@@ -43,14 +43,14 @@ type Peer struct {
 }
 
 // NewPeer creates a new Peer
-func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors, latency float64) (peer *Peer) {
+func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (peer *Peer) {
 	peer = new(Peer)
 	peer.id = peerID
 	peer.numberParticipants = numberParticipants
 	peer.consensusInfo = NewConsensusInfo()
 	peer.detectors = detectors
 	peer.alive = true
-    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, latency)
+    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers)
 
 	return
 }
@@ -141,7 +141,7 @@ func (peer *Peer) SetCoordinator(coordID int) {
 
 // SetDefaultDelta sets the value of DefaultDelta
 func (peer *Peer) SetDefaultDelta(defaultDelta float64) {
-	DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta*1000))
+	DefaultDelta = time.Millisecond * time.Duration(int(defaultDelta * 1000))
 }
 
 // SetProbabilityToFail sets the value of probabilityToFail

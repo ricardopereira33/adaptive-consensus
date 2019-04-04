@@ -3,6 +3,7 @@ package stubborn
 import (
 	"math/rand"
     "strconv"
+    "time"
 )
 
 // SendAll is the method that sends a message to all participants
@@ -41,8 +42,8 @@ func (channel *Channel) sendMessage(idDestination int) {
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
 	if successMessage(channel.percentageMiss) {
+        //Bandwidth
         channel.limiter.Take()
-        //time.Sleep(time.Second)
 
 		channel.sendToBuffer(idDestination, message)
 		channel.metrics.incrementMessagesSent(idDestination)
@@ -53,6 +54,9 @@ func (channel *Channel) sendToBuffer(id int, pack *Package) {
 	value, present := channel.peers.Get(strconv.Itoa(id))
 
 	if present {
+        // Latency
+        time.Sleep(channel.latency)
+
 		peerChannel := value.(chan *Package)
 		peerChannel <- pack
 	}

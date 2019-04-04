@@ -18,16 +18,17 @@ import (
 
 var (
 	debug              bool
+	withMetrics        bool
 	mutation           string
 	mutationCode       int
 	numberParticipants int
 	maxTries           int
+    bandwidth          int
 	defaultDelta       float64
 	percentageMiss     float64
 	percentageFaults   float64
     latency            float64
     probabilityToFail  float64
-	withMetrics        bool
 )
 
 func propose(value string) {
@@ -68,7 +69,7 @@ func propose(value string) {
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
-	peer := con.NewPeer(peerID, numberParticipants, channels, detectors, latency)
+	peer := con.NewPeer(peerID, numberParticipants, channels, detectors)
 	configurePeer(peer)
 
 	go consensus(peer, value)
@@ -88,7 +89,9 @@ func configurePeer(peer *con.Peer) {
 	channel.SetMaxTries(maxTries)
 	channel.SetPercentageMiss(percentageMiss)
 	channel.SetDelta0(mut.Delta0)
-	channel.SetDelta(mut.Delta)
+    channel.SetDelta(mut.Delta)
+    channel.SetBandwidth(bandwidth)
+    channel.SetLatency(latency)
 
     peer.SetDefaultDelta(defaultDelta)
     peer.SetProbabilityToFail(probabilityToFail)
@@ -118,10 +121,11 @@ func main() {
 	defaultDelta, err = strconv.ParseFloat(args[2], 64)
 	maxTries, err = strconv.Atoi(args[3])
 	percentageMiss, err = strconv.ParseFloat(args[4], 64)
-	latency, err = strconv.ParseFloat(args[5], 64)
-    percentageFaults, err = strconv.ParseFloat(args[6], 64)
-    probabilityToFail, err = strconv.ParseFloat(args[7], 64)
-	withMetrics, err = strconv.ParseBool(args[8])
+    latency, err = strconv.ParseFloat(args[5], 64)
+    bandwidth, err = strconv.Atoi(args[6])
+    percentageFaults, err = strconv.ParseFloat(args[7], 64)
+    probabilityToFail, err = strconv.ParseFloat(args[8], 64)
+	withMetrics, err = strconv.ParseBool(args[9])
 
     ex.CheckError(err)
 
@@ -130,7 +134,8 @@ func main() {
 		strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
 		strconv.Itoa(maxTries) + " - " +
         strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
-		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
+        strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
+        strconv.Itoa(bandwidth) + " - " +
 		strconv.FormatFloat(percentageFaults, 'f', 2, 64) + " - " +
         strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
 		strconv.FormatBool(withMetrics))

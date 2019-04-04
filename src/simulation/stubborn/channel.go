@@ -28,10 +28,11 @@ type Channel struct {
 	suspectedFunc      func(int, interface{})
 	delta0Func         func(int, *Package) bool
 	deltaFunc          func(int) bool
-	limiter            rl.Limiter
+    limiter            rl.Limiter
+    latency            time.Duration
 }
 
-func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, latency float64) (channel *Channel) {
+func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
 	channel = new(Channel)
 	channel.peerID = peerID
 	channel.peers = peers
@@ -39,7 +40,6 @@ func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap
 	channel.outputBuffer = newBuffer(numberParticipants)
 	channel.numberParticipants = numberParticipants
 	channel.metrics = NewMetrics(numberParticipants)
-	channel.limiter = rl.New(calculateLatencyConfig(latency))
 
 	value, present := peers.Get(strconv.Itoa(peerID))
 
@@ -128,9 +128,13 @@ func (channel *Channel) SetPercentageMiss(percentage float64) {
 	channel.percentageMiss = percentage
 }
 
-func calculateLatencyConfig(latency float64) int {
-    configValue := 1000.0 / latency
-	configValue *= 2
+// SetBandwidth sets bandwidth value
+func (channel *Channel) SetBandwidth(bandwidth int) {
+	channel.limiter = rl.New(bandwidth)
+}
 
-	return int(configValue)
+// SetLatency sets latency value
+func (channel *Channel) SetLatency(latency float64) {
+    duration := time.Duration(int(channel.latency / 2))
+    channel.latency = time.Millisecond * duration
 }
