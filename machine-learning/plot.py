@@ -24,7 +24,7 @@ metrics = {
         'bandwidth':           100,
         'latency':             125.0
     },
-    'high_bandwidth': {
+    'large_bandwidth': {
         'default_delta':       1.5,
         'max_tries':           3,
         'percentage_miss':     4.0,
@@ -44,7 +44,7 @@ metrics = {
     }
 }
 
-level = 'high_bandwidth'
+level = 'high_latency'
 
 default_delta       = metrics[level]['default_delta']
 max_tries           = metrics[level]['max_tries']
@@ -102,6 +102,8 @@ if data['early']:
         mutations[mutation]['error-2'] = [float(value[1]) - mutation_error(mutation) for value in data[mutation]]
 
     ## Plot charts
+    plt.xlabel('# nodes')
+    plt.ylabel('consensus time (ms)')
 
     # Early
     plt.fill_between(nodes, mutations['early']['error-'], mutations['early']['error+'], color="#e5ce70", alpha=0.4)
