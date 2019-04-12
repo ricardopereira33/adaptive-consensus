@@ -7,13 +7,6 @@ import (
 	"os"
 )
 
-// HandleErr handles the errors
-func HandleErr(err error) {
-	if err != nil {
-		log.Println("No one in the chat yet")
-	}
-}
-
 // CheckError checks the errors
 func CheckError(err error) bool {
 	if err != nil {

@@ -9,18 +9,18 @@ initial_latency             = 125
 
 max_tries = 3
 nodes     = 50
-mutations = ['early', 'centralized', 'gossip']
+mutations = ['ring', 'old_ring']
 # improving ring mutation
 
 puts 'Start!'
 
-nodes.step(250, 100) do |nodes_number|
+nodes.step(200, 50) do |nodes_number|
   initial_default_delta.step(5, 2) do |default_delta|
-    initial_percentage_miss.step(60, 30) do |percentage_miss|
-      initial_percentage_faults.step(40, 20) do |percentage_fault|
-        initial_probability_to_fail.step(40, 20) do |probability_to_fail|
-          initial_bandwidth.step(500, 100) do |bandwidth|
-            initial_latency.step(650, 175) do |latency|
+    initial_percentage_miss.step(16, 8) do |percentage_miss|
+      initial_percentage_faults.step(20, 10) do |percentage_fault|
+        initial_probability_to_fail.step(10, 5) do |probability_to_fail|
+          initial_bandwidth.step(400, 100) do |bandwidth|
+            initial_latency.step(400, 125) do |latency|
               mutations.each do |mutation|
                 if not (percentage_fault == 0 and probability_to_fail > 0)
                   begin
