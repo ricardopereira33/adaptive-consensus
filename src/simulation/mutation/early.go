@@ -19,7 +19,7 @@ func NewEarly(peer *con.Peer) (early *Early) {
 }
 
 // Delta0 is the delta0 implementation
-func (early Early) Delta0(id int, pack *stb.Package) bool {
+func (early *Early) Delta0(id int, pack *stb.Package) bool {
 	channel := early.peer.GetChannel()
 	isFresh := fresh(channel.GetPackage(id), pack)
 	isMajority := majority(pack, early.peer.GetNumberParticipants())
@@ -28,6 +28,6 @@ func (early Early) Delta0(id int, pack *stb.Package) bool {
 }
 
 // Delta is the delta implementation
-func (early Early) Delta(id int) bool {
+func (early *Early) Delta(id int) bool {
 	return true
 }

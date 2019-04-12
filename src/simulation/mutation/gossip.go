@@ -28,12 +28,12 @@ func NewGossip(peer *con.Peer) (gossip *Gossip) {
 }
 
 // Delta0 is the delta0 implementation
-func (gossip Gossip) Delta0(id int, message *stb.Package) bool {
+func (gossip *Gossip) Delta0(id int, message *stb.Package) bool {
 	return gossip.Delta(id)
 }
 
 // Delta is the delta implementation
-func (gossip Gossip) Delta(id int) bool {
+func (gossip *Gossip) Delta(id int) bool {
 	numberParticipants := len(gossip.permut)
 	gossip.turn++
 
@@ -45,7 +45,7 @@ func (gossip Gossip) Delta(id int) bool {
 	processIndex := 0
 
 	for processIndex < gossip.fanout {
-		if gossip.permut[(processIndex+gossip.processesToSkip)%numberParticipants] == id {
+		if gossip.permut[(processIndex + gossip.processesToSkip) % numberParticipants] == id {
 			return true
 		}
 		processIndex++
@@ -53,8 +53,6 @@ func (gossip Gossip) Delta(id int) bool {
 
 	return false
 }
-
-// Auxiliary Functions
 
 func perm(numberParticipants int) (list []int) {
 	list = rand.Perm(numberParticipants)

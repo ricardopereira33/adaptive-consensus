@@ -17,8 +17,9 @@ type SChannel interface {
 	Init(time.Duration)
 	Finish()
 
-	GetPackage(id int) *Package
+    LastPackageBuffered(peerID int) *Package
 
+	GetPackage(id int) *Package
 	SetMaxTries(int)
 	SetPercentageMiss(float64)
 	SetDelta0(function func(int, *Package) bool)

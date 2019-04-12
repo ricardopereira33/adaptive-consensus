@@ -96,6 +96,11 @@ func (channel *Channel) Finish() {
 	channel.metrics.finish()
 }
 
+// LastPackageBuffered returns the last packages buffered and probably sent
+func (channel *Channel) LastPackageBuffered(peerID int) *Package {
+    return channel.outputBuffer.GetElement(peerID)
+}
+
 // GetPackage returns the last package sent to id
 func (channel *Channel) GetPackage(id int) *Package {
 	pack := channel.outputBuffer.GetElement(id)

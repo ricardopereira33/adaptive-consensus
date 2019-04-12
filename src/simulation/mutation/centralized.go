@@ -19,7 +19,7 @@ func NewCentralized(peer *con.Peer) (centralized *Centralized) {
 }
 
 // Delta0 is the delta0 implementation
-func (centralized Centralized) Delta0(id int, pack *stb.Package) bool {
+func (centralized *Centralized) Delta0(id int, pack *stb.Package) bool {
 	coordID := centralized.peer.GetCoordID()
 	peerID := centralized.peer.GetPeerID()
 
@@ -32,6 +32,6 @@ func (centralized Centralized) Delta0(id int, pack *stb.Package) bool {
 }
 
 // Delta is the delta implementation
-func (centralized Centralized) Delta(id int) bool {
+func (centralized *Centralized) Delta(id int) bool {
 	return true
 }
