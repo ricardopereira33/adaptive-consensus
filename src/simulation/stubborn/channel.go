@@ -81,7 +81,7 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 	}
 }
 
-//Init starts the channel
+// Init starts the channel
 func (channel *Channel) Init(deltaDefault time.Duration) {
 	go channel.retransmission(deltaDefault)
 }

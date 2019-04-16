@@ -2,6 +2,10 @@ CURDIR :=$(shell pwd)
 GOPATH :=$(CURDIR)
 PATH   :=$(CURDIR)/bin:$(PATH)
 
+ifeq (false,${DEBUG})
+	export GOTRACEBACK=none
+endif
+
 compile:
 	go install ./src/consensus/exception/
 	go install ./src/consensus/message/
