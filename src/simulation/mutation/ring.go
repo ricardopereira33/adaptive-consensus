@@ -7,15 +7,17 @@ import (
 
 // Ring is a mutation of a ring
 type Ring struct {
-    peer  *con.Peer
-    steps int
+    peer           *con.Peer
+    steps          int
+    suspectFailure bool
 }
 
 // NewRing creates a new ring
 func NewRing(peer *con.Peer) (ring *Ring) {
 	ring = new(Ring)
     ring.peer = peer
-    ring.steps = 0
+    ring.steps = 1
+    ring.suspectFailure = false
 
 	return
 }
@@ -35,36 +37,38 @@ func (ring *Ring) Delta0(id int, pack *stb.Package) bool {
 
 // Delta is the delta implementation
 func (ring *Ring) Delta(id int) bool {
-    lastPackage := ring.peer.GetChannel().LastPackageBuffered(id)
+    next := ring.next()
+    previous := ring.previous()
 
-    if !lastPackage.Arrived {
+    lastPackage := ring.peer.GetChannel().LastPackageBuffered(id)
+    packageArrived := lastPackage != nil && lastPackage.Arrived
+
+    if !packageArrived && (id == next || id == previous) && !ring.suspectFailure {
         ring.steps++
+        ring.suspectFailure = true
     }
 
-    next := ring.nextWithStep()
-    previous := ring.previousWithStep()
+    if ring.isLastNode(id) {
+        ring.suspectFailure = false
+    }
 
 	return id == next || id == previous
 }
 
 func (ring *Ring) next() int {
-    return ring.peerID() + 1
-}
+    nextID := ring.peerID() + ring.steps
+    numberParticipants := ring.peer.GetNumberParticipants()
 
-func (ring *Ring) nextWithStep() int {
-    return (ring.peerID() + ring.steps) % ring.peer.GetNumberParticipants()
+    if nextID > numberParticipants {
+        return nextID % numberParticipants
+    }
+
+    return nextID
 }
 
 func (ring *Ring) previous() int {
-    return ring.previousNSteps(1)
-}
-
-func (ring *Ring) previousWithStep() int {
-    return ring.previousNSteps(ring.steps)
-}
-
-func (ring *Ring) previousNSteps(steps int) int {
     peerID := ring.peerID()
+    steps := ring.steps
 
     if (peerID - steps) <= 0 {
         return (ring.peer.GetNumberParticipants() + peerID) - steps
@@ -75,4 +79,14 @@ func (ring *Ring) previousNSteps(steps int) int {
 
 func (ring *Ring) peerID() int {
     return ring.peer.GetPeerID() % ring.peer.GetNumberParticipants()
+}
+
+func (ring *Ring) isLastNode(dest int) bool {
+    numberParticipants := ring.peer.GetNumberParticipants()
+
+    if ring.peerID() == numberParticipants {
+        return dest == numberParticipants - 1
+    }
+
+    return dest == numberParticipants
 }

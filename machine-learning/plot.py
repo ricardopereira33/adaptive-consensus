@@ -41,10 +41,47 @@ metrics = {
         'probability_to_fail': 10.0,
         'bandwidth':           100,
         'latency':             225.0
+    },
+    'edge_case_latency': {
+        'default_delta':       1.0,
+        'max_tries':           3,
+        'percentage_miss':     0.0,
+        'percentage_faults':   0.0,
+        'probability_to_fail': 0.0,
+        'bandwidth':           100,
+        'latency':             650.0
+    },
+    'edge_case_bandwidth': {
+        'default_delta':       1.0,
+        'max_tries':           3,
+        'percentage_miss':     0.0,
+        'percentage_faults':   0.0,
+        'probability_to_fail': 0.0,
+        'bandwidth':           500,
+        'latency':             125.0
+    },
+    'edge_case_faults': {
+        'default_delta':       1.0,
+        'max_tries':           3,
+        'percentage_miss':     0.0,
+        'percentage_faults':   40.0,
+        'probability_to_fail': 40.0,
+        'bandwidth':           200,
+        'latency':             125.0
+    },
+    'edge_case_lost_messages': {
+        'default_delta':       1.0,
+        'max_tries':           3,
+        'percentage_miss':     60.0,
+        'percentage_faults':   0.0,
+        'probability_to_fail': 0.0,
+        'bandwidth':           200,
+        'latency':             125.0
     }
 }
 
-level = 'high_latency'
+result_type = 'edge_cases'
+level       = 'edge_case_lost_messages'
 
 default_delta       = metrics[level]['default_delta']
 max_tries           = metrics[level]['max_tries']
@@ -76,7 +113,7 @@ def valid_row(row):
        float(row[6]) == latency             and
        int(row[7])   == bandwidth)
 
-with open('datasets/results/global_results_111k.csv') as csvfile:
+with open('datasets/results/global_results_' + result_type + '.csv') as csvfile:
     readCSV = csv.reader(csvfile, delimiter=',')
     next(readCSV, None)
 
@@ -111,9 +148,9 @@ if data['early']:
     plt.plot(nodes, mutations['early']['times'], color="#ea9f15", alpha=0.8, label="Early")
 
     # Ring
-    plt.fill_between(nodes, mutations['ring']['error-'], mutations['ring']['error+'], color="#adf442", alpha=0.4)
-    plt.fill_between(nodes, mutations['ring']['error-2'], mutations['ring']['error+2'], color="#87c924", alpha=0.6)
-    plt.plot(nodes, mutations['ring']['times'], color="#1cbf42", alpha=0.8, label="Ring")
+    # plt.fill_between(nodes, mutations['ring']['error-'], mutations['ring']['error+'], color="#adf442", alpha=0.4)
+    # plt.fill_between(nodes, mutations['ring']['error-2'], mutations['ring']['error+2'], color="#87c924", alpha=0.6)
+    # plt.plot(nodes, mutations['ring']['times'], color="#1cbf42", alpha=0.8, label="Ring")
 
     # Centralized
     plt.fill_between(nodes, mutations['centralized']['error-'], mutations['centralized']['error+'], color="#f48989", alpha=0.4)
