@@ -7,17 +7,21 @@ import (
 
 // Ring is a mutation of a ring
 type Ring struct {
-    peer           *con.Peer
-    steps          int
-    suspectFailure bool
+    peer                  *con.Peer
+    stepsForward          int
+    stepsToBack           int
+    suspectFailureForward bool
+    suspectFailureToBack  bool
 }
 
 // NewRing creates a new ring
 func NewRing(peer *con.Peer) (ring *Ring) {
 	ring = new(Ring)
     ring.peer = peer
-    ring.steps = 1
-    ring.suspectFailure = false
+    ring.stepsForward = 1
+    ring.stepsToBack = 1
+    ring.suspectFailureForward = false
+    ring.suspectFailureToBack = false
 
 	return
 }
@@ -43,20 +47,26 @@ func (ring *Ring) Delta(id int) bool {
     lastPackage := ring.peer.GetChannel().LastPackageBuffered(id)
     packageArrived := lastPackage != nil && lastPackage.Arrived
 
-    if !packageArrived && (id == next || id == previous) && !ring.suspectFailure {
-        ring.steps++
-        ring.suspectFailure = true
+    if !packageArrived {
+        if id == next && !ring.suspectFailureForward {
+            ring.stepsForward++
+            ring.suspectFailureForward = true
+        } else if id == previous && !ring.suspectFailureToBack {
+            ring.stepsToBack++
+            ring.suspectFailureToBack = true
+        }
     }
 
     if ring.isLastNode(id) {
-        ring.suspectFailure = false
+        ring.suspectFailureForward = false
+        ring.suspectFailureToBack = false
     }
 
 	return id == next || id == previous
 }
 
 func (ring *Ring) next() int {
-    nextID := ring.peerID() + ring.steps
+    nextID := ring.peerID() + ring.stepsForward
     numberParticipants := ring.peer.GetNumberParticipants()
 
     if nextID > numberParticipants {
@@ -68,7 +78,7 @@ func (ring *Ring) next() int {
 
 func (ring *Ring) previous() int {
     peerID := ring.peerID()
-    steps := ring.steps
+    steps := ring.stepsToBack
 
     if (peerID - steps) <= 0 {
         return (ring.peer.GetNumberParticipants() + peerID) - steps

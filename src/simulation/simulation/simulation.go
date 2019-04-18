@@ -100,7 +100,7 @@ func configurePeer(peer *con.Peer) {
 
 func argsInfo(nArgs int) {
 	if nArgs < 8 {
-		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <WITH_FAULTS> <WITH_ALL_METRICS>")
+		fmt.Println("simulation <MUTATION> <N_NODES> <DEFAULT_DELTA> <MAX_TRIES> <%_MISS> <LATENCY> <BANDWIDTH> <%_FAULTS> <PROB_TO_FAIL> <WITH_ALL_METRICS>")
 		os.Exit(1)
 	}
 }
