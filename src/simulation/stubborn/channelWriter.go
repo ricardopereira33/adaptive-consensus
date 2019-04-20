@@ -42,7 +42,7 @@ func (channel *Channel) sendMessage(idDestination int) {
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
     if successMessage(channel.percentageMiss) {
-        if channel.checkLimiter.Limit() {
+        if !channel.checkLimiter.Limit() {
             //Bandwidth
             channel.limiter.Take()
 
