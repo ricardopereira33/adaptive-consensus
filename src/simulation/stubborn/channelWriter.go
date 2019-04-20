@@ -41,13 +41,17 @@ func (channel *Channel) sendMessage(idDestination int) {
 }
 
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
-	if successMessage(channel.percentageMiss) {
-        //Bandwidth
-        channel.limiter.Take()
+    if successMessage(channel.percentageMiss) {
+        if channel.checkLimiter.Limit() {
+            //Bandwidth
+            channel.limiter.Take()
 
-		channel.sendToBuffer(idDestination, message)
-		channel.metrics.incrementMessagesSent(idDestination)
-	}
+            channel.sendToBuffer(idDestination, message)
+            channel.metrics.incrementMessagesSent(idDestination)
+        } else {
+            channel.bandwidthExceeded = true
+        }
+    }
 }
 
 func (channel *Channel) sendToBuffer(id int, pack *Package) {

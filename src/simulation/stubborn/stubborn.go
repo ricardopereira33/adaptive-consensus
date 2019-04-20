@@ -13,13 +13,14 @@ type SChannel interface {
 	Send(int, []byte)
 	SendAll([]byte)
 	SendSuspicion(int, int)
-	Results() ([]float64, []float64, time.Time, []float64)
+	Results() ([]float64, []float64, time.Time, []float64, bool)
 	Init(time.Duration)
 	Finish()
 
     LastPackageBuffered(peerID int) *Package
 
-	GetPackage(id int) *Package
+    GetPackage(id int) *Package
+    GetBandwidthExceeded() bool
 	SetMaxTries(int)
 	SetPercentageMiss(float64)
 	SetDelta0(function func(int, *Package) bool)

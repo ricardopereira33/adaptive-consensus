@@ -222,10 +222,11 @@ func ensureValue(value float64) string {
 	return result
 }
 
-func saveResult(endTime time.Time, startTime time.Time) {
+func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool) {
 	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
-	ex.CheckError(err)
 	defer file.Close()
+
+    ex.CheckError(err)
 
 	duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
@@ -237,6 +238,7 @@ func saveResult(endTime time.Time, startTime time.Time) {
         fmt.Sprintf("%f", probabilityToFail) + "," +
         fmt.Sprintf("%f", latency) + "," +
         strconv.Itoa(bandwidth) + "," +
+        strconv.FormatBool(bandwidthExceeded) + "," +
 		mutation + "," +
 		fmt.Sprintf("%f", duration) + "\n")
 }

@@ -25,6 +25,8 @@ install:
 	go get "github.com/joa/failuredetector"
 	go get gonum.org/v1/plot/...
 	go get "go.uber.org/ratelimit"
+	go get "github.com/yangwenmai/ratelimit/leakybucket"
+	go get "github.com/yangwenmai/ratelimit/simpleratelimit"
 
 run_mutation:
 	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}

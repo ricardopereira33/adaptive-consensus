@@ -5,7 +5,8 @@ import (
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map"
-	rl "go.uber.org/ratelimit"
+    rl "go.uber.org/ratelimit"
+    srl "github.com/yangwenmai/ratelimit/simpleratelimit"
 )
 
 var (
@@ -29,7 +30,9 @@ type Channel struct {
 	delta0Func         func(int, *Package) bool
 	deltaFunc          func(int) bool
     limiter            rl.Limiter
+    checkLimiter       *srl.RateLimiter
     latency            time.Duration
+    bandwidthExceeded  bool
 }
 
 func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
@@ -39,7 +42,8 @@ func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap
 	channel.peer = peer
 	channel.outputBuffer = newBuffer(numberParticipants)
 	channel.numberParticipants = numberParticipants
-	channel.metrics = NewMetrics(numberParticipants)
+    channel.metrics = NewMetrics(numberParticipants)
+    channel.bandwidthExceeded = false
 
 	value, present := peers.Get(strconv.Itoa(peerID))
 
@@ -87,8 +91,10 @@ func (channel *Channel) Init(deltaDefault time.Duration) {
 }
 
 // Results returns the metrics results
-func (channel *Channel) Results() ([]float64, []float64, time.Time, []float64) {
-	return channel.metrics.results()
+func (channel *Channel) Results() ([]float64, []float64, time.Time, []float64, bool) {
+    sent, received, decision, delays := channel.metrics.results()
+
+    return sent, received, decision, delays, channel.bandwidthExceeded
 }
 
 // Finish is the method that finish the consensus protocol
@@ -106,6 +112,11 @@ func (channel *Channel) GetPackage(id int) *Package {
 	pack := channel.outputBuffer.GetElement(id)
 
 	return pack
+}
+
+// GetBandwidthExceeded returns true if the bandwidth has been exceeded
+func (channel *Channel) GetBandwidthExceeded() bool {
+	return channel.bandwidthExceeded
 }
 
 // SetMaxTries sets the MaxTries value.
@@ -135,7 +146,8 @@ func (channel *Channel) SetPercentageMiss(percentage float64) {
 
 // SetBandwidth sets bandwidth value
 func (channel *Channel) SetBandwidth(bandwidth int) {
-	channel.limiter = rl.New(bandwidth)
+    channel.limiter = rl.New(bandwidth)
+    channel.checkLimiter = srl.New(bandwidth, time.Second)
 }
 
 // SetLatency sets latency value
