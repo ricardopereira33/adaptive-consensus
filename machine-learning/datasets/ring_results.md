@@ -2,19 +2,27 @@
 
 In order to have an overview and to be able to analyze all the results, a set of graphs was built. Each of these graphs represents a specific environment.
 
-## Messages exchange
+## New ring mutation
+
+A new implementation of it was made, in order to improve the performance of the ring mutation. Two things were changed:
+
+- The `delta0` function only allows it to send a message to the next or previous peer.
+
+- The `delta` function, responsible for the retransmission, allows the retransmission for the next or previous peer as well. However, when a peer didn't send a response, the message is sent to the next (or previous) and skip this one. The number of skips/steps is independent for each side.
+
+## Messages exchange (overview)
 
 ### Old Ring
 
-Sent                                                |  Received
-:--------------------------------------------------:|:-----------------------------------------------------:
-![](ring_results/compare_rings/sent_old_ring.png)  |  ![](ring_results/compare_rings/received_old_ring.png)
+Sent                                   |  Received
+:-------------------------------------:|:----------------------------------------:
+![](results/ring/sent_old_ring.png)    |  ![](results/ring/received_old_ring.png)
 
 ### New Ring
 
-Sent                                                |  Received
-:--------------------------------------------------:|:-------------------------------------------------:
-![](ring_results/compare_rings/sent_new_ring.png)  |  ![](ring_results/compare_rings/received_ring.png)
+Sent                                   |  Received
+:-------------------------------------:|:------------------------------------:
+![](results/ring/sent_ring.png)        |  ![](results/ring/received_ring.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -34,7 +42,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_without_faults_low_default_delta.png)
+![](results/ring/ring_without_faults_low_default_delta.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -52,7 +60,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_without_faults_normal.png)
+![](results/ring/ring_without_faults_normal.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -70,7 +78,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_without_faults_large_bandwidth.png)
+![](results/ring/ring_without_faults_large_bandwidth.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -88,7 +96,7 @@ latency             = 375.0 ms
 
 #### Graph
 
-![](ring_results/ring_without_faults_high_latency.png)
+![](results/ring/ring_without_faults_high_latency.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -108,7 +116,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_with_faults_low_default_delta.png)
+![](results/ring/ring_with_faults_low_default_delta.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -126,7 +134,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_with_faults_normal.png)
+![](results/ring/ring_with_faults_normal.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -144,7 +152,7 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_with_faults_large_bandwidth.png)
+![](results/ring/ring_with_faults_large_bandwidth.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -162,7 +170,7 @@ latency             = 375.0 ms
 
 #### Graph
 
-![](ring_results/ring_with_faults_high_latency.png)
+![](results/ring/ring_with_faults_high_latency.png)
 
 <div style="page-break-after: always;"></div>
 
@@ -180,5 +188,8 @@ latency             = 125.0 ms
 
 #### Graph
 
-![](ring_results/ring_with_a_lot_of_faults.png)
+![](results/ring/ring_with_a_lot_of_faults.png)
 
+# Conclusion
+
+The previous graphs show that the new ring mutation brings better performance in a faulty environment compared to the old ring mutation. However, for a non-faulty environment, the old ring mutation has a better performance.
