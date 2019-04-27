@@ -1,7 +1,7 @@
 require 'timeout'
 
 initial_default_delta       = 0.5
-initial_max_tries           = [3, 5]
+initial_max_tries           = [3, 5, 10]
 initial_percentage_miss     = 0
 initial_percentage_faults   = 0
 initial_probability_to_fail = 0

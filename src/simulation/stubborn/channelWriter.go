@@ -18,14 +18,16 @@ func (channel *Channel) SendAll(message []byte) {
 // SendSuspicion is the method that notify for a possible suspicion
 func (channel *Channel) SendSuspicion(peerID int, targetPeerID int) {
 	message := newSuspect(targetPeerID, true)
-	channel.sendDirect(peerID, message)
+
+    channel.sendDirect(peerID, message)
 }
 
 // Send is the method that sends the messages through the channel
 func (channel *Channel) Send(idDestination int, message []byte) {
 	packageMsg := newPackage(channel.peerID, message, false)
 	isToSend := channel.delta0(idDestination, packageMsg)
-	channel.outputBuffer.InsertElement(idDestination, packageMsg)
+
+    channel.outputBuffer.InsertElement(idDestination, packageMsg)
 
 	if isToSend {
 		channel.sendMessage(idDestination)
@@ -43,9 +45,10 @@ func (channel *Channel) sendMessage(idDestination int) {
 func (channel *Channel) sendDirect(idDestination int, message *Package) {
     if successMessage(channel.percentageMiss) {
         //Bandwidth
-        if !channel.checkLimiter.Limit() {
-            channel.limiter.Take()
+        _, err := channel.leakybucket.Add(1)
 
+        if err == nil {
+            channel.limiter.Take()
             channel.sendToBuffer(idDestination, message)
             channel.metrics.incrementMessagesSent(idDestination)
         } else {

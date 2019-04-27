@@ -39,7 +39,7 @@ func propose(value string) {
     bandwidthExceeded := false
 
 	for id := 1; id <= numberParticipants; id++ {
-		go runPeer(id, value, responses, channels, detectors)
+		go runPeer(id, value, responses, channels, detectors, startTime)
 	}
 
 	if debug {
@@ -70,10 +70,10 @@ func propose(value string) {
 	}
 
 	// save(list, mutation)
-	saveResult(endTime, startTime, bandwidthExceeded)
+	saveResult(endTime, startTime, bandwidthExceeded, list)
 }
 
-func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors) {
+func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors, startTime time.Time) {
 	peer := con.NewPeer(peerID, numberParticipants, channels, detectors)
 	configurePeer(peer)
 
@@ -81,9 +81,9 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 	handleMessages(peer)
 
 	channel := peer.GetChannel()
-	received, sent, decisionTime, delays, bandwidthExceeded := channel.Results()
+	received, sent, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded := channel.Results(startTime)
 
-	response <- con.NewResults(sent, received, decisionTime, delays, bandwidthExceeded, peerID)
+	response <- con.NewResults(sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded, peerID)
 }
 
 func configurePeer(peer *con.Peer) {

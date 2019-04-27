@@ -6,7 +6,7 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
     rl "go.uber.org/ratelimit"
-    srl "github.com/yangwenmai/ratelimit/simpleratelimit"
+	lb "github.com/yangwenmai/ratelimit/leakybucket"
 )
 
 var (
@@ -26,13 +26,15 @@ type Channel struct {
 	inputBuffer        chan *Package
 	metrics            *Metrics
 	percentageMiss     float64
-	suspectedFunc      func(int, interface{})
-	delta0Func         func(int, *Package) bool
-	deltaFunc          func(int) bool
     limiter            rl.Limiter
-    checkLimiter       *srl.RateLimiter
+    storage            *lb.Storage
+    leakybucket        lb.BucketI
     latency            time.Duration
     bandwidthExceeded  bool
+
+    suspectedFunc      func(int, interface{})
+	delta0Func         func(int, *Package) bool
+	deltaFunc          func(int) bool
 }
 
 func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
@@ -71,30 +73,33 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 
 	for {
 		time.Sleep(defaultDelta)
-		for id := 1; id <= channel.numberParticipants; id++ {
+        channel.metrics.saveRetransmission(channel.peerID)
+
+        for id := 1; id <= channel.numberParticipants; id++ {
 			if channel.delta(id) || tries > MaxTries {
 				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-					// channel.metrics.logDelay(id)
+					// channel.metrics.logDelay(id)x
 					channel.sendMessage(id)
-				}
+                }
 			}
-			tries++
+            tries++
 		}
 	}
 }
 
 // Init starts the channel
 func (channel *Channel) Init(deltaDefault time.Duration) {
-	go channel.retransmission(deltaDefault)
+    go channel.retransmission(deltaDefault)
+    go channel.metrics.checkBandwidth(channel.peerID, channel.leakybucket)
 }
 
 // Results returns the metrics results
-func (channel *Channel) Results() ([]float64, []float64, time.Time, []float64, bool) {
-    sent, received, decision, delays := channel.metrics.results()
+func (channel *Channel) Results(startTime time.Time) ([]float64, []float64, time.Time, []string, []string, bool) {
+    sent, received, decision, listOfBandwidthUsage, listOfRetransmission := channel.metrics.results(startTime)
 
-    return sent, received, decision, delays, channel.bandwidthExceeded
+    return sent, received, decision, listOfBandwidthUsage, listOfRetransmission, channel.bandwidthExceeded
 }
 
 // Finish is the method that finish the consensus protocol
@@ -147,7 +152,8 @@ func (channel *Channel) SetPercentageMiss(percentage float64) {
 // SetBandwidth sets bandwidth value
 func (channel *Channel) SetBandwidth(bandwidth int) {
     channel.limiter = rl.New(bandwidth)
-    channel.checkLimiter = srl.New(bandwidth, time.Second)
+    channel.storage = lb.New()
+    channel.leakybucket, _ = channel.storage.Create("leackyBucket", uint(bandwidth), time.Second)
 }
 
 // SetLatency sets latency value

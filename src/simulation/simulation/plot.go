@@ -222,7 +222,7 @@ func ensureValue(value float64) string {
 	return result
 }
 
-func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool) {
+func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, list map[int]*con.Results) {
 	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
 	defer file.Close()
 
@@ -240,5 +240,26 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool) 
         strconv.Itoa(bandwidth) + "," +
         strconv.FormatBool(bandwidthExceeded) + "," +
 		mutation + "," +
-		fmt.Sprintf("%f", duration) + "\n")
+        fmt.Sprintf("%f", duration) + "\n")
+
+    saveToCsv(list)
+}
+
+func saveToCsv(list map[int]*con.Results) {
+    fileBandwidth, err := os.OpenFile(DIRCSV + mutation + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+    fileRetransmission, err := os.OpenFile(DIRCSV + mutation + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+
+    defer fileBandwidth.Close()
+    defer fileRetransmission.Close()
+
+    ex.CheckError(err)
+
+	for _, result := range list {
+        for _, bandwidthUsage := range result.ListOfBandwidthUsage {
+            fileBandwidth.WriteString(bandwidthUsage + "\n")
+        }
+        for _, retransmission := range result.ListOfRetransmission {
+            fileRetransmission.WriteString(retransmission + "\n")
+        }
+    }
 }
