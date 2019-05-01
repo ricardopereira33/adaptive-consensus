@@ -223,10 +223,10 @@ func ensureValue(value float64) string {
 }
 
 func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, list map[int]*con.Results) {
-	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(DIRCSV+"global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
 	defer file.Close()
 
-    ex.CheckError(err)
+	ex.CheckError(err)
 
 	duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
@@ -234,32 +234,32 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		fmt.Sprintf("%f", defaultDelta) + "," +
 		strconv.Itoa(maxTries) + "," +
 		fmt.Sprintf("%f", percentageMiss) + "," +
-        fmt.Sprintf("%f", percentageFaults) + "," +
-        fmt.Sprintf("%f", probabilityToFail) + "," +
-        fmt.Sprintf("%f", latency) + "," +
-        strconv.Itoa(bandwidth) + "," +
-        strconv.FormatBool(bandwidthExceeded) + "," +
+		fmt.Sprintf("%f", percentageFaults) + "," +
+		fmt.Sprintf("%f", probabilityToFail) + "," +
+		fmt.Sprintf("%f", latency) + "," +
+		strconv.Itoa(bandwidth) + "," +
+		strconv.FormatBool(bandwidthExceeded) + "," +
 		mutation + "," +
-        fmt.Sprintf("%f", duration) + "\n")
+		fmt.Sprintf("%f", duration) + "\n")
 
-    saveToCsv(list)
+	saveToCsv(list)
 }
 
 func saveToCsv(list map[int]*con.Results) {
-    fileBandwidth, err := os.OpenFile(DIRCSV + mutation + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
-    fileRetransmission, err := os.OpenFile(DIRCSV + mutation + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	fileBandwidth, err := os.OpenFile(DIRCSV + mutation + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	fileRetransmission, err := os.OpenFile(DIRCSV + mutation + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
 
-    defer fileBandwidth.Close()
-    defer fileRetransmission.Close()
+	defer fileBandwidth.Close()
+	defer fileRetransmission.Close()
 
-    ex.CheckError(err)
+	ex.CheckError(err)
 
 	for _, result := range list {
-        for _, bandwidthUsage := range result.ListOfBandwidthUsage {
-            fileBandwidth.WriteString(bandwidthUsage + "\n")
-        }
-        for _, retransmission := range result.ListOfRetransmission {
-            fileRetransmission.WriteString(retransmission + "\n")
-        }
-    }
+		for _, bandwidthUsage := range result.ListOfBandwidthUsage {
+			fileBandwidth.WriteString(bandwidthUsage + "\n")
+		}
+		for _, retransmission := range result.ListOfRetransmission {
+			fileRetransmission.WriteString(retransmission + "\n")
+		}
+	}
 }

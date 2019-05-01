@@ -2,7 +2,8 @@ package consensus
 
 import (
 	"math/rand"
-    "time"
+	"sync/atomic"
+	"time"
 
 	cmap "github.com/orcaman/concurrent-map"
 	fd "simulation/failuredetection"
@@ -25,32 +26,35 @@ type IPeer interface {
 	GetConsensusDecision() string
 	GetConsensusInfo() *Info
 	GetChannel() stb.SChannel
+	GetMessageNumber() int
 
 	SetCoordinator(int)
-    SetDefaultDelta(float64)
-    SetProbabilityToFail(float64)
+	SetDefaultDelta(float64)
+	SetProbabilityToFail(float64)
 }
 
 // Peer is a struct that represents a peer
 type Peer struct {
 	id                 int
 	numberParticipants int
+	messageNumber      uint64
 	alive              bool
-    probabilityToFail  float64
+	probabilityToFail  float64
 	channel            stb.SChannel
 	consensusInfo      *Info
-    detectors          *fd.Detectors
+	detectors          *fd.Detectors
 }
 
 // NewPeer creates a new Peer
-func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors) (peer *Peer) {
+func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors *fd.Detectors, startTime time.Time) (peer *Peer) {
 	peer = new(Peer)
 	peer.id = peerID
 	peer.numberParticipants = numberParticipants
 	peer.consensusInfo = NewConsensusInfo()
 	peer.detectors = detectors
 	peer.alive = true
-    peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers)
+	peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, startTime)
+	peer.messageNumber = 0
 
 	return
 }
@@ -61,7 +65,7 @@ func (peer *Peer) triggerFailure() {
 			peer.alive = false
 			peer.detectors.IncrementFaults()
 
-            break
+			break
 		}
 
 		time.Sleep(500 * time.Millisecond)
@@ -95,8 +99,8 @@ func (peer *Peer) handleFailures() {
 func (peer *Peer) Init() {
 	peer.channel.Init(DefaultDelta)
 
-    go peer.handleFailures()
-    go peer.triggerFailure()
+	go peer.handleFailures()
+	go peer.triggerFailure()
 }
 
 // IsAlive returns the status of the peer
@@ -134,6 +138,13 @@ func (peer *Peer) GetChannel() stb.SChannel {
 	return peer.channel
 }
 
+// GetMessageNumber returns the next message number
+func (peer *Peer) GetMessageNumber() int {
+	atomic.AddUint64(&peer.messageNumber, 1)
+
+	return int(atomic.LoadUint64(&peer.messageNumber))
+}
+
 // SetCoordinator saves the coordainator ID
 func (peer *Peer) SetCoordinator(coordID int) {
 	peer.consensusInfo.CoordID = coordID
@@ -146,13 +157,13 @@ func (peer *Peer) SetDefaultDelta(defaultDelta float64) {
 
 // SetProbabilityToFail sets the value of probabilityToFail
 func (peer *Peer) SetProbabilityToFail(probabilityToFail float64) {
-    peer.probabilityToFail = probabilityToFail
+	peer.probabilityToFail = probabilityToFail
 }
 
 func (peer *Peer) peerFailed() bool {
 	randomValue := rand.Float64()
-    percentage := peer.probabilityToFail / 100.0
-    canPeerDie := peer.detectors.CanPeerDie()
+	percentage := peer.probabilityToFail / 100.0
+	canPeerDie := peer.detectors.CanPeerDie()
 
 	if randomValue < percentage && canPeerDie {
 		return true

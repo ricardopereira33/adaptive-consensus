@@ -60,17 +60,16 @@ func (detectors *Detectors) IsAvailable(id int) bool {
 
 // CanPeerDie verifies if a peer can die, taking into account the current number of faults
 func (detectors *Detectors) CanPeerDie() bool {
-    currentPercentageFaults := (float64(detectors.numberFaults) / float64(detectors.numberParticipants)) * 100
+	currentPercentageFaults := (float64(detectors.numberFaults) / float64(detectors.numberParticipants)) * 100
 
-    if currentPercentageFaults <= detectors.percentageFaults {
-        return true
-    }
+	if currentPercentageFaults <= detectors.percentageFaults {
+		return true
+	}
 
-    return false
+	return false
 }
 
 // IncrementFaults increments the number of faults
 func (detectors *Detectors) IncrementFaults() {
-    detectors.numberFaults++
+	detectors.numberFaults++
 }
-

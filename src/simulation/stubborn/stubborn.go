@@ -17,22 +17,25 @@ type SChannel interface {
 	Init(time.Duration)
 	Finish()
 
-    LastPackageBuffered(peerID int) *Package
+	LastPackageBuffered(peerID int) *Package
 
-    GetPackage(id int) *Package
-    GetBandwidthExceeded() bool
-	SetMaxTries(int)
+	GetPackage(id int) *Package
+	GetBandwidthExceeded() bool
+
+    SetMaxTries(int)
 	SetPercentageMiss(float64)
-	SetDelta0(function func(int, *Package) bool)
-	SetDelta(function func(int) bool)
-    SetSuspectedFunc(func(int, interface{}))
-    SetBandwidth(int)
+	SetSuspectedFunc(func(int, interface{}))
+	SetBandwidth(int)
     SetLatency(float64)
+
+    SetDelta0(function func(int, *Package) bool)
+	SetDelta(function func(int) bool)
+    SetSenderVoted(func(int, *Package) bool)
 }
 
 // NewSChannel is the constructor of a stubborn channel
-func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel SChannel) {
-	channel = newChannel(peerID, numberParticipants, peer, peers)
+func NewSChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, startTime time.Time) (channel SChannel) {
+	channel = newChannel(peerID, numberParticipants, peer, peers, startTime)
 
 	return
 }

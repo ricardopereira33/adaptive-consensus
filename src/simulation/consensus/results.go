@@ -7,11 +7,11 @@ type Results struct {
 	PeerID               int
 	Sent                 []float64
 	Received             []float64
-    Delays               []float64
-    ListOfBandwidthUsage []string
-    ListOfRetransmission []string
-    DecisionTime         time.Time
-    BandwidthExceeded    bool
+	Delays               []float64
+	ListOfBandwidthUsage []string
+	ListOfRetransmission []string
+	DecisionTime         time.Time
+	BandwidthExceeded    bool
 }
 
 // DurationSlice define a new type of Slice to get order a list of time values
@@ -24,9 +24,9 @@ func NewResults(sent, received []float64, decisionTime time.Time, listOfBandwidt
 	results.Sent = sent
 	results.Received = received
 	results.DecisionTime = decisionTime
-    results.ListOfBandwidthUsage = listOfBandwidthUsage
-    results.ListOfRetransmission = listOfRetransmission
-    results.BandwidthExceeded = bandwidthExceeded
+	results.ListOfBandwidthUsage = listOfBandwidthUsage
+	results.ListOfRetransmission = listOfRetransmission
+	results.BandwidthExceeded = bandwidthExceeded
 
 	return
 }
