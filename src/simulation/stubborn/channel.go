@@ -31,13 +31,15 @@ type Channel struct {
     leakybucket        lb.BucketI
     latency            time.Duration
     bandwidthExceeded  bool
+    startTime          time.Time
 
     suspectedFunc      func(int, interface{})
 	delta0Func         func(int, *Package) bool
-	deltaFunc          func(int) bool
+    deltaFunc          func(int) bool
+    senderVoted       func(int, *Package) bool
 }
 
-func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap) (channel *Channel) {
+func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap.ConcurrentMap, startTime time.Time) (channel *Channel) {
 	channel = new(Channel)
 	channel.peerID = peerID
 	channel.peers = peers
@@ -46,6 +48,7 @@ func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap
 	channel.numberParticipants = numberParticipants
     channel.metrics = NewMetrics(numberParticipants)
     channel.bandwidthExceeded = false
+    channel.startTime = startTime
 
 	value, present := peers.Get(strconv.Itoa(peerID))
 
@@ -73,15 +76,16 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 
 	for {
 		time.Sleep(defaultDelta)
-        channel.metrics.saveRetransmission(channel.peerID)
+        // channel.metrics.saveRetransmission(channel.peerID)
 
         for id := 1; id <= channel.numberParticipants; id++ {
 			if channel.delta(id) || tries > MaxTries {
 				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-					// channel.metrics.logDelay(id)x
-					channel.sendMessage(id)
+                    // channel.metrics.logDelay(id)
+                    // pack.IncRetransmission()
+					go channel.sendMessage(id, pack)
                 }
 			}
             tries++
@@ -92,7 +96,7 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 // Init starts the channel
 func (channel *Channel) Init(deltaDefault time.Duration) {
     go channel.retransmission(deltaDefault)
-    go channel.metrics.checkBandwidth(channel.peerID, channel.leakybucket)
+    // go channel.metrics.checkBandwidth(channel.peerID, channel.leakybucket)
 }
 
 // Results returns the metrics results
@@ -137,6 +141,11 @@ func (channel *Channel) SetDelta0(function func(int, *Package) bool) {
 // SetDelta is the method to define the delta implemention
 func (channel *Channel) SetDelta(function func(int) bool) {
 	channel.deltaFunc = function
+}
+
+// SetSenderVoted sets the method that checks if the sender voted
+func (channel *Channel) SetSenderVoted(function func(int, *Package) bool) {
+    channel.senderVoted = function
 }
 
 // SetSuspectedFunc is the method to define the suspected implementation

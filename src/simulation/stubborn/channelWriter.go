@@ -2,8 +2,8 @@ package stubborn
 
 import (
 	"math/rand"
-    "strconv"
-    "time"
+	"strconv"
+	"time"
 )
 
 // SendAll is the method that sends a message to all participants
@@ -19,7 +19,7 @@ func (channel *Channel) SendAll(message []byte) {
 func (channel *Channel) SendSuspicion(peerID int, targetPeerID int) {
 	message := newSuspect(targetPeerID, true)
 
-    channel.sendDirect(peerID, message)
+	channel.sendMessage(peerID, message)
 }
 
 // Send is the method that sends the messages through the channel
@@ -27,42 +27,41 @@ func (channel *Channel) Send(idDestination int, message []byte) {
 	packageMsg := newPackage(channel.peerID, message, false)
 	isToSend := channel.delta0(idDestination, packageMsg)
 
-    channel.outputBuffer.InsertElement(idDestination, packageMsg)
+	channel.outputBuffer.InsertElement(idDestination, packageMsg)
 
 	if isToSend {
-		channel.sendMessage(idDestination)
+		go channel.sendMessage(idDestination, packageMsg)
 	}
-	// else {
-	//     channel.metrics.initialDelay(idDestination)
-	// }
 }
 
-func (channel *Channel) sendMessage(idDestination int) {
-	message := channel.outputBuffer.GetElement(idDestination)
-	go channel.sendDirect(idDestination, message)
-}
+func (channel *Channel) sendMessage(idDestination int, message *Package) {
+	// duration := float64(time.Now().Sub(channel.startTime)) / float64(time.Millisecond)
+	// fmt.Println(strconv.Itoa(channel.peerID) + "," +
+	//     strconv.Itoa(idDestination) + "," +
+	//     strconv.FormatFloat(duration,'f', 2, 64) + "," +
+	//     strconv.Itoa(channel.peerID) + "_" + strconv.Itoa(message.MessageNumber) + "," +
+	//     strconv.Itoa(message.Retransmissions))
 
-func (channel *Channel) sendDirect(idDestination int, message *Package) {
-    if successMessage(channel.percentageMiss) {
-        //Bandwidth
-        _, err := channel.leakybucket.Add(1)
+	if successMessage(channel.percentageMiss) {
+		//Bandwidth
+		_, err := channel.leakybucket.Add(1)
 
-        if err == nil {
-            channel.limiter.Take()
-            channel.sendToBuffer(idDestination, message)
-            channel.metrics.incrementMessagesSent(idDestination)
-        } else {
-            channel.bandwidthExceeded = true
-        }
-    }
+		if err == nil {
+			channel.limiter.Take()
+			channel.sendToBuffer(idDestination, message)
+			channel.metrics.incrementMessagesSent(idDestination)
+		} else {
+			channel.bandwidthExceeded = true
+		}
+	}
 }
 
 func (channel *Channel) sendToBuffer(id int, pack *Package) {
 	value, present := channel.peers.Get(strconv.Itoa(id))
 
 	if present {
-        // Latency
-        time.Sleep(channel.latency)
+		// Latency
+		time.Sleep(channel.latency)
 
 		peerChannel := value.(chan *Package)
 		peerChannel <- pack

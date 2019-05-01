@@ -23,12 +23,12 @@ var (
 	mutationCode       int
 	numberParticipants int
 	maxTries           int
-    bandwidth          int
+	bandwidth          int
 	defaultDelta       float64
 	percentageMiss     float64
 	percentageFaults   float64
-    latency            float64
-    probabilityToFail  float64
+	latency            float64
+	probabilityToFail  float64
 )
 
 func propose(value string) {
@@ -36,7 +36,7 @@ func propose(value string) {
 	responses := make(chan *con.Results)
 	detectors := fd.NewDetectors(3.3, 10, numberParticipants, percentageFaults)
 	startTime := time.Now()
-    bandwidthExceeded := false
+	bandwidthExceeded := false
 
 	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels, detectors, startTime)
@@ -51,11 +51,11 @@ func propose(value string) {
 
 	for id := 1; id <= numberParticipants; id++ {
 		response := <-responses
-        list[response.PeerID] = response
+		list[response.PeerID] = response
 
-        if response.BandwidthExceeded {
-            bandwidthExceeded = true
-        }
+		if response.BandwidthExceeded {
+			bandwidthExceeded = true
+		}
 	}
 
 	endTime := time.Now()
@@ -74,7 +74,7 @@ func propose(value string) {
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors, startTime time.Time) {
-	peer := con.NewPeer(peerID, numberParticipants, channels, detectors)
+	peer := con.NewPeer(peerID, numberParticipants, channels, detectors, startTime)
 	configurePeer(peer)
 
 	go consensus(peer, value)
@@ -94,12 +94,13 @@ func configurePeer(peer *con.Peer) {
 	channel.SetMaxTries(maxTries)
 	channel.SetPercentageMiss(percentageMiss)
 	channel.SetDelta0(mut.Delta0)
-    channel.SetDelta(mut.Delta)
-    channel.SetBandwidth(bandwidth)
+	channel.SetDelta(mut.Delta)
+	channel.SetBandwidth(bandwidth)
     channel.SetLatency(latency)
+    channel.SetSenderVoted(con.SenderVoted)
 
-    peer.SetDefaultDelta(defaultDelta)
-    peer.SetProbabilityToFail(probabilityToFail)
+	peer.SetDefaultDelta(defaultDelta)
+	peer.SetProbabilityToFail(probabilityToFail)
 	peer.Init()
 }
 
@@ -126,23 +127,23 @@ func main() {
 	defaultDelta, err = strconv.ParseFloat(args[2], 64)
 	maxTries, err = strconv.Atoi(args[3])
 	percentageMiss, err = strconv.ParseFloat(args[4], 64)
-    latency, err = strconv.ParseFloat(args[5], 64)
-    bandwidth, err = strconv.Atoi(args[6])
-    percentageFaults, err = strconv.ParseFloat(args[7], 64)
-    probabilityToFail, err = strconv.ParseFloat(args[8], 64)
+	latency, err = strconv.ParseFloat(args[5], 64)
+	bandwidth, err = strconv.Atoi(args[6])
+	percentageFaults, err = strconv.ParseFloat(args[7], 64)
+	probabilityToFail, err = strconv.ParseFloat(args[8], 64)
 	withMetrics, err = strconv.ParseBool(args[9])
 
-    ex.CheckError(err)
+	ex.CheckError(err)
 
-    println(mutation + " - " +
-        strconv.Itoa(numberParticipants) + " - " +
+	println(mutation + " - " +
+		strconv.Itoa(numberParticipants) + " - " +
 		strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
 		strconv.Itoa(maxTries) + " - " +
-        strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
-        strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
-        strconv.Itoa(bandwidth) + " - " +
+		strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
+		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
+		strconv.Itoa(bandwidth) + " - " +
 		strconv.FormatFloat(percentageFaults, 'f', 2, 64) + " - " +
-        strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
+		strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
 		strconv.FormatBool(withMetrics))
 
 	propose("accept")
