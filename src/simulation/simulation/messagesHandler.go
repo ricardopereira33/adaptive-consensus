@@ -11,7 +11,7 @@ func handleMessages(peer *con.Peer) {
 		message := con.PackageToMessage(pack)
 		consensusInfo := peer.GetConsensusInfo()
 		numberParticipants := peer.GetNumberParticipants()
-		peerID := peer.GetPeerID()
+        peerID := peer.GetPeerID()
 
 		if len(consensusInfo.Voters) <= numberParticipants/2 {
 			checkRound(message, consensusInfo)
@@ -19,7 +19,7 @@ func handleMessages(peer *con.Peer) {
 			isMajority := (consensusInfo.Phase == 1) && (len(message.Voters) > numberParticipants/2)
 
 			if withNewVoters || isMajority {
-				message.Voters[peerID] = true
+				message.Voters[peerID] = 1
 				consensusInfo.Voters = union(consensusInfo.Voters, message.Voters)
 
 				if message.Estimate.PeerID == ((consensusInfo.Round % numberParticipants) + 1) {
@@ -28,6 +28,7 @@ func handleMessages(peer *con.Peer) {
 
 				message := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 				data := message.MessageToBytes()
+
 				channel.SendAll(data)
 			}
 		}
@@ -51,11 +52,11 @@ func checkRound(message *con.Message, consensusInfo *con.Info) {
 		consensusInfo.Estimate = message.Estimate
 		consensusInfo.Round = message.Round
 		consensusInfo.Phase = message.Phase
-		consensusInfo.Voters = make(map[int]bool)
+		consensusInfo.Voters = make(map[int]int)
 	}
 	if consensusInfo.Round == message.Round && consensusInfo.Phase < message.Phase {
 		consensusInfo.Phase = message.Phase
-		consensusInfo.Voters = make(map[int]bool)
+		consensusInfo.Voters = make(map[int]int)
 	}
 }
 
@@ -67,11 +68,11 @@ func checkPhase(message *con.Message, consensusInfo *con.Info) bool {
 
 	consensusInfo.Round++
 	consensusInfo.Phase = 1
-	consensusInfo.Voters = make(map[int]bool)
+	consensusInfo.Voters = make(map[int]int)
 	return false
 }
 
-func containsNewVoters(senderVoters map[int]bool, consensusInfo *con.Info) bool {
+func containsNewVoters(senderVoters map[int]int, consensusInfo *con.Info) bool {
 	for id := range senderVoters {
 		_, present := consensusInfo.Voters[id]
 		if !present {
@@ -82,9 +83,9 @@ func containsNewVoters(senderVoters map[int]bool, consensusInfo *con.Info) bool 
 	return false
 }
 
-func union(hash1 map[int]bool, hash2 map[int]bool) map[int]bool {
+func union(hash1 map[int]int, hash2 map[int]int) map[int]int {
 	for id := range hash2 {
-		hash1[id] = true
+		hash1[id] = 1
 	}
 
 	return hash1

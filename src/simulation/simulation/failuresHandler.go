@@ -13,7 +13,7 @@ func suspected(id int, iPeer interface{}) {
 
 	if id == ((consensusInfo.Round%numberParticipants)+1) && consensusInfo.Round == 1 {
 		consensusInfo.Round = 2
-		consensusInfo.Voters = make(map[int]bool)
+		consensusInfo.Voters = make(map[int]int)
 
 		message := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 		data := message.MessageToBytes()

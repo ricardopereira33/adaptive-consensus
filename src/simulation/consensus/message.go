@@ -12,12 +12,12 @@ type Message struct {
 	PeerID   int
 	Round    int
 	Phase    int
-	Voters   map[int]bool
+	Voters   map[int]int
 	Estimate *Estimate
 }
 
 // NewMessage creates a new message using the parameters passed in and returns it
-func NewMessage(peerID int, round int, phase int, voters map[int]bool, estimate *Estimate) (message *Message) {
+func NewMessage(peerID int, round int, phase int, voters map[int]int, estimate *Estimate) (message *Message) {
 	message = new(Message)
 	message.PeerID = peerID
 	message.Round = round
@@ -45,6 +45,17 @@ func PackageToMessage(pack *stb.Package) (message *Message) {
 	ex.CheckError(err)
 
 	return
+}
+
+// SenderVoted checks if the sender voted
+func SenderVoted(senderID int, pack *stb.Package) bool {
+    message := PackageToMessage(pack)
+
+    if message.Voters[senderID] == 1 {
+        return true
+    }
+
+    return false
 }
 
 /*** Axiliary Functions ***/
