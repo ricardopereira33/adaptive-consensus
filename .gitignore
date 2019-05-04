@@ -15,3 +15,6 @@ results/
 
 *.csv
 *.png
+*.dot
+*.txt
+*.out
