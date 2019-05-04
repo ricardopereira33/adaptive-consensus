@@ -28,7 +28,9 @@ func (centralized *Centralized) Delta0(id int, pack *stb.Package) bool {
 	isFresh := fresh(channel.GetPackage(id), pack)
 	isMajority := majority(pack, centralized.peer.GetNumberParticipants())
 
-	return isCoord && (isFresh || isMajority)
+	needAck := centralized.peer.NeedAck(id)
+
+	return (isCoord && (isFresh || isMajority)) || needAck
 }
 
 // Delta is the delta implementation

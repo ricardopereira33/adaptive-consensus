@@ -29,7 +29,9 @@ func NewGossip(peer *con.Peer) (gossip *Gossip) {
 
 // Delta0 is the delta0 implementation
 func (gossip *Gossip) Delta0(id int, message *stb.Package) bool {
-	return gossip.Delta(id)
+	needAck := gossip.peer.NeedAck(id)
+
+	return gossip.Delta(id) || needAck
 }
 
 // Delta is the delta implementation

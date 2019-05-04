@@ -35,12 +35,7 @@ func (channel *Channel) Send(idDestination int, message []byte) {
 }
 
 func (channel *Channel) sendMessage(idDestination int, message *Package) {
-	// duration := float64(time.Now().Sub(channel.startTime)) / float64(time.Millisecond)
-	// fmt.Println(strconv.Itoa(channel.peerID) + "," +
-	//     strconv.Itoa(idDestination) + "," +
-	//     strconv.FormatFloat(duration,'f', 2, 64) + "," +
-	//     strconv.Itoa(channel.peerID) + "_" + strconv.Itoa(message.MessageNumber) + "," +
-	//     strconv.Itoa(message.Retransmissions))
+	channel.metrics.incrementMessagesSent(idDestination)
 
 	if successMessage(channel.percentageMiss) {
 		//Bandwidth
@@ -49,7 +44,6 @@ func (channel *Channel) sendMessage(idDestination int, message *Package) {
 		if err == nil {
 			channel.limiter.Take()
 			channel.sendToBuffer(idDestination, message)
-			channel.metrics.incrementMessagesSent(idDestination)
 		} else {
 			channel.bandwidthExceeded = true
 		}

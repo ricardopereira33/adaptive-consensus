@@ -25,7 +25,9 @@ func (ring *OldRing) Delta0(id int, pack *stb.Package) bool {
 	isMajority := majority(pack, ring.peer.GetNumberParticipants())
 	isIDEqual := id == ((ring.peer.GetPeerID() % ring.peer.GetNumberParticipants()) + 1)
 
-	return isIDEqual && (isFresh || isMajority)
+	needAck := ring.peer.NeedAck(id)
+
+	return (isIDEqual && (isFresh || isMajority)) || needAck
 }
 
 // Delta is the delta implementation

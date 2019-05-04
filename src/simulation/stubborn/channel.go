@@ -46,7 +46,7 @@ func newChannel(peerID int, numberParticipants int, peer interface{}, peers cmap
 	channel.peer = peer
 	channel.outputBuffer = newBuffer(numberParticipants)
 	channel.numberParticipants = numberParticipants
-    channel.metrics = NewMetrics(numberParticipants)
+    channel.metrics = NewMetrics(numberParticipants, startTime)
     channel.bandwidthExceeded = false
     channel.startTime = startTime
 
@@ -83,7 +83,6 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-                    // channel.metrics.logDelay(id)
                     // pack.IncRetransmission()
 					go channel.sendMessage(id, pack)
                 }
@@ -133,6 +132,24 @@ func (channel *Channel) SetMaxTries(max int) {
 	MaxTries = max
 }
 
+// SetPercentageMiss sets percentageMiss value
+func (channel *Channel) SetPercentageMiss(percentage float64) {
+	channel.percentageMiss = percentage
+}
+
+// SetBandwidth sets bandwidth value
+func (channel *Channel) SetBandwidth(bandwidth int) {
+    channel.limiter = rl.New(bandwidth)
+    channel.storage = lb.New()
+    channel.leakybucket, _ = channel.storage.Create("leackyBucket", uint(bandwidth), time.Second)
+}
+
+// SetLatency sets latency value
+func (channel *Channel) SetLatency(latency float64) {
+    duration := time.Duration(int(channel.latency / 2))
+    channel.latency = time.Millisecond * duration
+}
+
 // SetDelta0 is the method to define the delta0 implemention
 func (channel *Channel) SetDelta0(function func(int, *Package) bool) {
 	channel.delta0Func = function
@@ -151,22 +168,4 @@ func (channel *Channel) SetSenderVoted(function func(int, *Package) bool) {
 // SetSuspectedFunc is the method to define the suspected implementation
 func (channel *Channel) SetSuspectedFunc(function func(int, interface{})) {
 	channel.suspectedFunc = function
-}
-
-// SetPercentageMiss sets percentageMiss value
-func (channel *Channel) SetPercentageMiss(percentage float64) {
-	channel.percentageMiss = percentage
-}
-
-// SetBandwidth sets bandwidth value
-func (channel *Channel) SetBandwidth(bandwidth int) {
-    channel.limiter = rl.New(bandwidth)
-    channel.storage = lb.New()
-    channel.leakybucket, _ = channel.storage.Create("leackyBucket", uint(bandwidth), time.Second)
-}
-
-// SetLatency sets latency value
-func (channel *Channel) SetLatency(latency float64) {
-    duration := time.Duration(int(channel.latency / 2))
-    channel.latency = time.Millisecond * duration
 }

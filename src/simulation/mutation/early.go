@@ -24,7 +24,9 @@ func (early *Early) Delta0(id int, pack *stb.Package) bool {
 	isFresh := fresh(channel.GetPackage(id), pack)
 	isMajority := majority(pack, early.peer.GetNumberParticipants())
 
-	return isFresh || isMajority
+	needAck := early.peer.NeedAck(id)
+
+	return (isFresh || isMajority) || needAck
 }
 
 // Delta is the delta implementation

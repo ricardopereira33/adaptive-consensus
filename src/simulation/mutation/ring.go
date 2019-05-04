@@ -36,7 +36,9 @@ func (ring *Ring) Delta0(id int, pack *stb.Package) bool {
 	next := ring.next()
 	previous := ring.previous()
 
-	return (id == next || id == previous) && (isFresh || isMajority)
+	needAck := ring.peer.NeedAck(id)
+
+	return ((id == next || id == previous) && (isFresh || isMajority)) || needAck
 }
 
 // Delta is the delta implementation
@@ -95,7 +97,7 @@ func (ring *Ring) isLastNode(dest int) bool {
 	numberParticipants := ring.peer.GetNumberParticipants()
 
 	if ring.peerID() == numberParticipants {
-		return dest == numberParticipants-1
+		return dest == numberParticipants - 1
 	}
 
 	return dest == numberParticipants

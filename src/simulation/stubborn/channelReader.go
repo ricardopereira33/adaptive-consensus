@@ -8,14 +8,17 @@ func (channel *Channel) Receive() (pack *Package) {
 		if pack.Suspicious {
 			channel.suspected(pack.SuspiciousID)
 		} else {
-			// channel.metrics.incrementMessagesReceived(pack.ID)
+			channel.metrics.incrementMessagesReceived(pack.ID)
 
-            if channel.senderVoted(pack.ID, pack) {
-                oldPack := channel.outputBuffer.GetElement(pack.ID)
-                oldPack.Arrived = true
+			if channel.senderVoted(pack.ID, pack){
+				oldPack := channel.outputBuffer.GetElement(pack.ID)
 
-                channel.outputBuffer.InsertElement(pack.ID, oldPack)
-            }
+				if oldPack != nil {
+					oldPack.Arrived = true
+
+					channel.outputBuffer.InsertElement(pack.ID, oldPack)
+				}
+			}
 
 			return pack
 		}

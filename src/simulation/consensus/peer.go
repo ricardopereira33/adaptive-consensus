@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"sync/atomic"
 	"time"
+	"strconv"
 
 	cmap "github.com/orcaman/concurrent-map"
 	fd "simulation/failuredetection"
@@ -18,6 +19,8 @@ var (
 // IPeer is an interface for a peer
 type IPeer interface {
 	Init()
+	ReceiveMessage(int)
+	NeedAck(int)
 	IsAlive() bool
 
 	GetPeerID() int
@@ -43,6 +46,7 @@ type Peer struct {
 	channel            stb.SChannel
 	consensusInfo      *Info
 	detectors          *fd.Detectors
+	lastMessages	   cmap.ConcurrentMap
 }
 
 // NewPeer creates a new Peer
@@ -55,8 +59,26 @@ func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors
 	peer.alive = true
 	peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, startTime)
 	peer.messageNumber = 0
+	peer.lastMessages = newLastMessagesMap(numberParticipants)
 
 	return
+}
+
+// ReceiveMessage update map of received messages
+func (peer *Peer) ReceiveMessage(peerID int) {
+	peer.lastMessages.Set(strconv.Itoa(peerID), true)
+}
+
+// NeedAck checks if is needed send an ACK
+func (peer *Peer) NeedAck(peerID int) bool {
+	value, _ := peer.lastMessages.Get(strconv.Itoa(peerID))
+	needAck := value.(bool)
+
+	if needAck {
+		peer.lastMessages.Set(strconv.Itoa(peerID), false)
+	}
+
+	return needAck
 }
 
 func (peer *Peer) triggerFailure() {
@@ -170,4 +192,14 @@ func (peer *Peer) peerFailed() bool {
 	}
 
 	return false
+}
+
+func newLastMessagesMap(numberParticipants int) cmap.ConcurrentMap {
+	lastMessagesMap := cmap.New()
+
+	for id := 1; id <= numberParticipants; id++ {
+		lastMessagesMap.Set(strconv.Itoa(id), false)
+	}
+
+	return lastMessagesMap
 }
