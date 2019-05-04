@@ -2,8 +2,11 @@ package stubborn
 
 import (
 	"encoding/json"
-	ex "simulation/exception"
 	"sync"
+	"strconv"
+
+	ex "simulation/exception"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 // Buffer is a interface to absract the buffer implementation
@@ -15,7 +18,7 @@ type Buffer interface {
 // BufferStruct is a struct where we keep the messages
 type BufferStruct struct {
 	Size  int
-	Data  map[int]*Package
+	Data  cmap.ConcurrentMap
 	Mutex *sync.Mutex
 }
 
@@ -32,7 +35,7 @@ type Package struct {
 func newBuffer(size int) (buffer *BufferStruct) {
 	buffer = new(BufferStruct)
 	buffer.Size = size
-	buffer.Data = make(map[int]*Package, size)
+	buffer.Data = cmap.New()
 	buffer.Mutex = new(sync.Mutex)
 
 	return
@@ -60,19 +63,15 @@ func newSuspect(suspiciousID int, suspicious bool) (pack *Package) {
 
 // InsertElement insert a package to the buffer
 func (buffer *BufferStruct) InsertElement(id int, pack *Package) {
-	buffer.Mutex.Lock()
-	buffer.Data[id] = pack
-	buffer.Mutex.Unlock()
+	buffer.Data.Set(strconv.Itoa(id), pack)
 }
 
 // GetElement get a package for the process "id"
 func (buffer BufferStruct) GetElement(id int) *Package {
-	buffer.Mutex.Lock()
-	pack, present := buffer.Data[id]
-	buffer.Mutex.Unlock()
+	pack, present := buffer.Data.Get(strconv.Itoa(id))
 
 	if present {
-		return pack
+		return pack.(*Package)
 	}
 
 	return nil
