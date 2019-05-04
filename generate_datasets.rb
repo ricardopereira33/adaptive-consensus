@@ -22,7 +22,7 @@ def execute(mutation, nodes, default_delta, max_tries, percentage_miss, percenta
             probability_to_fail.each do |probability|
               bandwidth.each do |bandw|
                 latency.each do |lat|
-                  if !(percentage_fault == 0 and probability_to_fail > 0)
+                  if !(percentage_fault == 0 and probability_to_fail > 0) || !(nodes > 50 && default_delta < 2 && mutation == 'ring')
                     run("./bin/simulation #{mutation} #{nodes_number} #{delta} #{max} #{percentage} #{lat} #{bandw} #{percentage_fault} #{probability} false")
                   end
                 end
@@ -52,9 +52,7 @@ execute('early', nodes, default_delta, max_tries, percentage_miss, percentage_fa
 
 puts 'Ring'
 
-if !(nodes > 50 && default_delta < 2)
-  execute('ring', nodes, default_delta, max_tries, percentage_miss, percentage_faults, probability_to_fail, bandwidth, latency)
-end
+execute('ring', nodes, default_delta, max_tries, percentage_miss, percentage_faults, probability_to_fail, bandwidth, latency)
 
 puts 'Old Ring'
 
