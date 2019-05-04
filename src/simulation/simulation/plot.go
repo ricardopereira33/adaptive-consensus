@@ -190,8 +190,7 @@ func save(data map[int]*con.Results, mutation string) {
 		mutation + "_" +
 		fmt.Sprintf("%f", defaultDelta) + "_" +
 		strconv.Itoa(maxTries) + "_" +
-		strconv.FormatFloat(percentageMiss, 'f', 2, 64) + "_" +
-		".csv")
+		strconv.FormatFloat(percentageMiss, 'f', 2, 64) + ".csv")
 
 	ex.CheckError(err)
 	defer file.Close()
@@ -223,7 +222,7 @@ func ensureValue(value float64) string {
 }
 
 func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, list map[int]*con.Results) {
-	file, err := os.OpenFile(DIRCSV+"global_results.csv", os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND | os.O_WRONLY, 0666)
 	defer file.Close()
 
 	ex.CheckError(err)
@@ -242,10 +241,10 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		mutation + "," +
 		fmt.Sprintf("%f", duration) + "\n")
 
-	saveToCsv(list)
+	// saveToCsv(list, int(duration))
 }
 
-func saveToCsv(list map[int]*con.Results) {
+func saveToCsv(list map[int]*con.Results, duration int) {
 	fileBandwidth, err := os.OpenFile(DIRCSV + mutation + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
 	fileRetransmission, err := os.OpenFile(DIRCSV + mutation + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
 

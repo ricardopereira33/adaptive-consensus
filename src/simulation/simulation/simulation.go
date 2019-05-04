@@ -81,7 +81,7 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 	handleMessages(peer)
 
 	channel := peer.GetChannel()
-	received, sent, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded := channel.Results(startTime)
+	sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded := channel.Results(startTime)
 
 	response <- con.NewResults(sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded, peerID)
 }

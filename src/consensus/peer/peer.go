@@ -51,9 +51,9 @@ func configChannel(channel stubborn.StubChannel) {
 }
 
 func argsInfo(nArgs int) {
-    if nArgs < 4 { 
+    if nArgs < 4 {
         fmt.Println("peer <MUTATION> <DEFAULT_DELTA> <MAX_TRIES> <OWN_PORT> <NEIGHBOR_PORT> ...")
-        os.Exit(1) 
+        os.Exit(1)
     }
 }
 
@@ -61,16 +61,16 @@ func argsInfo(nArgs int) {
 func main() {
     debugFlag := flag.Bool("debug", false, "Debug mode")
     flag.Parse()
-    
+
     debug = *debugFlag
-    args := flag.Args()	
+    args := flag.Args()
     argsInfo(len(args))
 
     var err error
-    mutation,      err = mut.Find(args[0])	
+    mutation,      err = mut.Find(args[0])
     defaultDelta,  err = strconv.Atoi(args[1])
     maxTries,      err = strconv.Atoi(args[2])
-    port              := args[3]	
+    port              := args[3]
     ex.CheckError(err)
 
     run("consensus", port, args[4:])

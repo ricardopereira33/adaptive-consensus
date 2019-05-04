@@ -11,7 +11,7 @@ func handleMessages(peer *con.Peer) {
 		message := con.PackageToMessage(pack)
 		consensusInfo := peer.GetConsensusInfo()
 		numberParticipants := peer.GetNumberParticipants()
-        peerID := peer.GetPeerID()
+		peerID := peer.GetPeerID()
 
 		if len(consensusInfo.Voters) <= numberParticipants/2 {
 			checkRound(message, consensusInfo)
@@ -19,6 +19,8 @@ func handleMessages(peer *con.Peer) {
 			isMajority := (consensusInfo.Phase == 1) && (len(message.Voters) > numberParticipants/2)
 
 			if withNewVoters || isMajority {
+				peer.ReceiveMessage(message.PeerID)
+
 				message.Voters[peerID] = 1
 				consensusInfo.Voters = union(consensusInfo.Voters, message.Voters)
 

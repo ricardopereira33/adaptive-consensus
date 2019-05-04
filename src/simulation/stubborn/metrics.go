@@ -1,10 +1,10 @@
 package stubborn
 
 import (
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
+	"fmt"
 
 	cmap "github.com/orcaman/concurrent-map"
 	lb "github.com/yangwenmai/ratelimit/leakybucket"
@@ -18,6 +18,8 @@ type Metrics struct {
 	retransmissions     []*retransmission
 	bandwidthMutex      *sync.Mutex
 	retransmissionMutex *sync.Mutex
+
+	startTime			time.Time
 	decision            time.Time
 }
 
@@ -33,7 +35,7 @@ type retransmission struct {
 }
 
 // NewMetrics creates a new metrics struct
-func NewMetrics(numberParticipants int) (metrics *Metrics) {
+func NewMetrics(numberParticipants int, startTime time.Time) (metrics *Metrics) {
 	metrics = new(Metrics)
 	metrics.messagesReceived = newMap(numberParticipants, 0)
 	metrics.messagesSent = newMap(numberParticipants, 0)
@@ -41,6 +43,7 @@ func NewMetrics(numberParticipants int) (metrics *Metrics) {
 	metrics.retransmissions = make([]*retransmission, 0)
 	metrics.bandwidthMutex = new(sync.Mutex)
 	metrics.retransmissionMutex = new(sync.Mutex)
+	metrics.startTime = startTime
 
 	return
 }
