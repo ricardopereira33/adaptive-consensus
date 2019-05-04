@@ -22,7 +22,7 @@ def execute(mutation, nodes, default_delta, max_tries, percentage_miss, percenta
             probability_to_fail.each do |probability|
               bandwidth.each do |bandw|
                 latency.each do |lat|
-                  if !(percentage_fault == 0 and probability_to_fail > 0) || !(nodes > 50 && default_delta < 2 && mutation == 'ring')
+                  if !(percentage_fault == 0 && probability > 0) || !(nodes_number > 50 && delta < 2 && mutation == 'ring')
                     run("./bin/simulation #{mutation} #{nodes_number} #{delta} #{max} #{percentage} #{lat} #{bandw} #{percentage_fault} #{probability} false")
                   end
                 end
