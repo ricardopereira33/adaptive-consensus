@@ -20,7 +20,7 @@ var (
 type IPeer interface {
 	Init()
 	ReceiveMessage(int)
-	NeedAck(int)
+	NeedAck(int) bool
 	IsAlive() bool
 
 	GetPeerID() int
