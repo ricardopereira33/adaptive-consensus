@@ -1,8 +1,8 @@
 require 'timeout'
 
 def run(command)
-  pid = Process.spawn(command)
   begin
+    pid = Process.spawn(command, mutation)
 
     Timeout.timeout(300) do
       Process.wait(pid)
@@ -23,7 +23,7 @@ def execute(mutation, nodes, default_delta, max_tries, percentage_miss, percenta
               bandwidth.each do |bandw|
                 latency.each do |lat|
                   if !(percentage_fault == 0 && probability > 0) || !(nodes_number > 50 && delta < 2 && mutation == 'ring')
-                    run("./bin/simulation #{mutation} #{nodes_number} #{delta} #{max} #{percentage} #{lat} #{bandw} #{percentage_fault} #{probability} false")
+                    run("./bin/simulation #{mutation} #{nodes_number} #{delta} #{max} #{percentage} #{lat} #{bandw} #{percentage_fault} #{probability} false", mutation)
                   end
                 end
               end
