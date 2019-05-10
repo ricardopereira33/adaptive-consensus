@@ -19,7 +19,7 @@ func (channel *Channel) SendAll(message []byte) {
 func (channel *Channel) SendSuspicion(peerID int, targetPeerID int) {
 	message := newSuspect(targetPeerID, true)
 
-	channel.sendMessage(peerID, message)
+	channel.sendToBufferSuspicions(peerID, message)
 }
 
 // Send is the method that sends the messages through the channel
@@ -51,13 +51,25 @@ func (channel *Channel) sendMessage(idDestination int, message *Package) {
 }
 
 func (channel *Channel) sendToBuffer(id int, pack *Package) {
-	value, present := channel.peers.Get(strconv.Itoa(id))
+	value, present := channel.peersChannels.Get(strconv.Itoa(id))
 
 	if present {
 		// Latency
 		time.Sleep(channel.latency)
 
-		peerChannel := value.(chan *Package)
+		peerChannel := value.(*peerChannels).inputBuffer
+		peerChannel <- pack
+	}
+}
+
+func (channel *Channel) sendToBufferSuspicions(id int, pack *Package) {
+	value, present := channel.peersChannels.Get(strconv.Itoa(id))
+
+	if present {
+		// Latency
+		time.Sleep(channel.latency)
+
+		peerChannel := value.(*peerChannels).inputSuspicions
 		peerChannel <- pack
 	}
 }

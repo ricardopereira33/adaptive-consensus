@@ -24,10 +24,10 @@ type SChannel interface {
 
     SetMaxTries(int)
 	SetPercentageMiss(float64)
-	SetSuspectedFunc(func(int, interface{}))
 	SetBandwidth(int)
     SetLatency(float64)
 
+	SetSuspectedFunc(func(int, interface{}))
     SetDelta0(function func(int, *Package) bool)
 	SetDelta(function func(int) bool)
     SetSenderVoted(func(int, *Package) bool)
@@ -45,7 +45,11 @@ func Channels(numberParticipants int) (channels cmap.ConcurrentMap) {
 	channels = cmap.New()
 
 	for id := 1; id <= numberParticipants; id++ {
-		channels.Set(strconv.Itoa(id), make(chan *Package))
+		pChannels := new(peerChannels)
+		pChannels.inputBuffer = make(chan *Package)
+		pChannels.inputSuspicions = make(chan *Package)
+
+		channels.Set(strconv.Itoa(id), pChannels)
 	}
 
 	return
