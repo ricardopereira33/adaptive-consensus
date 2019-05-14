@@ -25,7 +25,5 @@ func (channel *Channel) receiveSuspicious() {
 		pack := <- channel.peerChannel.inputSuspicions
 
 		channel.suspected(pack.SuspiciousID)
-
-		println("> Suspicious <")
 	}
 }
