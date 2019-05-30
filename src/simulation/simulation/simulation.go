@@ -69,6 +69,8 @@ func propose(value string) {
 		drawResults(list, startTime, mutation)
 	}
 
+	fmt.Println("Done.")
+
 	// save(list, mutation)
 	saveResult(endTime, startTime, bandwidthExceeded, list)
 }
@@ -81,9 +83,10 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 	handleMessages(peer)
 
 	channel := peer.GetChannel()
+	metrics := peer.GetMetrics()
 	sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded := channel.Results(startTime)
 
-	response <- con.NewResults(sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded, peerID)
+	response <- con.NewResults(sent, received, decisionTime, listOfBandwidthUsage, listOfRetransmission, bandwidthExceeded, metrics, peerID)
 }
 
 func configurePeer(peer *con.Peer) {
@@ -96,8 +99,8 @@ func configurePeer(peer *con.Peer) {
 	channel.SetDelta0(mut.Delta0)
 	channel.SetDelta(mut.Delta)
 	channel.SetBandwidth(bandwidth)
-    channel.SetLatency(latency)
-    channel.SetSenderVoted(con.SenderVoted)
+	channel.SetLatency(latency)
+	channel.SetSenderVoted(con.SenderVoted)
 
 	peer.SetDefaultDelta(defaultDelta)
 	peer.SetProbabilityToFail(probabilityToFail)

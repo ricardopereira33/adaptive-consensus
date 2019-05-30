@@ -221,7 +221,7 @@ func ensureValue(value float64) string {
 	return result
 }
 
-func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, list map[int]*con.Results) {
+func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, list map[int] *con.Results) {
 	file, err := os.OpenFile(DIRCSV + "global_results.csv", os.O_APPEND | os.O_WRONLY, 0666)
 	defer file.Close()
 
@@ -242,6 +242,7 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		fmt.Sprintf("%f", duration) + "\n")
 
 	// saveToCsv(list, int(duration))
+	saveDelays(list)
 }
 
 func saveToCsv(list map[int]*con.Results, duration int) {
@@ -260,5 +261,101 @@ func saveToCsv(list map[int]*con.Results, duration int) {
 		for _, retransmission := range result.ListOfRetransmission {
 			fileRetransmission.WriteString(retransmission + "\n")
 		}
+	}
+}
+
+func saveDelays(list map[int] *con.Results) {
+	finalResults := make([]*con.Snapshot, 0)
+
+	for _, result := range list {
+		listOfSnapshots := make([]*con.Snapshot, 0)
+		index := 0
+
+		for {
+			snapshot := result.Metrics.GetOther(index)
+
+			if snapshot != nil {
+				listOfSnapshots = append(listOfSnapshots, snapshot)
+			} else {
+				break
+			}
+
+			index++
+		}
+
+		finalResults = append(finalResults, listOfSnapshots...)
+	}
+
+	orderedSnapshots := make([] *con.Snapshot, 0)
+
+	for (len(finalResults) != 0) {
+		latestSnapshot := finalResults[0]
+		latestSnapShotIndex := 0
+
+		for id, snapshot := range finalResults {
+			if latestSnapshot.Timestamp.After(snapshot.Timestamp) {
+				latestSnapshot = snapshot
+				latestSnapShotIndex = id
+			}
+		}
+
+		finalResults = append(finalResults[:latestSnapShotIndex], finalResults[latestSnapShotIndex + 1:]...)
+		orderedSnapshots = append(orderedSnapshots, latestSnapshot)
+	}
+
+	exportResults(orderedSnapshots, len(list))
+}
+
+
+func exportResults(results []*con.Snapshot, numberOfPeers int) {
+	index := 0
+
+	for _, peerResult := range results {
+		fileSnapshot, err := os.OpenFile("deep-learning/results/snapshot" + strconv.Itoa(index) + ".csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+		ex.CheckError(err)
+
+		// header
+		fileSnapshot.WriteString("CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
+
+		for id := 1; id <= numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
+		}
+
+		for id := 1; id < numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
+		}
+
+		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d\n", numberOfPeers))
+
+		// rows
+		fileSnapshot.WriteString("" +
+			strconv.Itoa(peerResult.CoordID) + "," +
+			strconv.Itoa(peerResult.Round) + "," +
+			strconv.Itoa(peerResult.Phase) + "," +
+			strconv.Itoa(peerResult.EstimatePeerID) + "," +
+			peerResult.EstimateValue + "," +
+			peerResult.Decision + ",")
+
+		for id := 1; id <= numberOfPeers; id++ {
+			vote, present := peerResult.Voters[id]
+
+			if present {
+				fileSnapshot.WriteString(strconv.Itoa(vote) + ",")
+			} else {
+				fileSnapshot.WriteString("0,")
+			}
+		}
+
+		for id := 0; id < numberOfPeers - 1; id++ {
+			delay := peerResult.Delays[id]
+
+			fileSnapshot.WriteString(fmt.Sprintf("%f,", delay))
+		}
+
+		delay := peerResult.Delays[numberOfPeers - 1]
+		fileSnapshot.WriteString(fmt.Sprintf("%f\n", delay))
+
+		fileSnapshot.Close()
+		index++
 	}
 }

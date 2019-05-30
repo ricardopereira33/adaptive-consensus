@@ -12,13 +12,14 @@ type Results struct {
 	ListOfRetransmission []string
 	DecisionTime         time.Time
 	BandwidthExceeded    bool
+	Metrics 			 *Metrics
 }
 
 // DurationSlice define a new type of Slice to get order a list of time values
 type DurationSlice []time.Duration
 
 // NewResults creates a new estimate
-func NewResults(sent, received []float64, decisionTime time.Time, listOfBandwidthUsage []string, listOfRetransmission []string, bandwidthExceeded bool, id int) (results *Results) {
+func NewResults(sent, received []float64, decisionTime time.Time, listOfBandwidthUsage []string, listOfRetransmission []string, bandwidthExceeded bool, metrics *Metrics, id int) (results *Results) {
 	results = new(Results)
 	results.PeerID = id
 	results.Sent = sent
@@ -27,6 +28,7 @@ func NewResults(sent, received []float64, decisionTime time.Time, listOfBandwidt
 	results.ListOfBandwidthUsage = listOfBandwidthUsage
 	results.ListOfRetransmission = listOfRetransmission
 	results.BandwidthExceeded = bandwidthExceeded
+	results.Metrics = metrics
 
 	return
 }

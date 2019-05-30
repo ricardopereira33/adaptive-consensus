@@ -22,6 +22,7 @@ type IPeer interface {
 	ReceiveMessage(int)
 	NeedAck(int) bool
 	IsAlive() bool
+	RecordMetrics()
 
 	GetPeerID() int
 	GetNumberParticipants() int
@@ -30,6 +31,7 @@ type IPeer interface {
 	GetConsensusInfo() *Info
 	GetChannel() stb.SChannel
 	GetMessageNumber() int
+	GetMetrics() *Metrics
 
 	SetCoordinator(int)
 	SetDefaultDelta(float64)
@@ -46,6 +48,7 @@ type Peer struct {
 	channel            stb.SChannel
 	consensusInfo      *Info
 	detectors          *fd.Detectors
+	metrics 		   *Metrics
 	lastMessages	   cmap.ConcurrentMap
 }
 
@@ -60,6 +63,7 @@ func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors
 	peer.channel = stb.NewSChannel(peerID, numberParticipants, peer, peers, startTime)
 	peer.messageNumber = 0
 	peer.lastMessages = newLastMessagesMap(numberParticipants)
+	peer.metrics = newMetrics()
 
 	return
 }
@@ -67,6 +71,17 @@ func NewPeer(peerID, numberParticipants int, peers cmap.ConcurrentMap, detectors
 // ReceiveMessage update map of received messages
 func (peer *Peer) ReceiveMessage(peerID int) {
 	peer.lastMessages.Set(strconv.Itoa(peerID), true)
+}
+
+// RecordMetrics records algorithm variables
+func (peer *Peer) RecordMetrics() {
+	voters := CopyMap(peer.consensusInfo.Voters)
+	go peer.metrics.recordSnapshot(peer.consensusInfo, voters, peer.channel)
+}
+
+// GetMetrics returns collected metrics
+func (peer *Peer) GetMetrics() *Metrics {
+	return peer.metrics
 }
 
 // NeedAck checks if is needed send an ACK

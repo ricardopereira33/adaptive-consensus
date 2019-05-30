@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 	"fmt"
+	// "log"
 
 	cmap "github.com/orcaman/concurrent-map"
 	lb "github.com/yangwenmai/ratelimit/leakybucket"
@@ -14,13 +15,15 @@ import (
 type Metrics struct {
 	messagesReceived    cmap.ConcurrentMap
 	messagesSent        cmap.ConcurrentMap
+	delays           	cmap.ConcurrentMap
 	bandwidthUsage      []*bandwidthUsage
 	retransmissions     []*retransmission
 	bandwidthMutex      *sync.Mutex
 	retransmissionMutex *sync.Mutex
 
-	startTime			time.Time
-	decision            time.Time
+	startTime time.Time
+	decision  time.Time
+	flag bool
 }
 
 type bandwidthUsage struct {
@@ -34,6 +37,12 @@ type retransmission struct {
 	timestamp time.Time
 }
 
+// Delay stuffs
+type Delay struct {
+    lastRegister time.Time
+    value        time.Duration
+}
+
 // NewMetrics creates a new metrics struct
 func NewMetrics(numberParticipants int, startTime time.Time) (metrics *Metrics) {
 	metrics = new(Metrics)
@@ -44,12 +53,67 @@ func NewMetrics(numberParticipants int, startTime time.Time) (metrics *Metrics) 
 	metrics.bandwidthMutex = new(sync.Mutex)
 	metrics.retransmissionMutex = new(sync.Mutex)
 	metrics.startTime = startTime
+	metrics.delays = newMap(numberParticipants, defaultDelay(-1))
+	metrics.flag = false
 
 	return
 }
 
 func (metrics *Metrics) finish() {
 	metrics.decision = time.Now()
+}
+
+// logDelay log a delay for a given peer
+func (metrics *Metrics) initialDelay(peerID int) {
+    strID := strconv.Itoa(peerID)
+    metrics.delays.Set(strID, defaultDelay(0))
+}
+
+// logDelay log a delay for a given peer
+func (metrics *Metrics) logDelay(peerID int, id int) {
+	strID := strconv.Itoa(peerID)
+    oldDelay, _ := metrics.delays.Get(strID)
+	newDelay := defaultDelay(0)
+
+	if oldDelay.(*Delay).value == time.Duration(-1) {
+		newDelay.value = newDelay.lastRegister.Sub(oldDelay.(*Delay).lastRegister)
+	} else {
+		newDelay.value = oldDelay.(*Delay).value + newDelay.lastRegister.Sub(oldDelay.(*Delay).lastRegister)
+	}
+
+	metrics.delays.Set(strID, newDelay)
+
+	// metrics.flag = true
+}
+
+func defaultDelay(value int) (delay *Delay) {
+    delay = new(Delay)
+    delay.lastRegister = time.Now()
+    delay.value = time.Duration(value)
+
+    return
+}
+
+func (metrics *Metrics) resultsOfDelays(peerID int) (delays []float64) {
+	// if metrics.flag {
+	// 	log.Printf("[resultOfDelays] PeerID (%d) | Memory address (%v)", peerID, &metrics)
+	// }
+
+	size := metrics.messagesSent.Count()
+    delays = make([]float64, size)
+
+    for _, id := range metrics.delays.Keys() {
+		delay, _ := metrics.delays.Get(id)
+		id, _ := strconv.Atoi(id)
+
+		// if metrics.flag {
+		// 	fmt.Println(delay)
+		// }
+
+		delays[id - 1] = float64(delay.(*Delay).value) / float64(time.Millisecond)
+	}
+
+    return
 }
 
 // incrementMessagesReceived increments the number of received messages

@@ -31,12 +31,15 @@ func handleMessages(peer *con.Peer) {
 				message := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 				data := message.MessageToBytes()
 
+				peer.RecordMetrics()
+
 				channel.SendAll(data)
 			}
 		}
 
 		if len(consensusInfo.Voters) > numberParticipants/2 {
 			if checkPhase(message, consensusInfo) {
+				peer.RecordMetrics()
 				channel.Finish()
 				break
 			}

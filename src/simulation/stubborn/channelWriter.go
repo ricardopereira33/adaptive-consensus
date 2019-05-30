@@ -30,6 +30,8 @@ func (channel *Channel) Send(idDestination int, message []byte) {
 	channel.outputBuffer.InsertElement(idDestination, packageMsg)
 
 	if isToSend {
+		channel.metrics.initialDelay(idDestination)
+
 		go channel.sendMessage(idDestination, packageMsg)
 	}
 }

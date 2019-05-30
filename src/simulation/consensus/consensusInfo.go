@@ -3,7 +3,7 @@ package consensus
 // Info is the struct that contains the information about consensus
 type Info struct {
 	CoordID  int
-	Voters   map[int]int
+	Voters   map[int] int
 	Round    int
 	Phase    int
 	Estimate *Estimate

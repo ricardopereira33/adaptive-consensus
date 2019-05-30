@@ -91,6 +91,7 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 					// pack.IncRetransmission()
 					go channel.sendMessage(id, pack)
 				}
+				channel.metrics.logDelay(id, channel.peerID)
 			}
 			tries++
 		}
@@ -131,6 +132,11 @@ func (channel *Channel) GetPackage(id int) *Package {
 // GetBandwidthExceeded returns true if the bandwidth has been exceeded
 func (channel *Channel) GetBandwidthExceeded() bool {
 	return channel.bandwidthExceeded
+}
+
+// GetDelays returns current delays between this peer to the others
+func (channel *Channel) GetDelays()	[]float64 {
+	return channel.metrics.resultsOfDelays(channel.peerID)
 }
 
 // SetMaxTries sets the MaxTries value.

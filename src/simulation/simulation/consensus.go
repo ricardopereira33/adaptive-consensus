@@ -22,6 +22,8 @@ func consensus(peer *con.Peer, value string) {
 		data := message.MessageToBytes()
 
 		peer.SetCoordinator(consensusInfo.CoordID)
+		peer.RecordMetrics()
+
 		channel.SendAll(data)
 	}
 }
