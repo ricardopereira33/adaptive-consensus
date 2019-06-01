@@ -1,7 +1,10 @@
 package main
 
 import (
+	"strconv"
+
 	con "simulation/consensus"
+	cmap "github.com/orcaman/concurrent-map"
 )
 
 func handleMessages(peer *con.Peer) {
@@ -13,7 +16,7 @@ func handleMessages(peer *con.Peer) {
 		numberParticipants := peer.GetNumberParticipants()
 		peerID := peer.GetPeerID()
 
-		if len(consensusInfo.Voters) <= numberParticipants/2 {
+		if consensusInfo.Voters.Count() <= numberParticipants/2 {
 			checkRound(message, consensusInfo)
 			withNewVoters := (consensusInfo.Round == message.Round) && containsNewVoters(message.Voters, consensusInfo)
 			isMajority := (consensusInfo.Phase == 1) && (len(message.Voters) > numberParticipants/2)
@@ -37,7 +40,7 @@ func handleMessages(peer *con.Peer) {
 			}
 		}
 
-		if len(consensusInfo.Voters) > numberParticipants/2 {
+		if consensusInfo.Voters.Count() > numberParticipants/2 {
 			if checkPhase(message, consensusInfo) {
 				peer.RecordMetrics()
 				channel.Finish()
@@ -57,29 +60,33 @@ func checkRound(message *con.Message, consensusInfo *con.Info) {
 		consensusInfo.Estimate = message.Estimate
 		consensusInfo.Round = message.Round
 		consensusInfo.Phase = message.Phase
-		consensusInfo.Voters = make(map[int]int)
+		consensusInfo.Voters = cmap.New()
 	}
+
 	if consensusInfo.Round == message.Round && consensusInfo.Phase < message.Phase {
 		consensusInfo.Phase = message.Phase
-		consensusInfo.Voters = make(map[int]int)
+		consensusInfo.Voters = cmap.New()
 	}
 }
 
 func checkPhase(message *con.Message, consensusInfo *con.Info) bool {
 	if consensusInfo.Phase == 1 {
 		consensusInfo.Decision = message.Estimate.Value
+
 		return true
 	}
 
 	consensusInfo.Round++
 	consensusInfo.Phase = 1
-	consensusInfo.Voters = make(map[int]int)
+	consensusInfo.Voters = cmap.New()
+
 	return false
 }
 
 func containsNewVoters(senderVoters map[int]int, consensusInfo *con.Info) bool {
 	for id := range senderVoters {
-		_, present := consensusInfo.Voters[id]
+		present := consensusInfo.Voters.Has(strconv.Itoa(id))
+
 		if !present {
 			return true
 		}
@@ -88,9 +95,9 @@ func containsNewVoters(senderVoters map[int]int, consensusInfo *con.Info) bool {
 	return false
 }
 
-func union(hash1 map[int]int, hash2 map[int]int) map[int]int {
+func union(hash1 cmap.ConcurrentMap, hash2 map[int]int) cmap.ConcurrentMap {
 	for id := range hash2 {
-		hash1[id] = 1
+		hash1.Set(strconv.Itoa(id), 1)
 	}
 
 	return hash1

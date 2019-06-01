@@ -13,6 +13,7 @@ const (
 	GOSSIP      = iota
 	CENTRALIZED = iota
 	OLDRING     = iota
+	ADAPTED	    = iota
 )
 
 // Mutation is an interface
@@ -34,6 +35,8 @@ func NewMutation(peer *con.Peer, mutationType int) Mutation {
 		return NewCentralized(peer)
 	case OLDRING:
 		return NewOldRing(peer)
+	case ADAPTED:
+		return NewAdapted(peer)
 	}
 
 	return NewEarly(peer)
@@ -52,6 +55,8 @@ func Find(mutation string) (int, error) {
 		return CENTRALIZED, nil
 	case "old_ring":
 		return OLDRING, nil
+	case "adapted":
+		return ADAPTED, nil
 	}
 
 	return -1, ex.NewError("Wrong mutation!")

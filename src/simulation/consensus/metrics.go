@@ -1,6 +1,7 @@
 package consensus
 
 import (
+	"github.com/orcaman/concurrent-map"
 	"sync"
 	"time"
 
@@ -33,7 +34,7 @@ func newMetrics() (metrics *Metrics) {
 	return
 }
 
-func newSnapshot(consensusInfo *Info, voters map[int] int, channel stb.SChannel) (snapshot *Snapshot) {
+func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel) (snapshot *Snapshot) {
 	snapshot = new(Snapshot)
 	snapshot.CoordID = consensusInfo.CoordID
 	snapshot.Round = consensusInfo.Round
@@ -41,7 +42,7 @@ func newSnapshot(consensusInfo *Info, voters map[int] int, channel stb.SChannel)
 	snapshot.EstimatePeerID = consensusInfo.Estimate.PeerID
 	snapshot.EstimateValue = consensusInfo.Estimate.Value
 	snapshot.Decision = consensusInfo.Decision
-	snapshot.Voters = voters
+	snapshot.Voters = convertCmapToMap(voters)
 	snapshot.Delays = channel.GetDelays()
 	snapshot.Timestamp = time.Now()
 
@@ -62,7 +63,7 @@ func (metrics *Metrics) GetOther(index int) *Snapshot {
 	return nil
 }
 
-func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters map[int] int, channel stb.SChannel) {
+func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel) {
 	metrics.mutex.Lock()
 
 	snapshot := newSnapshot(consensusInfo, voters, channel)

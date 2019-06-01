@@ -2,6 +2,7 @@ package main
 
 import (
 	con "simulation/consensus"
+	cmap"github.com/orcaman/concurrent-map"
 )
 
 func suspected(id int, iPeer interface{}) {
@@ -13,10 +14,11 @@ func suspected(id int, iPeer interface{}) {
 
 	if id == ((consensusInfo.Round % numberParticipants) + 1) && consensusInfo.Phase == 1 {
 		consensusInfo.Phase = 2
-		consensusInfo.Voters = make(map[int]int)
+		consensusInfo.Voters = cmap.New()
 
 		message := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
 		data := message.MessageToBytes()
+
 		channel.SendAll(data)
 	}
 }

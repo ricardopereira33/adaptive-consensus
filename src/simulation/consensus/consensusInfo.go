@@ -1,9 +1,16 @@
 package consensus
 
+import (
+	"strconv"
+
+	ex "simulation/exception"
+	cmap "github.com/orcaman/concurrent-map"
+)
+
 // Info is the struct that contains the information about consensus
 type Info struct {
 	CoordID  int
-	Voters   map[int] int
+	Voters   cmap.ConcurrentMap
 	Round    int
 	Phase    int
 	Estimate *Estimate
@@ -30,4 +37,17 @@ func NewEstimate(value string, id int) (estimate *Estimate) {
 	estimate.PeerID = id
 
 	return
+}
+
+func convertCmapToMap(concurrentMap cmap.ConcurrentMap) map[int] int {
+	normalMap := make(map[int]int)
+
+	for value := range concurrentMap.Iter() {
+		id, err := strconv.Atoi(value.Key)
+		ex.CheckError(err)
+
+		normalMap[id] = value.Val.(int)
+	}
+
+	return normalMap
 }

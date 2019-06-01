@@ -2,9 +2,11 @@ package consensus
 
 import (
 	"encoding/json"
+	"strconv"
+
+	cmap "github.com/orcaman/concurrent-map"
 	ex "simulation/exception"
 	stb "simulation/stubborn"
-	"strconv"
 )
 
 // Message sent out to the server
@@ -17,12 +19,12 @@ type Message struct {
 }
 
 // NewMessage creates a new message using the parameters passed in and returns it
-func NewMessage(peerID int, round int, phase int, voters map[int]int, estimate *Estimate) (message *Message) {
+func NewMessage(peerID int, round int, phase int, voters cmap.ConcurrentMap, estimate *Estimate) (message *Message) {
 	message = new(Message)
 	message.PeerID = peerID
 	message.Round = round
 	message.Phase = phase
-	message.Voters = voters
+	message.Voters = convertCmapToMap(voters)
 	message.Estimate = estimate
 
 	return
