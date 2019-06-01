@@ -28,6 +28,8 @@ install:
 	go get "github.com/yangwenmai/ratelimit/leakybucket"
 	go get "github.com/yangwenmai/ratelimit/simpleratelimit"
 	go get "github.com/kr/pretty"
+	go get "github.com/tensorflow/tensorflow/tensorflow/go"
+	go get "github.com/galeone/tfgo"
 
 run_mutation:
 	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
