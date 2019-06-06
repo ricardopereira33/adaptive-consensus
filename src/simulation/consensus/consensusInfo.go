@@ -9,6 +9,7 @@ import (
 
 // Info is the struct that contains the information about consensus
 type Info struct {
+	PeerID   int
 	CoordID  int
 	Voters   cmap.ConcurrentMap
 	Round    int

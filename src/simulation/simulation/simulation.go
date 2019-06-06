@@ -36,7 +36,7 @@ func propose(value string) {
 	responses := make(chan *con.Results)
 	detectors := fd.NewDetectors(3.3, 10, numberParticipants, percentageFaults)
 	startTime := time.Now()
-	// bandwidthExceeded := false
+	bandwidthExceeded := false
 
 	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels, detectors, startTime)
@@ -53,12 +53,12 @@ func propose(value string) {
 		response := <-responses
 		list[response.PeerID] = response
 
-		// if response.BandwidthExceeded {
-		// 	bandwidthExceeded = true
-		// }
+		if response.BandwidthExceeded {
+			bandwidthExceeded = true
+		}
 	}
 
-	// endTime := time.Now()
+	endTime := time.Now()
 
 	if debug {
 		log.Println("All received!")
@@ -72,7 +72,7 @@ func propose(value string) {
 	fmt.Println("Done.")
 
 	// save(list, mutation)
-	// saveResult(endTime, startTime, bandwidthExceeded, list)
+	saveResult(endTime, startTime, bandwidthExceeded, list)
 }
 
 func runPeer(peerID int, value string, response chan *con.Results, channels cmap.ConcurrentMap, detectors *fd.Detectors, startTime time.Time) {

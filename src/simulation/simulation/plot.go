@@ -303,7 +303,7 @@ func saveDelays(list map[int] *con.Results) {
 		orderedSnapshots = append(orderedSnapshots, latestSnapshot)
 	}
 
-	exportResults(orderedSnapshots, len(list))
+	// exportResults(orderedSnapshots, len(list))
 }
 
 
@@ -315,7 +315,7 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 		ex.CheckError(err)
 
 		// header
-		fileSnapshot.WriteString("CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
+		fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
 
 		for id := 1; id <= numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
@@ -329,6 +329,7 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 
 		// rows
 		fileSnapshot.WriteString("" +
+			strconv.Itoa(peerResult.PeerID) + "," +
 			strconv.Itoa(peerResult.CoordID) + "," +
 			strconv.Itoa(peerResult.Round) + "," +
 			strconv.Itoa(peerResult.Phase) + "," +

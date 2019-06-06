@@ -15,6 +15,7 @@ func consensus(peer *con.Peer, value string) {
 	consensusInfo.Phase = 1
 	consensusInfo.Estimate = con.NewEstimate(value, peer.GetPeerID())
 	consensusInfo.CoordID = (consensusInfo.Round % peer.GetNumberParticipants()) + 1
+	consensusInfo.PeerID = peerID
 
 	if peerID == peer.GetCoordID() {
 		go broadcastMessage(peer, consensusInfo, peerID)

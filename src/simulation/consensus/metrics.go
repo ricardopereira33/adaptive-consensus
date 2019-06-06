@@ -16,6 +16,7 @@ type Metrics struct {
 
 // Snapshot is a snapshot of mutable consensus variables
 type Snapshot struct {
+	PeerID          int
 	CoordID			int
 	Round			int
 	Phase 			int
@@ -36,6 +37,7 @@ func newMetrics() (metrics *Metrics) {
 
 func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel) (snapshot *Snapshot) {
 	snapshot = new(Snapshot)
+	snapshot.PeerID = consensusInfo.PeerID
 	snapshot.CoordID = consensusInfo.CoordID
 	snapshot.Round = consensusInfo.Round
 	snapshot.Phase = consensusInfo.Phase
