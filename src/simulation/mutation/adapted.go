@@ -6,6 +6,7 @@ import (
 
 	con "simulation/consensus"
 	stb "simulation/stubborn"
+	tg "github.com/galeone/tfgo"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	ex "simulation/exception"
 	cmap "github.com/orcaman/concurrent-map"
@@ -14,7 +15,7 @@ import (
 // Adapted is a mutation type
 type Adapted struct {
 	peer  *con.Peer
-	model *tf.SavedModel
+	model *tg.Model
 }
 
 // NewAdapted creates a new adapted mutation
@@ -33,59 +34,68 @@ func (adapted *Adapted) Delta0(id int, pack *stb.Package) bool {
 
 // Delta is the delta implementation
 func (adapted *Adapted) Delta(id int) bool {
-	inputData := adapted.getConsensusStatus()
-	tensor, err := tf.NewTensor(inputData)
-	ex.CheckError(err)
+	inputData, voters := adapted.getConsensusStatus()
 
-	result, err := adapted.model.Session.Run(
-		map[tf.Output]*tf.Tensor {
-			adapted.model.Graph.Operation("input_layer_input_3").Output(0): tensor,
-		},
-		[]tf.Output{
-			adapted.model.Graph.Operation("output_layer_3/BiasAdd").Output(0),
-		},
-		nil,
-	)
+	if voters != nil {
+		tensor, err := tf.NewTensor(inputData)
+		ex.CheckError(err)
 
-	ex.CheckError(err)
+		result := adapted.model.Exec(
+			[]tf.Output{
+				adapted.model.Op("output_layer_1/add", 0),
+			}, map[tf.Output]*tf.Tensor{
+				adapted.model.Op("input_layer_input_1", 0): tensor,
+			},
+		)
 
-	matrixValue := result[0].Value()
-	value := matrixValue.([][][]float32)[0][0][id - 1]
+		ex.CheckError(err)
 
-	if value > 0 {
-		time.Sleep(time.Duration(value) * time.Millisecond)
+		matrixValue := result[0].Value()
+		delayValues := matrixValue.([][][]float32)[0][0]
+		value := delayValues[id - 1]
 
-		return true
+		if value > 0 {
+			time.Sleep(time.Duration(value) * time.Millisecond)
+
+			return true
+		}
 	}
 
 	return false
 }
 
-func (adapted *Adapted) getConsensusStatus() [][][]float32 {
+func (adapted *Adapted) getConsensusStatus() ([][][]float32, []float32) {
 	consensus := adapted.peer.GetConsensusInfo()
 	finalList := make([][][]float32, 0)
 	intermateList:= make([][]float32, 0)
+	numberParticipants := adapted.peer.GetNumberParticipants()
 
-	consensusStatus := []float32 {
-		float32(consensus.CoordID),
-		float32(consensus.Round),
-		float32(consensus.Phase),
-		float32(consensus.Estimate.PeerID),
-		normalizeDecision(consensus.Estimate.Value),
-		normalizeDecision(consensus.Decision)}
+	listOfVoters := getVoters(consensus.Voters, numberParticipants)
 
-	listOfVoters := getVoters(consensus.Voters, adapted.peer.GetNumberParticipants())
+	if listOfVoters != nil {
+		coordIDValues := getGenericValues(consensus.CoordID, numberParticipants)
+		peerIDValues := getGenericValues(consensus.PeerID, numberParticipants)
+		EstimatePeerIDValues := getGenericValues(consensus.Estimate.PeerID, numberParticipants)
+		phaseValues := getPhaseValues(consensus.Phase)
 
-	consensusStatus = append(consensusStatus, listOfVoters...)
-	intermateList = append(intermateList, consensusStatus)
-	finalList = append(finalList, intermateList)
+		consensusStatus := []float32 { float32(consensus.Round) }
 
-	return finalList
+		consensusStatus = append(consensusStatus, listOfVoters...)
+		consensusStatus = append(consensusStatus, normalizeDecision(consensus.Estimate.Value), normalizeDecision(consensus.Decision))
+		consensusStatus = append(consensusStatus, peerIDValues...)
+		consensusStatus = append(consensusStatus, coordIDValues...)
+		consensusStatus = append(consensusStatus, EstimatePeerIDValues...)
+		consensusStatus = append(consensusStatus, phaseValues...)
+
+		intermateList = append(intermateList, consensusStatus)
+		finalList = append(finalList, intermateList)
+	}
+
+	return finalList, listOfVoters
 }
 
-func newModel() *tf.SavedModel {
-	model, err := tf.LoadSavedModel("src/simulation/models/mut_model", []string{"mut_tag"}, nil)
-	ex.CheckError(err)
+func newModel() *tg.Model {
+	model := tg.LoadModel("src/simulation/models/mut_model", []string{"mut_tag"}, nil)
 
 	return model
 }
@@ -101,15 +111,41 @@ func normalizeDecision(value string) float32 {
 func getVoters(voters cmap.ConcurrentMap, NumberParticipants int) []float32 {
 	newList := make([]float32, 0)
 
-	for id := 0; id < NumberParticipants; id++ {
-		present := voters.Has(strconv.Itoa(id))
+	if voters != nil {
+		for id := 1; id <= NumberParticipants; id++ {
+			present := voters.Has(strconv.Itoa(id))
 
-		if present {
-			newList = append(newList, 1.0)
+			if present {
+				newList = append(newList, 1.0)
+			} else {
+				newList = append(newList, 0.0)
+			}
+		}
+
+		return newList
+	}
+
+	return nil
+}
+
+func getGenericValues(peerID int, NumberParticipants int) []float32 {
+	list := make([]float32, 0)
+
+	for id := 1; id <= NumberParticipants; id++ {
+		if id == peerID {
+			list = append(list, 1.0)
 		} else {
-			newList = append(newList, 0.0)
+			list = append(list, 0.0)
 		}
 	}
 
-	return newList
+	return list
+}
+
+func getPhaseValues(phase int) []float32 {
+	if phase == 1 {
+		return []float32{ 1.0, 0.0 }
+	}
+
+	return []float32{ 0.0, 1.0 }
 }
