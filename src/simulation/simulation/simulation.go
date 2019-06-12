@@ -14,12 +14,14 @@ import (
 	fd "simulation/failuredetection"
 	mut "simulation/mutation"
 	stb "simulation/stubborn"
+	tg "github.com/galeone/tfgo"
 )
 
 var (
 	debug              bool
 	withMetrics        bool
-	mutation           string
+	mutation 		   mut.Mutation
+	mutationName       string
 	mutationCode       int
 	numberParticipants int
 	maxTries           int
@@ -29,14 +31,21 @@ var (
 	percentageFaults   float64
 	latency            float64
 	probabilityToFail  float64
+	adaptedModels	   map[int] *tg.Model
 )
 
 func propose(value string) {
 	channels := stb.Channels(numberParticipants)
 	responses := make(chan *con.Results)
 	detectors := fd.NewDetectors(3.3, 10, numberParticipants, percentageFaults)
-	startTime := time.Now()
 	bandwidthExceeded := false
+
+	if mutationName == "adapted" {
+		adaptedModels = mut.NewAdaptedModels(numberParticipants)
+	}
+
+	println("Finish.")
+	startTime := time.Now()
 
 	for id := 1; id <= numberParticipants; id++ {
 		go runPeer(id, value, responses, channels, detectors, startTime)
@@ -66,12 +75,12 @@ func propose(value string) {
 	}
 
 	if withMetrics {
-		drawResults(list, startTime, mutation)
+		drawResults(list, startTime, mutationName)
 	}
 
 	fmt.Println("Done.")
 
-	// save(list, mutation)
+	// save(list, mutationName)
 	saveResult(endTime, startTime, bandwidthExceeded, list)
 }
 
@@ -91,13 +100,18 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 
 func configurePeer(peer *con.Peer) {
 	channel := peer.GetChannel()
-	mut := mut.NewMutation(peer, mutationCode)
+
+	if mutationName == "adapted" {
+		mutation = mut.NewMutation(peer, mutationCode, adaptedModels[peer.GetPeerID()])
+	} else {
+		mutation = mut.NewMutation(peer, mutationCode)
+	}
 
 	channel.SetSuspectedFunc(suspected)
 	channel.SetMaxTries(maxTries)
 	channel.SetPercentageMiss(percentageMiss)
-	channel.SetDelta0(mut.Delta0)
-	channel.SetDelta(mut.Delta)
+	channel.SetDelta0(mutation.Delta0)
+	channel.SetDelta(mutation.Delta)
 	channel.SetBandwidth(bandwidth)
 	channel.SetLatency(latency)
 	channel.SetSenderVoted(con.SenderVoted)
@@ -124,8 +138,8 @@ func main() {
 
 	var err error
 
-	mutation = args[0]
-	mutationCode, err = mut.Find(mutation)
+	mutationName = args[0]
+	mutationCode, err = mut.Find(mutationName)
 	numberParticipants, err = strconv.Atoi(args[1])
 	defaultDelta, err = strconv.ParseFloat(args[2], 64)
 	maxTries, err = strconv.Atoi(args[3])
@@ -138,7 +152,7 @@ func main() {
 
 	ex.CheckError(err)
 
-	println(mutation + " - " +
+	println(mutationName + " - " +
 		strconv.Itoa(numberParticipants) + " - " +
 		strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
 		strconv.Itoa(maxTries) + " - " +

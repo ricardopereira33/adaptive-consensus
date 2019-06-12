@@ -238,7 +238,7 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		fmt.Sprintf("%f", latency) + "," +
 		strconv.Itoa(bandwidth) + "," +
 		strconv.FormatBool(bandwidthExceeded) + "," +
-		mutation + "," +
+		mutationName + "," +
 		fmt.Sprintf("%f", duration) + "\n")
 
 	// saveToCsv(list, int(duration))
@@ -246,8 +246,8 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 }
 
 func saveToCsv(list map[int]*con.Results, duration int) {
-	fileBandwidth, err := os.OpenFile(DIRCSV + mutation + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
-	fileRetransmission, err := os.OpenFile(DIRCSV + mutation + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	fileBandwidth, err := os.OpenFile(DIRCSV + mutationName + "_bandwidth_usage.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	fileRetransmission, err := os.OpenFile(DIRCSV + mutationName + "_retransmission.csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
 
 	defer fileBandwidth.Close()
 	defer fileRetransmission.Close()

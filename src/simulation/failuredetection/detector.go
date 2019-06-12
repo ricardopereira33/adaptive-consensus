@@ -26,7 +26,7 @@ func NewDetectors(threshold float64, maxSampleSize int, numberParticipants int, 
 	detectors.percentageFaults = percentageFaults
 
 	for id := 1; id <= numberParticipants; id++ {
-		value, err := fd.New(8.0, 200, 500*time.Millisecond, 0, 500*time.Millisecond, nil)
+		value, err := fd.New(8.0, 200, 500 * time.Millisecond, 0, 500 * time.Millisecond, nil)
 
 		ex.CheckError(err)
 

@@ -19,10 +19,10 @@ type Adapted struct {
 }
 
 // NewAdapted creates a new adapted mutation
-func NewAdapted(peer *con.Peer) (adapted *Adapted) {
+func NewAdapted(peer *con.Peer, model *tg.Model) (adapted *Adapted) {
 	adapted = new(Adapted)
 	adapted.peer = peer
-	adapted.model = newModel()
+	adapted.model = model
 
 	return
 }
@@ -98,6 +98,17 @@ func newModel() *tg.Model {
 	model := tg.LoadModel("src/simulation/models/mut_model", []string{"mut_tag"}, nil)
 
 	return model
+}
+
+// NewAdaptedModels returns a list of DL models
+func NewAdaptedModels(numberParticipants int) map[int] *tg.Model {
+	models := make(map[int] *tg.Model)
+
+	for id := 1 ; id <= numberParticipants; id++ {
+		models[id] = newModel()
+	}
+
+	return models
 }
 
 func normalizeDecision(value string) float32 {
