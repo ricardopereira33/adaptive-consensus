@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"runtime/debug"
 
 	cmap "github.com/orcaman/concurrent-map"
 	con "simulation/consensus"
@@ -18,7 +19,7 @@ import (
 )
 
 var (
-	debug              bool
+	debugFlag		   bool
 	withMetrics        bool
 	mutation 		   mut.Mutation
 	mutationName       string
@@ -51,7 +52,7 @@ func propose(value string) {
 		go runPeer(id, value, responses, channels, detectors, startTime)
 	}
 
-	if debug {
+	if debugFlag {
 		log.Println("--------------")
 		log.Println("Running peers...")
 	}
@@ -69,7 +70,7 @@ func propose(value string) {
 
 	endTime := time.Now()
 
-	if debug {
+	if debugFlag {
 		log.Println("All received!")
 		log.Println("--------------")
 	}
@@ -129,10 +130,10 @@ func argsInfo(nArgs int) {
 }
 
 func main() {
-	debugFlag := flag.Bool("debug", false, "Debug mode")
+	debugFlagValue := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
-	debug = *debugFlag
+	debugFlag = *debugFlagValue
 	args := flag.Args()
 	argsInfo(len(args))
 
@@ -162,6 +163,8 @@ func main() {
 		strconv.FormatFloat(percentageFaults, 'f', 2, 64) + " - " +
 		strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
 		strconv.FormatBool(withMetrics))
+
+	debug.SetMaxThreads(100000)
 
 	propose("accept")
 }
