@@ -4,7 +4,7 @@ import (
 	con "simulation/consensus"
 	ex "simulation/exception"
 	stb "simulation/stubborn"
-	tg "github.com/galeone/tfgo"
+	ml "simulation/machinelearning"
 )
 
 // kind of enums
@@ -24,7 +24,7 @@ type Mutation interface {
 }
 
 // NewMutation creates a new Mutation.
-func NewMutation(peer *con.Peer, mutationType int, models ...*tg.Model) Mutation {
+func NewMutation(peer *con.Peer, mutationType int, model *ml.Balancer) Mutation {
 	switch mutationType {
 	case EARLY:
 		return NewEarly(peer)
@@ -37,7 +37,7 @@ func NewMutation(peer *con.Peer, mutationType int, models ...*tg.Model) Mutation
 	case OLDRING:
 		return NewOldRing(peer)
 	case ADAPTED:
-		return NewAdapted(peer, models[0])
+		return NewAdapted(peer, model)
 	}
 
 	return NewEarly(peer)

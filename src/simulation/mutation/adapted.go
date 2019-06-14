@@ -6,20 +6,18 @@ import (
 
 	con "simulation/consensus"
 	stb "simulation/stubborn"
-	tg "github.com/galeone/tfgo"
-	tf "github.com/tensorflow/tensorflow/tensorflow/go"
-	ex "simulation/exception"
 	cmap "github.com/orcaman/concurrent-map"
+	ml "simulation/machinelearning"
 )
 
 // Adapted is a mutation type
 type Adapted struct {
 	peer  *con.Peer
-	model *tg.Model
+	model *ml.Balancer
 }
 
 // NewAdapted creates a new adapted mutation
-func NewAdapted(peer *con.Peer, model *tg.Model) (adapted *Adapted) {
+func NewAdapted(peer *con.Peer, model *ml.Balancer) (adapted *Adapted) {
 	adapted = new(Adapted)
 	adapted.peer = peer
 	adapted.model = model
@@ -37,21 +35,8 @@ func (adapted *Adapted) Delta(id int) bool {
 	inputData, voters := adapted.getConsensusStatus()
 
 	if voters != nil {
-		tensor, err := tf.NewTensor(inputData)
-		ex.CheckError(err)
+		delayValues := adapted.model.CreateRequest(inputData)[0][0]
 
-		result := adapted.model.Exec(
-			[]tf.Output{
-				adapted.model.Op("output_layer_1/add", 0),
-			}, map[tf.Output]*tf.Tensor{
-				adapted.model.Op("input_layer_input_1", 0): tensor,
-			},
-		)
-
-		ex.CheckError(err)
-
-		matrixValue := result[0].Value()
-		delayValues := matrixValue.([][][]float32)[0][0]
 		value := delayValues[id - 1]
 
 		if value > 0 {
@@ -92,23 +77,6 @@ func (adapted *Adapted) getConsensusStatus() ([][][]float32, []float32) {
 	}
 
 	return finalList, listOfVoters
-}
-
-func newModel() *tg.Model {
-	model := tg.LoadModel("src/simulation/models/mut_model", []string{"mut_tag"}, nil)
-
-	return model
-}
-
-// NewAdaptedModels returns a list of DL models
-func NewAdaptedModels(numberParticipants int) map[int] *tg.Model {
-	models := make(map[int] *tg.Model)
-
-	for id := 1 ; id <= numberParticipants; id++ {
-		models[id] = newModel()
-	}
-
-	return models
 }
 
 func normalizeDecision(value string) float32 {

@@ -15,13 +15,12 @@ import (
 	fd "simulation/failuredetection"
 	mut "simulation/mutation"
 	stb "simulation/stubborn"
-	tg "github.com/galeone/tfgo"
+	ml "simulation/machinelearning"
 )
 
 var (
 	debugFlag		   bool
 	withMetrics        bool
-	mutation 		   mut.Mutation
 	mutationName       string
 	mutationCode       int
 	numberParticipants int
@@ -32,18 +31,15 @@ var (
 	percentageFaults   float64
 	latency            float64
 	probabilityToFail  float64
-	adaptedModels	   map[int] *tg.Model
+	balancer		   *ml.Balancer
 )
 
 func propose(value string) {
 	channels := stb.Channels(numberParticipants)
 	responses := make(chan *con.Results)
 	detectors := fd.NewDetectors(3.3, 10, numberParticipants, percentageFaults)
+	balancer = ml.NewBalancer(15, numberParticipants * 2)
 	bandwidthExceeded := false
-
-	if mutationName == "adapted" {
-		adaptedModels = mut.NewAdaptedModels(numberParticipants)
-	}
 
 	println("Finish.")
 	startTime := time.Now()
@@ -101,12 +97,7 @@ func runPeer(peerID int, value string, response chan *con.Results, channels cmap
 
 func configurePeer(peer *con.Peer) {
 	channel := peer.GetChannel()
-
-	if mutationName == "adapted" {
-		mutation = mut.NewMutation(peer, mutationCode, adaptedModels[peer.GetPeerID()])
-	} else {
-		mutation = mut.NewMutation(peer, mutationCode)
-	}
+	mutation := mut.NewMutation(peer, mutationCode, balancer)
 
 	channel.SetSuspectedFunc(suspected)
 	channel.SetMaxTries(maxTries)
@@ -150,17 +141,18 @@ func main() {
 	percentageFaults, err = strconv.ParseFloat(args[7], 64)
 	probabilityToFail, err = strconv.ParseFloat(args[8], 64)
 	withMetrics, err = strconv.ParseBool(args[9])
-
 	ex.CheckError(err)
 
-	println(mutationName + " - " +
-		strconv.Itoa(numberParticipants) + " - " +
-		strconv.FormatFloat(defaultDelta, 'f', 2, 64) + " - " +
-		strconv.Itoa(maxTries) + " - " +
-		strconv.FormatFloat(percentageMiss, 'f', 2, 64) + " - " +
-		strconv.FormatFloat(latency, 'f', 2, 64) + " - " +
-		strconv.Itoa(bandwidth) + " - " +
-		strconv.FormatFloat(percentageFaults, 'f', 2, 64) + " - " +
+	fmt.Println(mutationCode)
+
+	println(mutationName                                   + " - " +
+		strconv.Itoa(numberParticipants)                   + " - " +
+		strconv.FormatFloat(defaultDelta, 'f', 2, 64)      + " - " +
+		strconv.Itoa(maxTries)                             + " - " +
+		strconv.FormatFloat(percentageMiss, 'f', 2, 64)    + " - " +
+		strconv.FormatFloat(latency, 'f', 2, 64)           + " - " +
+		strconv.Itoa(bandwidth)                            + " - " +
+		strconv.FormatFloat(percentageFaults, 'f', 2, 64)  + " - " +
 		strconv.FormatFloat(probabilityToFail, 'f', 2, 64) + " - " +
 		strconv.FormatBool(withMetrics))
 
