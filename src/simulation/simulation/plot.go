@@ -230,18 +230,18 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 	duration := float64(endTime.Sub(startTime)) / float64(time.Millisecond)
 
 	file.WriteString(strconv.Itoa(numberParticipants) + "," +
-		fmt.Sprintf("%f", defaultDelta) + "," +
-		strconv.Itoa(maxTries) + "," +
-		fmt.Sprintf("%f", percentageMiss) + "," +
-		fmt.Sprintf("%f", percentageFaults) + "," +
-		fmt.Sprintf("%f", probabilityToFail) + "," +
-		fmt.Sprintf("%f", latency) + "," +
-		strconv.Itoa(bandwidth) + "," +
-		strconv.FormatBool(bandwidthExceeded) + "," +
-		mutationName + "," +
+		fmt.Sprintf("%f", defaultDelta)               + "," +
+		strconv.Itoa(maxTries)                        + "," +
+		fmt.Sprintf("%f", percentageMiss)             + "," +
+		fmt.Sprintf("%f", percentageFaults)           + "," +
+		fmt.Sprintf("%f", probabilityToFail)          + "," +
+		fmt.Sprintf("%f", latency)                    + "," +
+		strconv.Itoa(bandwidth)                       + "," +
+		strconv.FormatBool(bandwidthExceeded)         + "," +
+		mutationName                                  + "," +
 		fmt.Sprintf("%f", duration) + "\n")
 
-	// saveToCsv(list, int(duration))
+	// saveToCsv(list, int(duration), consensusParams)
 	saveDelays(list)
 }
 
@@ -329,12 +329,12 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 
 		// rows
 		fileSnapshot.WriteString("" +
-			strconv.Itoa(peerResult.PeerID) + "," +
-			strconv.Itoa(peerResult.CoordID) + "," +
-			strconv.Itoa(peerResult.Round) + "," +
-			strconv.Itoa(peerResult.Phase) + "," +
+			strconv.Itoa(peerResult.PeerID)         + "," +
+			strconv.Itoa(peerResult.CoordID)        + "," +
+			strconv.Itoa(peerResult.Round)          + "," +
+			strconv.Itoa(peerResult.Phase)          + "," +
 			strconv.Itoa(peerResult.EstimatePeerID) + "," +
-			peerResult.EstimateValue + "," +
+			peerResult.EstimateValue                + "," +
 			peerResult.Decision + ",")
 
 		for id := 1; id <= numberOfPeers; id++ {
