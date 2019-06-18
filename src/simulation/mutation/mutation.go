@@ -20,7 +20,7 @@ const (
 // Mutation is an interface
 type Mutation interface {
 	Delta0(int, *stb.Package) bool
-	Delta(int) bool
+	Delta(int)                bool
 }
 
 // NewMutation creates a new Mutation.

@@ -239,10 +239,12 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		strconv.Itoa(bandwidth)                       + "," +
 		strconv.FormatBool(bandwidthExceeded)         + "," +
 		mutationName                                  + "," +
-		fmt.Sprintf("%f", duration) + "\n")
+		fmt.Sprintf("%f", duration)                   + "\n")
 
 	// saveToCsv(list, int(duration), consensusParams)
-	saveDelays(list)
+	if mutationName != "adapted" {
+		saveDelays(list)
+	}
 }
 
 func saveToCsv(list map[int]*con.Results, duration int) {
@@ -303,30 +305,28 @@ func saveDelays(list map[int] *con.Results) {
 		orderedSnapshots = append(orderedSnapshots, latestSnapshot)
 	}
 
-	// exportResults(orderedSnapshots, len(list))
+	exportResults(orderedSnapshots, len(list))
 }
 
 
 func exportResults(results []*con.Snapshot, numberOfPeers int) {
-	index := 0
+	fileSnapshot, err := os.OpenFile("deep-learning/results/snapshots_" + strconv.Itoa(numberParticipants) + ".csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
+	ex.CheckError(err)
+
+	// header
+	fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
+
+	for id := 1; id <= numberOfPeers; id++ {
+		fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
+	}
+
+	for id := 1; id < numberOfPeers; id++ {
+		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
+	}
+
+	fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d\n", numberOfPeers))
 
 	for _, peerResult := range results {
-		fileSnapshot, err := os.OpenFile("deep-learning/results/snapshot" + strconv.Itoa(index) + ".csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
-		ex.CheckError(err)
-
-		// header
-		fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
-
-		for id := 1; id <= numberOfPeers; id++ {
-			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
-		}
-
-		for id := 1; id < numberOfPeers; id++ {
-			fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
-		}
-
-		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d\n", numberOfPeers))
-
 		// rows
 		fileSnapshot.WriteString("" +
 			strconv.Itoa(peerResult.PeerID)         + "," +
@@ -335,7 +335,7 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 			strconv.Itoa(peerResult.Phase)          + "," +
 			strconv.Itoa(peerResult.EstimatePeerID) + "," +
 			peerResult.EstimateValue                + "," +
-			peerResult.Decision + ",")
+			peerResult.Decision                     + ",")
 
 		for id := 1; id <= numberOfPeers; id++ {
 			vote, present := peerResult.Voters[id]
@@ -355,8 +355,7 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 
 		delay := peerResult.Delays[numberOfPeers - 1]
 		fileSnapshot.WriteString(fmt.Sprintf("%f\n", delay))
-
-		fileSnapshot.Close()
-		index++
 	}
+
+	fileSnapshot.Close()
 }
