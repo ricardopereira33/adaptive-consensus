@@ -38,10 +38,13 @@ func propose(value string) {
 	channels := stb.Channels(numberParticipants)
 	responses := make(chan *con.Results)
 	detectors := fd.NewDetectors(3.3, 10, numberParticipants, percentageFaults)
-	balancer = ml.NewBalancer(15, numberParticipants * 2)
 	bandwidthExceeded := false
 
-	println("Finish.")
+	if mutationName == "adapted" {
+		balancer = ml.NewBalancer(0, 8, numberParticipants)
+		println("Finish.")
+	}
+
 	startTime := time.Now()
 
 	for id := 1; id <= numberParticipants; id++ {
@@ -108,6 +111,10 @@ func configurePeer(peer *con.Peer) {
 	channel.SetLatency(latency)
 	channel.SetSenderVoted(con.SenderVoted)
 
+	if mutationName == "adapted" {
+		channel.SetCacheQuerie(mutation.(*mut.Adapted).CacheQuerie)
+	}
+
 	peer.SetDefaultDelta(defaultDelta)
 	peer.SetProbabilityToFail(probabilityToFail)
 	peer.Init()
@@ -142,8 +149,6 @@ func main() {
 	probabilityToFail, err = strconv.ParseFloat(args[8], 64)
 	withMetrics, err = strconv.ParseBool(args[9])
 	ex.CheckError(err)
-
-	fmt.Println(mutationCode)
 
 	println(mutationName                                   + " - " +
 		strconv.Itoa(numberParticipants)                   + " - " +

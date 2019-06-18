@@ -33,10 +33,11 @@ type Channel struct {
 	bandwidthExceeded	bool
 	startTime			time.Time
 
-	suspectedFunc	func(int, interface{})
-	delta0Func		func(int, *Package) bool
-	deltaFunc		func(int) bool
-	senderVoted		func(int, *Package) bool
+	suspectedFunc   func(int, interface{})
+	delta0Func      func(int, *Package) bool
+	deltaFunc       func(int) bool
+	senderVoted	    func(int, *Package) bool
+	cacheQuerieFunc func()
 }
 
 type peerChannels struct {
@@ -70,6 +71,10 @@ func (channel *Channel) delta0(id int, pack *Package) bool {
 
 func (channel *Channel) delta(id int) bool {
 	return channel.deltaFunc(id)
+}
+
+func (channel *Channel) cacheQuerie() {
+	channel.cacheQuerieFunc()
 }
 
 func (channel *Channel) suspected(id int) {
@@ -170,6 +175,11 @@ func (channel *Channel) SetDelta0(function func(int, *Package) bool) {
 // SetDelta is the method to define the delta implemention
 func (channel *Channel) SetDelta(function func(int) bool) {
 	channel.deltaFunc = function
+}
+
+// SetCacheQuerie is the method to define the cache implementation
+func (channel *Channel) SetCacheQuerie(function func()) {
+	channel.cacheQuerieFunc = function
 }
 
 // SetSenderVoted sets the method that checks if the sender voted

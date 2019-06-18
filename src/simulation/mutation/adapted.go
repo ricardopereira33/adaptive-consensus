@@ -3,6 +3,7 @@ package mutation
 import (
 	"time"
 	"strconv"
+	// "math"
 
 	con "simulation/consensus"
 	stb "simulation/stubborn"
@@ -12,8 +13,9 @@ import (
 
 // Adapted is a mutation type
 type Adapted struct {
-	peer  *con.Peer
-	model *ml.Balancer
+	peer        *con.Peer
+	model       *ml.Balancer
+	lastRequest []float32
 }
 
 // NewAdapted creates a new adapted mutation
@@ -21,6 +23,7 @@ func NewAdapted(peer *con.Peer, model *ml.Balancer) (adapted *Adapted) {
 	adapted = new(Adapted)
 	adapted.peer = peer
 	adapted.model = model
+	adapted.lastRequest = nil
 
 	return
 }
@@ -32,12 +35,11 @@ func (adapted *Adapted) Delta0(id int, pack *stb.Package) bool {
 
 // Delta is the delta implementation
 func (adapted *Adapted) Delta(id int) bool {
-	inputData, voters := adapted.getConsensusStatus()
+	consensusInfo := adapted.peer.GetConsensusInfo()
 
-	if voters != nil {
-		delayValues := adapted.model.CreateRequest(inputData)[0][0]
-
-		value := delayValues[id - 1]
+	if consensusInfo.Voters != nil && adapted.lastRequest != nil {
+		value := adapted.lastRequest[id - 1]
+		// value := math.Round(float64(adapted.lastRequest[id - 1]))
 
 		if value > 0 {
 			time.Sleep(time.Duration(value) * time.Millisecond)
@@ -49,8 +51,14 @@ func (adapted *Adapted) Delta(id int) bool {
 	return false
 }
 
-func (adapted *Adapted) getConsensusStatus() ([][][]float32, []float32) {
-	consensus := adapted.peer.GetConsensusInfo()
+// CacheQuerie caches the last query to the ML model
+func (adapted *Adapted) CacheQuerie() {
+	consensusInfo := adapted.peer.GetConsensusInfo()
+	inputData := adapted.getConsensusStatus(consensusInfo)
+	adapted.lastRequest = adapted.model.CreateRequest(inputData)[0][0]
+}
+
+func (adapted *Adapted) getConsensusStatus(consensus *con.Info) ([][][]float32) {
 	finalList := make([][][]float32, 0)
 	intermateList:= make([][]float32, 0)
 	numberParticipants := adapted.peer.GetNumberParticipants()
@@ -76,7 +84,7 @@ func (adapted *Adapted) getConsensusStatus() ([][][]float32, []float32) {
 		finalList = append(finalList, intermateList)
 	}
 
-	return finalList, listOfVoters
+	return finalList
 }
 
 func normalizeDecision(value string) float32 {

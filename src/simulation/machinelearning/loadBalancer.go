@@ -12,20 +12,21 @@ type Request struct {
 
 // Balancer represents
 type Balancer struct {
-	pool Pool
+	id       int
+	pool     Pool
 	requests chan Request
 	done 	 chan *Worker
 }
 
 // NewBalancer creates a new balancer
-func NewBalancer(nWorkers, nRequester int) *Balancer {
+func NewBalancer(id, nWorkers, nRequester int) *Balancer {
 	done := make(chan *Worker, nWorkers)
 	requests := make(chan Request)
 
-	balancer := &Balancer{make(Pool, 0, nWorkers), requests, done}
+	balancer := &Balancer{id, make(Pool, 0, nWorkers), requests, done}
 
 	for i := 0; i < nWorkers; i++ {
-		worker := newWorker(make(chan Request, nRequester))
+		worker := newWorker(make(chan Request, nRequester), nRequester)
 
 		heap.Push(&balancer.pool, worker)
 
@@ -77,4 +78,3 @@ func (balancer *Balancer) completed(worker *Worker) {
 	heap.Remove(&balancer.pool, worker.idx)
 	heap.Push(&balancer.pool, worker)
 }
-
