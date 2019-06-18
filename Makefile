@@ -12,11 +12,11 @@ compile:
 	go install ./src/consensus/stubborn/
 	go install ./src/consensus/peer/
 
-simulation:
+simulator:
 	go install ./src/simulation/exception/
 	go install ./src/simulation/consensus/
 	go install ./src/simulation/stubborn/
-	go install ./src/simulation/simulation/
+	go install ./src/simulation/simulator/
 	go install ./src/simulation/mutation/
 	go install ./src/simulation/failuredetection/
 
@@ -33,24 +33,24 @@ install:
 	go get gonum.org/v1/plot/...
 
 run_mutation:
-	./bin/simulation ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
 
 test:
-	./bin/simulation early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulation ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulation centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulation gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
 
 format:
 	go fmt ./src/simulation/exception/
 	go fmt ./src/simulation/consensus/
 	go fmt ./src/simulation/stubborn/
-	go fmt ./src/simulation/simulation/
+	go fmt ./src/simulation/simulator/
 	go fmt ./src/simulation/mutation/
 	go fmt ./src/simulation/failuredetection/
 
 debug:
-	dlv debug ./src/simulation/simulation/
+	dlv debug ./src/simulation/simulator/
 
 run:
 	./bin/peer
