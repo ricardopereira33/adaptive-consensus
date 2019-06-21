@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -19,7 +18,6 @@ import (
 )
 
 var (
-	debugFlag		   bool
 	withMetrics        bool
 	mutationName       string
 	mutationCode       int
@@ -51,11 +49,6 @@ func propose(value string) {
 		go runPeer(id, value, responses, channels, detectors, startTime)
 	}
 
-	if debugFlag {
-		log.Println("--------------")
-		log.Println("Running peers...")
-	}
-
 	list := make(map[int]*con.Results)
 
 	for id := 1; id <= numberParticipants; id++ {
@@ -69,16 +62,9 @@ func propose(value string) {
 
 	endTime := time.Now()
 
-	if debugFlag {
-		log.Println("All received!")
-		log.Println("--------------")
-	}
-
 	if withMetrics {
 		drawResults(list, startTime, mutationName)
 	}
-
-	fmt.Println("Done.")
 
 	// save(list, mutationName)
 	saveResult(endTime, startTime, bandwidthExceeded, list)
@@ -128,10 +114,7 @@ func argsInfo(nArgs int) {
 }
 
 func main() {
-	debugFlagValue := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
-
-	debugFlag = *debugFlagValue
 	args := flag.Args()
 	argsInfo(len(args))
 

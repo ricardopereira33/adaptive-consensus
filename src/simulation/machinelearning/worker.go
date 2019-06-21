@@ -1,17 +1,22 @@
 package machinelearning
 
 import (
+	"strconv"
+
 	tg "github.com/galeone/tfgo"
 	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	ex "simulation/exception"
 )
 
-const (
-	model40 = "mut_model_40"
-	model80 = "mut_model_80"
-)
-
 var modelSettings = map[string] map[string] string{
+	"mut_model_10": map[string] string {
+		"input_layer"  : "input_layer_input",
+		"output_layer" : "output_layer/add",
+	},
+	"mut_model_20": map[string] string {
+		"input_layer"  : "input_layer_input",
+		"output_layer" : "output_layer/add",
+	},
 	"mut_model_40": map[string] string {
 		"input_layer"  : "input_layer_input",
 		"output_layer" : "output_layer/add",
@@ -61,12 +66,5 @@ func (worker *Worker) doWork(done chan *Worker) {
 }
 
 func selectModel(numberParticipants int) string {
-	switch numberParticipants {
-	case 40:
-		return model40
-	case 80:
-		return model80
-	}
-
-	return model40
+	return "mut_model_" + strconv.Itoa(numberParticipants)
 }

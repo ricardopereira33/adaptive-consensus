@@ -3,6 +3,7 @@ package stubborn
 import (
 	"strconv"
 	"time"
+	// "fmt"
 
 	cmap "github.com/orcaman/concurrent-map"
 	rl "go.uber.org/ratelimit"
@@ -98,8 +99,8 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 				}
 				channel.metrics.logDelay(id, channel.peerID)
 			}
-			tries++
 		}
+		tries++
 	}
 }
 

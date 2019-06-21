@@ -3,7 +3,7 @@ package mutation
 import (
 	"time"
 	"strconv"
-	// "math"
+	"math"
 
 	con "simulation/consensus"
 	stb "simulation/stubborn"
@@ -35,13 +35,10 @@ func (adapted *Adapted) Delta0(id int, pack *stb.Package) bool {
 
 // Delta is the delta implementation
 func (adapted *Adapted) Delta(id int) bool {
-	consensusInfo := adapted.peer.GetConsensusInfo()
+	if adapted.lastRequest != nil {
+		value := math.Round(float64(adapted.lastRequest[id - 1]))
 
-	if consensusInfo.Voters != nil && adapted.lastRequest != nil {
-		value := adapted.lastRequest[id - 1]
-		// value := math.Round(float64(adapted.lastRequest[id - 1]))
-
-		if value > 0 {
+		if value >= 0 {
 			time.Sleep(time.Duration(value) * time.Millisecond)
 
 			return true

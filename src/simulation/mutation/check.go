@@ -11,7 +11,7 @@ func fresh(oldPackage *stb.Package, newPackage *stb.Package) bool {
 		newMessage := cons.PackageToMessage(newPackage)
 
 		sameRound := oldMessage.Round == newMessage.Round
-		samePhase := oldMessage.Phase == newMessage.Round
+		samePhase := oldMessage.Phase == newMessage.Phase
 
 		if sameRound && samePhase {
 			return false
