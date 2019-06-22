@@ -50,14 +50,15 @@ func (adapted *Adapted) Delta(id int) bool {
 
 // CacheQuerie caches the last query to the ML model
 func (adapted *Adapted) CacheQuerie() {
-	consensusInfo := adapted.peer.GetConsensusInfo()
-	inputData := adapted.getConsensusStatus(consensusInfo)
+	inputData := adapted.getConsensusStatus()
+
 	adapted.lastRequest = adapted.model.CreateRequest(inputData)[0][0]
 }
 
-func (adapted *Adapted) getConsensusStatus(consensus *con.Info) ([][][]float32) {
+func (adapted *Adapted) getConsensusStatus() ([][][]float32) {
+	consensus := adapted.peer.GetConsensusInfo()
 	finalList := make([][][]float32, 0)
-	intermateList:= make([][]float32, 0)
+	intermediateList:= make([][]float32, 0)
 	numberParticipants := adapted.peer.GetNumberParticipants()
 
 	listOfVoters := getVoters(consensus.Voters, numberParticipants)
@@ -77,8 +78,8 @@ func (adapted *Adapted) getConsensusStatus(consensus *con.Info) ([][][]float32) 
 		consensusStatus = append(consensusStatus, EstimatePeerIDValues...)
 		consensusStatus = append(consensusStatus, phaseValues...)
 
-		intermateList = append(intermateList, consensusStatus)
-		finalList = append(finalList, intermateList)
+		intermediateList = append(intermediateList, consensusStatus)
+		finalList = append(finalList, intermediateList)
 	}
 
 	return finalList
