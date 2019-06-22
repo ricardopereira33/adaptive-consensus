@@ -74,8 +74,8 @@ func (peer *Peer) ReceiveMessage(peerID int) {
 }
 
 // RecordMetrics records algorithm variables
-func (peer *Peer) RecordMetrics() {
-	go peer.metrics.recordSnapshot(peer.consensusInfo, peer.consensusInfo.Voters, peer.channel)
+func (peer *Peer) RecordMetrics(message *Message) {
+	go peer.metrics.recordSnapshot(peer.consensusInfo, peer.consensusInfo.Voters, peer.channel, peer.numberParticipants, message)
 }
 
 // GetMetrics returns collected metrics

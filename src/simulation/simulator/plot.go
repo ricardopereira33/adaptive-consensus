@@ -314,10 +314,14 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 	ex.CheckError(err)
 
 	// header
-	fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
+	fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,isMajority,")
 
 	for id := 1; id <= numberOfPeers; id++ {
 		fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
+	}
+
+	for id := 1; id <= numberOfPeers; id++ {
+		fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
 	}
 
 	for id := 1; id < numberOfPeers; id++ {
@@ -337,11 +341,27 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 			peerResult.EstimateValue                + "," +
 			peerResult.Decision                     + ",")
 
+		if peerResult.IsMajority {
+			fileSnapshot.WriteString("1,")
+		} else {
+			fileSnapshot.WriteString("0,")
+		}
+
 		for id := 1; id <= numberOfPeers; id++ {
 			vote, present := peerResult.Voters[id]
 
 			if present {
 				fileSnapshot.WriteString(strconv.Itoa(vote) + ",")
+			} else {
+				fileSnapshot.WriteString("0,")
+			}
+		}
+
+		for id := 0; id < numberOfPeers; id++ {
+			isFreshValue := peerResult.IsFresh[id]
+
+			if isFreshValue {
+				fileSnapshot.WriteString("1,")
 			} else {
 				fileSnapshot.WriteString("0,")
 			}

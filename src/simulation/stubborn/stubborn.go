@@ -32,7 +32,7 @@ type SChannel interface {
     SetDelta0(function func(int, *Package) bool)
 	SetDelta(function func(int) bool)
 	SetSenderVoted(func(int, *Package) bool)
-	SetCacheQuerie(func())
+	SetCacheQuerie(func(pack *Package))
 }
 
 // NewSChannel is the constructor of a stubborn channel

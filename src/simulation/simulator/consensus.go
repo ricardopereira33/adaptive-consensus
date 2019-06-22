@@ -31,7 +31,7 @@ func broadcastMessage(peer *con.Peer, consensusInfo *con.Info, peerID int) {
 	data := message.MessageToBytes()
 
 	peer.SetCoordinator(consensusInfo.CoordID)
-	peer.RecordMetrics()
+	peer.RecordMetrics(message)
 
 	channel.SendAll(data)
 }

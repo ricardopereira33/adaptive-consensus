@@ -31,25 +31,27 @@ func handleMessages(peer *con.Peer) {
 					consensusInfo.Estimate = message.Estimate
 				}
 
-				message := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
-				data := message.MessageToBytes()
+				newMessage := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
+				data := newMessage.MessageToBytes()
 
-				peer.RecordMetrics()
-
+				peer.RecordMetrics(newMessage)
 				channel.SendAll(data)
 			}
 		}
 
 		if consensusInfo.Voters.Count() > numberParticipants/2 {
 			if checkPhase(message, consensusInfo) {
-				peer.RecordMetrics()
+				newMessage := con.NewMessage(peerID, consensusInfo.Round, consensusInfo.Phase, consensusInfo.Voters, consensusInfo.Estimate)
+				peer.RecordMetrics(newMessage)
 				channel.Finish()
+
 				break
 			}
 		}
 
 		if !peer.IsAlive() {
 			channel.Finish()
+
 			break
 		}
 	}

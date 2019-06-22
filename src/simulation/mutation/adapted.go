@@ -49,13 +49,13 @@ func (adapted *Adapted) Delta(id int) bool {
 }
 
 // CacheQuerie caches the last query to the ML model
-func (adapted *Adapted) CacheQuerie() {
-	inputData := adapted.getConsensusStatus()
+func (adapted *Adapted) CacheQuerie(pack *stb.Package) {
+	inputData := adapted.getConsensusStatus(pack)
 
 	adapted.lastRequest = adapted.model.CreateRequest(inputData)[0][0]
 }
 
-func (adapted *Adapted) getConsensusStatus() ([][][]float32) {
+func (adapted *Adapted) getConsensusStatus(pack *stb.Package) ([][][]float32) {
 	consensus := adapted.peer.GetConsensusInfo()
 	finalList := make([][][]float32, 0)
 	intermediateList:= make([][]float32, 0)
@@ -69,9 +69,10 @@ func (adapted *Adapted) getConsensusStatus() ([][][]float32) {
 		EstimatePeerIDValues := getGenericValues(consensus.Estimate.PeerID, numberParticipants)
 		phaseValues := getPhaseValues(consensus.Phase)
 
-		consensusStatus := []float32 { float32(consensus.Round) }
+		consensusStatus := []float32 { float32(consensus.Round), isMajority(pack, numberParticipants) }
 
 		consensusStatus = append(consensusStatus, listOfVoters...)
+		consensusStatus = append(consensusStatus, getIsFreshValues(adapted.peer.GetChannel(), pack, numberParticipants)...)
 		consensusStatus = append(consensusStatus, normalizeDecision(consensus.Estimate.Value), normalizeDecision(consensus.Decision))
 		consensusStatus = append(consensusStatus, peerIDValues...)
 		consensusStatus = append(consensusStatus, coordIDValues...)
@@ -133,4 +134,26 @@ func getPhaseValues(phase int) []float32 {
 	}
 
 	return []float32{ 0.0, 1.0 }
+}
+
+func getIsFreshValues(channel stb.SChannel, pack *stb.Package, NumberParticipants int) []float32 {
+	list := make([]float32, 0)
+
+	for id := 1; id <= NumberParticipants; id++ {
+		if fresh(channel.GetPackage(id), pack) {
+			list = append(list, 1.0)
+		} else {
+			list = append(list, 0.0)
+		}
+	}
+
+	return list
+}
+
+func isMajority(pack *stb.Package, numberParticipants int) float32 {
+	if majority(pack, numberParticipants) {
+		return 1.0
+	}
+
+	return 0.0
 }

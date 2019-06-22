@@ -38,7 +38,7 @@ type Channel struct {
 	delta0Func      func(int, *Package) bool
 	deltaFunc       func(int) bool
 	senderVoted	    func(int, *Package) bool
-	cacheQuerieFunc func()
+	cacheQuerieFunc func(*Package)
 }
 
 type peerChannels struct {
@@ -74,8 +74,8 @@ func (channel *Channel) delta(id int) bool {
 	return channel.deltaFunc(id)
 }
 
-func (channel *Channel) cacheQuerie() {
-	channel.cacheQuerieFunc()
+func (channel *Channel) cacheQuerie(pack *Package) {
+	channel.cacheQuerieFunc(pack)
 }
 
 func (channel *Channel) suspected(id int) {
@@ -179,7 +179,7 @@ func (channel *Channel) SetDelta(function func(int) bool) {
 }
 
 // SetCacheQuerie is the method to define the cache implementation
-func (channel *Channel) SetCacheQuerie(function func()) {
+func (channel *Channel) SetCacheQuerie(function func(*Package)) {
 	channel.cacheQuerieFunc = function
 }
 

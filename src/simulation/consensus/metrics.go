@@ -23,6 +23,8 @@ type Snapshot struct {
 	EstimatePeerID 	int
 	EstimateValue 	string
 	Decision		string
+	IsFresh         []bool
+	IsMajority      bool
 	Voters 			map[int] int
 	Delays			[]float64
 	Timestamp 		time.Time
@@ -35,7 +37,7 @@ func newMetrics() (metrics *Metrics) {
 	return
 }
 
-func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel) (snapshot *Snapshot) {
+func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, numberParticipants int, newMessage *Message) (snapshot *Snapshot) {
 	snapshot = new(Snapshot)
 	snapshot.PeerID = consensusInfo.PeerID
 	snapshot.CoordID = consensusInfo.CoordID
@@ -44,6 +46,8 @@ func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SCh
 	snapshot.EstimatePeerID = consensusInfo.Estimate.PeerID
 	snapshot.EstimateValue = consensusInfo.Estimate.Value
 	snapshot.Decision = consensusInfo.Decision
+	snapshot.IsFresh = isFresh(channel, newMessage, numberParticipants)
+	snapshot.IsMajority = isMajority(newMessage, numberParticipants)
 	snapshot.Voters = convertCmapToMap(voters)
 	snapshot.Delays = channel.GetDelays()
 	snapshot.Timestamp = time.Now()
@@ -65,10 +69,10 @@ func (metrics *Metrics) GetOther(index int) *Snapshot {
 	return nil
 }
 
-func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel) {
+func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, numberParticipants int, newMessage *Message) {
 	metrics.mutex.Lock()
 
-	snapshot := newSnapshot(consensusInfo, voters, channel)
+	snapshot := newSnapshot(consensusInfo, voters, channel, numberParticipants, newMessage)
 	metrics.snapshots = append(metrics.snapshots, snapshot)
 
 	metrics.mutex.Unlock()
@@ -83,4 +87,35 @@ func CopyMap(mapStruct map[int] int) map[int] int {
 	}
 
 	return copyMap
+}
+
+func isFresh(channel stb.SChannel, newMessage *Message, numberParticipants int) []bool {
+	resultList := make([]bool, 0)
+
+	for id := 1; id <= numberParticipants; id ++ {
+		oldPackage := channel.GetPackage(id)
+
+		if oldPackage != nil {
+			oldMessage := PackageToMessage(oldPackage)
+
+			sameRound := oldMessage.Round == newMessage.Round
+			samePhase := oldMessage.Phase == newMessage.Phase
+
+			if sameRound && samePhase {
+				resultList = append(resultList, false)
+			}
+		}
+
+		resultList = append(resultList, true)
+	}
+
+	return resultList
+}
+
+func isMajority(message *Message, numberParticipants int) bool {
+	if len(message.Voters) > numberParticipants/2 {
+		return true
+	}
+
+	return false
 }

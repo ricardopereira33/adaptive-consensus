@@ -9,7 +9,8 @@ import (
 // SendAll is the method that sends a message to all participants
 func (channel *Channel) SendAll(message []byte) {
 	if channel.cacheQuerieFunc != nil {
-		channel.cacheQuerieFunc()
+		pack := newPackage(channel.peerID, message, false)
+		channel.cacheQuerieFunc(pack)
 	}
 
 	for id := 1; id <= channel.numberParticipants; id++ {
