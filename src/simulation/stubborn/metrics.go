@@ -64,9 +64,9 @@ func (metrics *Metrics) finish() {
 }
 
 // logDelay log a delay for a given peer
-func (metrics *Metrics) initialDelay(peerID int) {
+func (metrics *Metrics) initialDelay(peerID, value int) {
     strID := strconv.Itoa(peerID)
-    metrics.delays.Set(strID, defaultDelay(0))
+    metrics.delays.Set(strID, defaultDelay(value))
 }
 
 // logDelay log a delay for a given peer
@@ -95,20 +95,12 @@ func defaultDelay(value int) (delay *Delay) {
 }
 
 func (metrics *Metrics) resultsOfDelays(peerID int) (delays []float64) {
-	// if metrics.flag {
-	// 	log.Printf("[resultOfDelays] PeerID (%d) | Memory address (%v)", peerID, &metrics)
-	// }
-
 	size := metrics.messagesSent.Count()
     delays = make([]float64, size)
 
     for _, id := range metrics.delays.Keys() {
 		delay, _ := metrics.delays.Get(id)
 		id, _ := strconv.Atoi(id)
-
-		// if metrics.flag {
-		// 	fmt.Println(delay)
-		// }
 
 		delays[id - 1] = float64(delay.(*Delay).value) / float64(time.Millisecond)
 	}
@@ -120,7 +112,7 @@ func (metrics *Metrics) resultsOfDelays(peerID int) (delays []float64) {
 func (metrics *Metrics) incrementMessagesReceived(peerID int) {
 	strID := strconv.Itoa(peerID)
 	value, _ := metrics.messagesReceived.Get(strID)
-	metrics.messagesReceived.Set(strID, value.(int)+1)
+	metrics.messagesReceived.Set(strID, value.(int) + 1)
 }
 
 // incrementMessagesSent increments the number of sended messages
@@ -128,7 +120,7 @@ func (metrics *Metrics) incrementMessagesSent(peerID int) {
 	strID := strconv.Itoa(peerID)
 	value, _ := metrics.messagesSent.Get(strID)
 
-	metrics.messagesSent.Set(strID, value.(int)+1)
+	metrics.messagesSent.Set(strID, value.(int) + 1)
 }
 
 // getMessagesSent returns the number of received messages

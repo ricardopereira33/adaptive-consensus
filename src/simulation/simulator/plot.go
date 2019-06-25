@@ -324,6 +324,10 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 		fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
 	}
 
+	for id := 1; id <= numberOfPeers; id++ {
+		fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
+	}
+
 	for id := 1; id < numberOfPeers; id++ {
 		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
 	}
@@ -361,6 +365,16 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 			isFreshValue := peerResult.IsFresh[id]
 
 			if isFreshValue {
+				fileSnapshot.WriteString("1,")
+			} else {
+				fileSnapshot.WriteString("0,")
+			}
+		}
+
+		for id := 0; id < numberOfPeers; id++ {
+			needAckValue := peerResult.NeedACK[id]
+
+			if needAckValue {
 				fileSnapshot.WriteString("1,")
 			} else {
 				fileSnapshot.WriteString("0,")

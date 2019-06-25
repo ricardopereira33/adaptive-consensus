@@ -24,6 +24,7 @@ type Snapshot struct {
 	EstimateValue 	string
 	Decision		string
 	IsFresh         []bool
+	NeedACK			[]bool
 	IsMajority      bool
 	Voters 			map[int] int
 	Delays			[]float64
@@ -37,7 +38,7 @@ func newMetrics() (metrics *Metrics) {
 	return
 }
 
-func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, numberParticipants int, newMessage *Message) (snapshot *Snapshot) {
+func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, peer *Peer, numberParticipants int, newMessage *Message) (snapshot *Snapshot) {
 	snapshot = new(Snapshot)
 	snapshot.PeerID = consensusInfo.PeerID
 	snapshot.CoordID = consensusInfo.CoordID
@@ -48,6 +49,7 @@ func newSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SCh
 	snapshot.Decision = consensusInfo.Decision
 	snapshot.IsFresh = isFresh(channel, newMessage, numberParticipants)
 	snapshot.IsMajority = isMajority(newMessage, numberParticipants)
+	snapshot.NeedACK = needAck(peer, numberParticipants)
 	snapshot.Voters = convertCmapToMap(voters)
 	snapshot.Delays = channel.GetDelays()
 	snapshot.Timestamp = time.Now()
@@ -69,10 +71,10 @@ func (metrics *Metrics) GetOther(index int) *Snapshot {
 	return nil
 }
 
-func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, numberParticipants int, newMessage *Message) {
+func (metrics *Metrics) recordSnapshot(consensusInfo *Info, voters cmap.ConcurrentMap, channel stb.SChannel, peer *Peer, numberParticipants int, newMessage *Message) {
 	metrics.mutex.Lock()
 
-	snapshot := newSnapshot(consensusInfo, voters, channel, numberParticipants, newMessage)
+	snapshot := newSnapshot(consensusInfo, voters, channel, peer, numberParticipants, newMessage)
 	metrics.snapshots = append(metrics.snapshots, snapshot)
 
 	metrics.mutex.Unlock()
@@ -118,4 +120,15 @@ func isMajority(message *Message, numberParticipants int) bool {
 	}
 
 	return false
+}
+
+func needAck(peer *Peer, numberParticipants int) []bool {
+	list := make([]bool, 0)
+
+	for id := 1; id <= numberParticipants; id++ {
+		value := peer.NeedAck(id)
+		list = append(list, value)
+	}
+
+	return list
 }
