@@ -310,29 +310,37 @@ func saveDelays(list map[int] *con.Results) {
 
 
 func exportResults(results []*con.Snapshot, numberOfPeers int) {
-	fileSnapshot, err := os.OpenFile("deep-learning/results/snapshots_" + strconv.Itoa(numberParticipants) + ".csv", os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0666)
-	ex.CheckError(err)
+	filepath := "deep-learning/results/snapshots_" + strconv.Itoa(numberParticipants) + ".csv"
+	var fileSnapshot *os.File
 
-	// header
-	fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,isMajority,")
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		fileSnapshot, err = os.OpenFile(filepath, os.O_WRONLY | os.O_CREATE, 0666)
+		ex.CheckError(err)
 
-	for id := 1; id <= numberOfPeers; id++ {
-		fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
+		// header
+		fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,isMajority,")
+
+		for id := 1; id <= numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
+		}
+
+		for id := 1; id <= numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
+		}
+
+		for id := 1; id <= numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
+		}
+
+		for id := 1; id < numberOfPeers; id++ {
+			fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
+		}
+
+		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d\n", numberOfPeers))
+	} else {
+		fileSnapshot, err = os.OpenFile(filepath, os.O_WRONLY | os.O_APPEND, 0666)
+		ex.CheckError(err)
 	}
-
-	for id := 1; id <= numberOfPeers; id++ {
-		fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
-	}
-
-	for id := 1; id <= numberOfPeers; id++ {
-		fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
-	}
-
-	for id := 1; id < numberOfPeers; id++ {
-		fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
-	}
-
-	fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d\n", numberOfPeers))
 
 	for _, peerResult := range results {
 		// rows
