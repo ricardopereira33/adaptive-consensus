@@ -22,7 +22,7 @@ type IPeer interface {
 	ReceiveMessage(int)
 	NeedAck(int) bool
 	IsAlive() bool
-	RecordMetrics()
+	RecordMetrics(*Message)
 
 	GetPeerID() int
 	GetNumberParticipants() int
