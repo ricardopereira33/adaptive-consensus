@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"time"
+	"strings"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -23,6 +24,8 @@ const (
 	DIRCSV = "results/csv-datasets/"
 	// DIRPNG is the directory for plots in png formate
 	DIRPNG = "results/png-plots/"
+	// FONTSIZE gives an entry height of 10.
+	FONTSIZE = 10.189054726368159
 )
 
 // INTERVALS is the constant that indicates the time interval in the cumulative graph
@@ -53,20 +56,40 @@ func drawResults(results map[int]*con.Results, startTime time.Time, mutation str
 
 	ex.CheckError(err)
 
-	drawData(sentPlot, sent, "sent_" + mutation)
-	drawData(receivedPlot, received, "received_" + mutation)
+	drawData(sentPlot, sent, "sent_" + mutation, mutation)
+	drawData(receivedPlot, received, "received_" + mutation, mutation)
 	drawTimeData(timePlot, time, mutation)
 }
 
-func drawData(plot *plot.Plot, data plotter.XYZs, label string) {
-	plot.Title.Text = "# Messages " + label
-	plot.X.Label.Text = "Node"
-	plot.Y.Label.Text = "Node"
+func drawData(plot *plot.Plot, data plotter.XYZs, label string, mutation string) {
+	font, err := vg.MakeFont("Helvetica-Bold", FONTSIZE * 1.2)
+
+	if err != nil {
+		println("failed to create font: %v", err)
+	}
+
+	if mutation == "old_ring" {
+		plot.Title.Text = "Ring"
+	}else {
+		plot.Title.Text = strings.Title(mutation)
+	}
+
+	plot.Title.TextStyle = draw.TextStyle{
+		Color:  color.Black,
+		Font:   font,
+		XAlign: draw.XCenter,
+		YAlign: draw.YTop,
+	}
+
+	plot.X.Label.Text = "Peer i"
+	plot.Y.Label.Text = "Peer j"
+	plot.X.Label.TextStyle = draw.TextStyle{Color: color.Black, Font: font}
+	plot.Y.Label.TextStyle = draw.TextStyle{Color: color.Black, Font: font}
 
 	bubbles := newBubbles(data)
 	plot.Add(bubbles)
 
-	err := plot.Save(20 * vg.Inch, 20 * vg.Inch, DIRPNG + label + ".png")
+	err = plot.Save(7 * vg.Inch, 7 * vg.Inch, DIRPNG + label + ".png")
 	ex.CheckError(err)
 }
 

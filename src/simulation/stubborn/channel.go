@@ -20,7 +20,8 @@ var (
 // Channel to send and receive messages between peers
 type Channel struct {
 	peerID				int
-	numberParticipants	int
+	numberParticipants  int
+	bandwidth           int
 	peer				interface{}
 	peersChannels		cmap.ConcurrentMap
 	peerChannel			*peerChannels
@@ -135,6 +136,11 @@ func (channel *Channel) GetPackage(id int) *Package {
 	return pack
 }
 
+// GetBandwidth returns true if the bandwidth has been exceeded
+func (channel *Channel) GetBandwidth() int {
+	return channel.bandwidth
+}
+
 // GetBandwidthExceeded returns true if the bandwidth has been exceeded
 func (channel *Channel) GetBandwidthExceeded() bool {
 	return channel.bandwidthExceeded
@@ -157,6 +163,7 @@ func (channel *Channel) SetPercentageMiss(percentage float64) {
 
 // SetBandwidth sets bandwidth value
 func (channel *Channel) SetBandwidth(bandwidth int) {
+	channel.bandwidth = bandwidth
 	channel.limiter = rl.New(bandwidth)
 	channel.storage = lb.New()
 	channel.leakybucket, _ = channel.storage.Create("leackyBucket", uint(bandwidth), time.Second)

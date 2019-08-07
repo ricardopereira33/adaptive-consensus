@@ -22,6 +22,7 @@ type SChannel interface {
 	GetPackage(id int) *Package
 	GetBandwidthExceeded() bool
 	GetDelays()	[]float64
+	GetBandwidth() int
 
     SetMaxTries(int)
 	SetPercentageMiss(float64)

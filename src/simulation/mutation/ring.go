@@ -49,7 +49,7 @@ func (ring *Ring) Delta(id int) bool {
 	lastPackage := ring.peer.GetChannel().LastPackageBuffered(id)
 	packageArrived := lastPackage != nil && lastPackage.Arrived
 
-	if !packageArrived {
+	if !packageArrived || ring.peer.GetConsensusInfo().Round == 2 {
 		if id == next && !ring.suspectFailureForward {
 			ring.stepsForward++
 			ring.suspectFailureForward = true
