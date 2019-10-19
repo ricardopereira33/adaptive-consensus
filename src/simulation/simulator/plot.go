@@ -94,12 +94,28 @@ func drawData(plot *plot.Plot, data plotter.XYZs, label string, mutation string)
 }
 
 func drawTimeData(plot *plot.Plot, data plotter.XYs, mutation string) {
-	plot.Title.Text = "Number of Nodes that decide, over time"
-	plot.X.Label.Text = "Time"
-	plot.Y.Label.Text = "# Nodes"
+	font, err := vg.MakeFont("Helvetica-Bold", FONTSIZE * 1.2)
 
-	err := plotutil.AddLines(plot, mutation, data)
-	err = plot.Save(8 * vg.Inch, 8 * vg.Inch, DIRPNG + "time_" + mutation + ".png")
+	if err != nil {
+		println("failed to create font: %v", err)
+	}
+
+	plot.Title.TextStyle = draw.TextStyle{
+		Color:  color.Black,
+		Font:   font,
+		XAlign: draw.XCenter,
+		YAlign: draw.YTop,
+	}
+
+	plot.Title.Text = "Number of nodes deciding over time"
+	plot.X.Label.Text = "Time (s)"
+	plot.Y.Label.Text = "Number of nodes"
+
+	plot.X.Label.TextStyle = draw.TextStyle{Color: color.Black, Font: font}
+	plot.Y.Label.TextStyle = draw.TextStyle{Color: color.Black, Font: font}
+
+	err = plotutil.AddLines(plot, mutation, data)
+	err = plot.Save(7 * vg.Inch, 7 * vg.Inch, DIRPNG + "time_" + mutation + ".png")
 
 	ex.CheckError(err)
 }
@@ -342,6 +358,7 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 
 		// header
 		fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,isMajority,")
+		// fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
 
 		for id := 1; id <= numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
@@ -351,9 +368,9 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 			fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
 		}
 
-		for id := 1; id <= numberOfPeers; id++ {
-			fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
-		}
+		// for id := 1; id <= numberOfPeers; id++ {
+		// 	fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
+		// }
 
 		for id := 1; id < numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
@@ -402,15 +419,15 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 			}
 		}
 
-		for id := 0; id < numberOfPeers; id++ {
-			needAckValue := peerResult.NeedACK[id]
+		// for id := 0; id < numberOfPeers; id++ {
+		// 	needAckValue := peerResult.NeedACK[id]
 
-			if needAckValue {
-				fileSnapshot.WriteString("1,")
-			} else {
-				fileSnapshot.WriteString("0,")
-			}
-		}
+		// 	if needAckValue {
+		// 		fileSnapshot.WriteString("1,")
+		// 	} else {
+		// 		fileSnapshot.WriteString("0,")
+		// 	}
+		// }
 
 		for id := 0; id < numberOfPeers - 1; id++ {
 			delay := peerResult.Delays[id]

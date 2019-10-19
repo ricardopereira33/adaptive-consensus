@@ -9,7 +9,7 @@ import (
 // SendAll is the method that sends a message to all participants
 func (channel *Channel) SendAll(message []byte) {
 	if channel.cacheQuerieFunc != nil {
-		pack := newPackage(channel.peerID, message, false)
+		pack := newPackage(channel.peerID, message)
 		channel.cacheQuerieFunc(pack)
 	}
 
@@ -29,7 +29,7 @@ func (channel *Channel) SendSuspicion(peerID int, targetPeerID int) {
 
 // Send is the method that sends the messages through the channel
 func (channel *Channel) Send(idDestination int, message []byte) {
-	packageMsg := newPackage(channel.peerID, message, false)
+	packageMsg := newPackage(channel.peerID, message)
 	isToSend := channel.delta0(idDestination, packageMsg)
 
 	channel.outputBuffer.InsertElement(idDestination, packageMsg)

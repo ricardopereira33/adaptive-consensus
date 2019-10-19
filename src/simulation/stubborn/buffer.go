@@ -27,7 +27,6 @@ type Package struct {
 	ID           int
 	Data         []byte
 	Arrived      bool
-	Ack          bool
 	Suspicious   bool
 	SuspiciousID int
 }
@@ -41,11 +40,10 @@ func newBuffer(size int) (buffer *BufferStruct) {
 	return
 }
 
-func newPackage(id int, data []byte, ack bool) (pack *Package) {
+func newPackage(id int, data []byte) (pack *Package) {
 	pack = new(Package)
 	pack.ID = id
 	pack.Data = data
-	pack.Ack = ack
 	pack.Arrived = false
 
 	return

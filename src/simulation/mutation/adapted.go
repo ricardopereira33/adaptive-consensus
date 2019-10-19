@@ -31,6 +31,9 @@ func NewAdapted(peer *con.Peer, model *ml.Balancer) (adapted *Adapted) {
 
 // Delta0 is the delta0 implementation
 func (adapted *Adapted) Delta0(id int, pack *stb.Package) bool {
+	// inputData := adapted.getConsensusStatus(pack)
+	// adapted.lastRequest = adapted.model.CreateRequest(inputData)[0][0]
+
 	return adapted.Delta(id)
 }
 
@@ -76,12 +79,13 @@ func (adapted *Adapted) getConsensusStatus(pack *stb.Package) ([][][]float32) {
 
 	if listOfVoters != nil {
 		coordIDValues := getGenericValues(consensus.CoordID, numberParticipants, 1.0)
-		peerIDValues := getGenericValues(consensus.PeerID, numberParticipants, 200.0)
-		// EstimatePeerIDValues := getGenericValues(consensus.Estimate.PeerID, numberParticipants)
+		peerIDValues := getGenericValues(consensus.PeerID, numberParticipants, 100.0)
+		// EstimatePeerIDValues := getGenericValues(consensus.Estimate.PeerID, numberParticipants, 1.0)
 		// phaseValues := getPhaseValues(consensus.Phase)
 
 		// consensusStatus := []float32 { float32(consensus.Round), isMajority(pack, numberParticipants) }
-		consensusStatus := []float32 { isMajority(pack, numberParticipants), normalizeBandwidth(adapted.peer.GetChannel().GetBandwidth()) }
+		// consensusStatus := []float32 { float32(consensus.Round) }
+		consensusStatus := []float32 { isMajority(pack, numberParticipants) , normalizeBandwidth(adapted.peer.GetChannel().GetBandwidth()) }
 
 		consensusStatus = append(consensusStatus, listOfVoters...)
 		// consensusStatus = append(consensusStatus, getIsFreshValues(adapted.peer.GetChannel(), pack, numberParticipants)...)
@@ -123,7 +127,7 @@ func getVoters(voters cmap.ConcurrentMap, NumberParticipants int) []float32 {
 			present := voters.Has(strconv.Itoa(id))
 
 			if present {
-				newList = append(newList, 20.0)
+				newList = append(newList, 10.0)
 			} else {
 				newList = append(newList, 0.0)
 			}
@@ -173,7 +177,7 @@ func getIsFreshValues(channel stb.SChannel, pack *stb.Package, NumberParticipant
 
 func isMajority(pack *stb.Package, numberParticipants int) float32 {
 	if majority(pack, numberParticipants) {
-		return 10.0
+		return 5.0
 	}
 
 	return 0.0
