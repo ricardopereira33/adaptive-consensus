@@ -7,7 +7,7 @@ import (
 	ml "simulation/machinelearning"
 )
 
-// kind of enums
+// Enums to represent each mutation
 const (
 	EARLY       = iota
 	RING        = iota
@@ -17,7 +17,7 @@ const (
 	ADAPTED	    = iota
 )
 
-// Mutation is an interface
+// Mutation interface that forces a mutation implements Delta0 and Delta functions
 type Mutation interface {
 	Delta0(int, *stb.Package) bool
 	Delta(int)                bool

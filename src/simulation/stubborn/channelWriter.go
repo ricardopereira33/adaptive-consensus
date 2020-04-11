@@ -22,7 +22,7 @@ func (channel *Channel) SendAll(message []byte) {
 
 // SendSuspicion is the method that notify for a possible suspicion
 func (channel *Channel) SendSuspicion(peerID int, targetPeerID int) {
-	message := newSuspect(targetPeerID, true)
+	message := newSuspect(targetPeerID)
 
 	channel.sendToBufferSuspicions(peerID, message)
 }

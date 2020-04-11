@@ -6,12 +6,6 @@ ifeq (false,${DEBUG})
 	export GOTRACEBACK=none
 endif
 
-compile:
-	go install ./src/consensus/exception/
-	go install ./src/consensus/message/
-	go install ./src/consensus/stubborn/
-	go install ./src/consensus/peer/
-
 simulator:
 	go install ./src/simulation/exception/
 	go install ./src/simulation/consensus/
@@ -33,13 +27,9 @@ install:
 	go get gonum.org/v1/plot/...
 
 run_mutation:
-	./bin/simulator ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-
-test:
-	./bin/simulator early ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulator ring ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulator centralized ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
-	./bin/simulator gossip ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} ${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} ${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
+	./bin/simulator ${MUTATION} ${NODES} ${DEFAULT_DELTA} ${MAX_TRIES} \
+		${PERCENTAGE_MISS} ${LATENCY} ${BANDWIDTH} ${PERCENTAGE_FAULTS} \
+		${PROBABILITY_TO_FAIL} ${WITH_ALL_METRICS}
 
 format:
 	go fmt ./src/simulation/exception/
@@ -51,9 +41,6 @@ format:
 
 debug:
 	dlv debug ./src/simulation/simulator/
-
-run:
-	./bin/peer
 
 clean_results:
 	rm *.csv

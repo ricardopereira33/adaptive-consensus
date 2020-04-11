@@ -280,7 +280,6 @@ func saveResult(endTime time.Time, startTime time.Time, bandwidthExceeded bool, 
 		mutationName                                  + "," +
 		fmt.Sprintf("%f", duration)                   + "\n")
 
-	// saveToCsv(list, int(duration), consensusParams)
 	if mutationName != "adapted" {
 		saveDelays(list)
 	}
@@ -358,7 +357,6 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 
 		// header
 		fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,isMajority,")
-		// fileSnapshot.WriteString("PeerID,CoordID,Round,Phase,EstimatePeerID,EstimateValue,Decision,")
 
 		for id := 1; id <= numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("Peer%dVote,",id))
@@ -367,10 +365,6 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 		for id := 1; id <= numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("isFreshForPeer%d,",id))
 		}
-
-		// for id := 1; id <= numberOfPeers; id++ {
-		// 	fileSnapshot.WriteString(fmt.Sprintf("Peer%dNeedAck,",id))
-		// }
 
 		for id := 1; id < numberOfPeers; id++ {
 			fileSnapshot.WriteString(fmt.Sprintf("DelayToPeer%d,", id))
@@ -418,16 +412,6 @@ func exportResults(results []*con.Snapshot, numberOfPeers int) {
 				fileSnapshot.WriteString("0,")
 			}
 		}
-
-		// for id := 0; id < numberOfPeers; id++ {
-		// 	needAckValue := peerResult.NeedACK[id]
-
-		// 	if needAckValue {
-		// 		fileSnapshot.WriteString("1,")
-		// 	} else {
-		// 		fileSnapshot.WriteString("0,")
-		// 	}
-		// }
 
 		for id := 0; id < numberOfPeers - 1; id++ {
 			delay := peerResult.Delays[id]

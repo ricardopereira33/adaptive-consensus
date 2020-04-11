@@ -8,33 +8,6 @@ import (
 	ex "simulation/exception"
 )
 
-var modelSettings = map[string] map[string] string{
-	"mut_model": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-	"mut_model_old_40": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-	"mut_model_20": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-	"mut_model_merge_40": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-	"mut_model_centralized_40": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-	"mut_model_ring_40": map[string] string {
-		"input_layer"  : "input_layer_input",
-		"output_layer" : "output_layer/add",
-	},
-}
-
 // Worker is the struct that contains all attributes for a worker
 type Worker struct {
 	idx       int
@@ -48,9 +21,7 @@ func newWorker(work chan Request, numberParticipants int) (worker *Worker) {
 	worker = new(Worker)
 	worker.work = work
 	worker.modelName = selectModel(numberParticipants)
-	// worker.model = tg.LoadModel("src/simulation/models/" + worker.modelName + "_33", []string{"mut_tag"}, nil)
-	worker.model = tg.LoadModel("src/simulation/models/" + worker.modelName + "_v1", []string{"mut_tag"}, nil)
-	// worker.model = tg.LoadModel("src/simulation/models/" + worker.modelName + "_test_2", []string{"mut_tag"}, nil)
+	worker.model = tg.LoadModel("src/simulation/models/" + worker.modelName, []string{"mut_tag"}, nil)
 	worker.pending = 0
 
 	return
@@ -64,9 +35,9 @@ func (worker *Worker) doWork(done chan *Worker) {
 
 		result := worker.model.Exec(
 			[]tf.Output{
-				worker.model.Op(modelSettings[worker.modelName]["output_layer"], 0),
+				worker.model.Op("output_layer/add", 0),
 			}, map[tf.Output]*tf.Tensor{
-				worker.model.Op(modelSettings[worker.modelName]["input_layer"], 0): tensor,
+				worker.model.Op("input_layer_input", 0): tensor,
 			},
 		)
 		request.responseChannel <- result[0].Value().([][][]float32)
@@ -76,6 +47,5 @@ func (worker *Worker) doWork(done chan *Worker) {
 }
 
 func selectModel(numberParticipants int) string {
-	// return "mut_model_centralized_" + strconv.Itoa(numberParticipants)
-	return "mut_model_merge_" + strconv.Itoa(numberParticipants)
+	return "mut_model_" + strconv.Itoa(numberParticipants)
 }

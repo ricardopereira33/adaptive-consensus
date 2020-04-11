@@ -88,14 +88,12 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 
 	for {
 		time.Sleep(defaultDelta)
-		// channel.metrics.saveRetransmission(channel.peerID)
 
 		for id := 1; id <= channel.numberParticipants; id++ {
 			if channel.delta(id) || tries > MaxTries {
 				pack := channel.outputBuffer.GetElement(id)
 
 				if pack != nil && !pack.Arrived {
-					// pack.IncRetransmission()
 					go channel.sendMessage(id, pack)
 				}
 				channel.metrics.logDelay(id, channel.peerID)
@@ -109,7 +107,6 @@ func (channel *Channel) retransmission(defaultDelta time.Duration) {
 func (channel *Channel) Init(deltaDefault time.Duration) {
 	go channel.retransmission(deltaDefault)
 	go channel.receiveSuspicious()
-	// go channel.metrics.checkBandwidth(channel.peerID, channel.leakybucket)
 }
 
 // Results returns the metrics results

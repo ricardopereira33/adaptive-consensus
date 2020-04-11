@@ -27,7 +27,6 @@ type Package struct {
 	ID           int
 	Data         []byte
 	Arrived      bool
-	Suspicious   bool
 	SuspiciousID int
 }
 
@@ -49,10 +48,9 @@ func newPackage(id int, data []byte) (pack *Package) {
 	return
 }
 
-func newSuspect(suspiciousID int, suspicious bool) (pack *Package) {
+func newSuspect(suspiciousID int) (pack *Package) {
 	pack = new(Package)
 	pack.SuspiciousID = suspiciousID
-	pack.Suspicious = suspicious
 
 	return
 }

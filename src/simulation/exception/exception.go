@@ -3,7 +3,6 @@ package exception
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -14,15 +13,6 @@ func CheckError(err error) bool {
 		os.Exit(1)
 	}
 	return true
-}
-
-// CheckUDPError checks the UDP errors
-func CheckUDPError(err error) bool {
-	if err != nil {
-		log.Println("Conection closed.")
-		return true
-	}
-	return false
 }
 
 // NewError creates a new error

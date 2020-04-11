@@ -66,7 +66,6 @@ func propose(value string) {
 		drawResults(list, startTime, mutationName)
 	}
 
-	// save(list, mutationName)
 	saveResult(endTime, startTime, bandwidthExceeded, list)
 }
 

@@ -31,9 +31,6 @@ func NewAdapted(peer *con.Peer, model *ml.Balancer) (adapted *Adapted) {
 
 // Delta0 is the delta0 implementation
 func (adapted *Adapted) Delta0(id int, pack *stb.Package) bool {
-	// inputData := adapted.getConsensusStatus(pack)
-	// adapted.lastRequest = adapted.model.CreateRequest(inputData)[0][0]
-
 	return adapted.Delta(id)
 }
 
@@ -52,7 +49,7 @@ func (adapted *Adapted) Delta(id int) bool {
 	return false
 }
 
-// CacheQuerie caches the last query to the ML model
+// CacheQuerie caches the last query given by the ML model
 func (adapted *Adapted) CacheQuerie(pack *stb.Package) {
 	inputData := adapted.getConsensusStatus(pack)
 
@@ -60,7 +57,6 @@ func (adapted *Adapted) CacheQuerie(pack *stb.Package) {
 
 	id := adapted.peer.GetPeerID()
 	if id < 35 && id > 5 {
-		// [0][0][:42]
 		fmt.Println("PEER ", id, " | INPUT: ", inputData, "\nPREDITION: ", adapted.lastRequest[(id-2):(id+2)])
 	} else if id <= 5 {
 		fmt.Println("PEER ", id, " | INPUT: ", inputData, "\nPREDITION: ", adapted.lastRequest[38:], adapted.lastRequest[:(id+2)])
@@ -79,22 +75,13 @@ func (adapted *Adapted) getConsensusStatus(pack *stb.Package) ([][][]float32) {
 
 	if listOfVoters != nil {
 		coordIDValues := getGenericValues(consensus.CoordID, numberParticipants, 1.0)
-		peerIDValues := getGenericValues(consensus.PeerID, numberParticipants, 100.0)
-		// EstimatePeerIDValues := getGenericValues(consensus.Estimate.PeerID, numberParticipants, 1.0)
-		// phaseValues := getPhaseValues(consensus.Phase)
+		peerIDValues := getGenericValues(consensus.PeerID, numberParticipants, 200.0)
 
-		// consensusStatus := []float32 { float32(consensus.Round), isMajority(pack, numberParticipants) }
-		// consensusStatus := []float32 { float32(consensus.Round) }
 		consensusStatus := []float32 { isMajority(pack, numberParticipants) , normalizeBandwidth(adapted.peer.GetChannel().GetBandwidth()) }
-
 		consensusStatus = append(consensusStatus, listOfVoters...)
-		// consensusStatus = append(consensusStatus, getIsFreshValues(adapted.peer.GetChannel(), pack, numberParticipants)...)
-		// consensusStatus = append(consensusStatus, normalizeDecision(consensus.Estimate.Value), normalizeDecision(consensus.Decision))
 		consensusStatus = append(consensusStatus, normalizeDecision(consensus.Decision))
 		consensusStatus = append(consensusStatus, peerIDValues...)
 		consensusStatus = append(consensusStatus, coordIDValues...)
-		// consensusStatus = append(consensusStatus, EstimatePeerIDValues...)
-		// consensusStatus = append(consensusStatus, phaseValues...)
 
 		intermediateList = append(intermediateList, consensusStatus)
 		finalList = append(finalList, intermediateList)
@@ -104,10 +91,6 @@ func (adapted *Adapted) getConsensusStatus(pack *stb.Package) ([][][]float32) {
 }
 
 func normalizeBandwidth(value int) float32 {
-	// minValue := float32(0.0)
-	// maxValue := float32(500.0)
-
-	// return (float32(value) - minValue)/(maxValue - minValue)
 	return float32(value)
 }
 
@@ -127,7 +110,7 @@ func getVoters(voters cmap.ConcurrentMap, NumberParticipants int) []float32 {
 			present := voters.Has(strconv.Itoa(id))
 
 			if present {
-				newList = append(newList, 10.0)
+				newList = append(newList, 20.0)
 			} else {
 				newList = append(newList, 0.0)
 			}
@@ -177,7 +160,7 @@ func getIsFreshValues(channel stb.SChannel, pack *stb.Package, NumberParticipant
 
 func isMajority(pack *stb.Package, numberParticipants int) float32 {
 	if majority(pack, numberParticipants) {
-		return 5.0
+		return 10.0
 	}
 
 	return 0.0
